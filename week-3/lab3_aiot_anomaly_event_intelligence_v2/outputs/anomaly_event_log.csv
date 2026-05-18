@@ -1,0 +1,29 @@
+timestamp,device_id,value,anomaly_score,severity,event_type,decision,explanation,model_version
+2013-07-06 06:10:00,nab_office_temp_sensor_01,26.62,0.924,HIGH,TEMPERATURE_ANOMALY,CREATE_ALERT_AND_REQUIRE_HUMAN_CHECK,Isolation Forest marks this point as unusual,iforest_v1
+2013-07-06 06:15:00,nab_office_temp_sensor_01,25.91,0.717,MEDIUM,TEMPERATURE_ANOMALY,CREATE_WARNING_EVENT,Isolation Forest marks this point as unusual,iforest_v1
+2013-07-06 06:20:00,nab_office_temp_sensor_01,26.551,0.6993,MEDIUM,TEMPERATURE_ANOMALY,CREATE_WARNING_EVENT,Isolation Forest marks this point as unusual,iforest_v1
+2013-07-06 06:25:00,nab_office_temp_sensor_01,25.576,0.612,MEDIUM,TEMPERATURE_ANOMALY,CREATE_WARNING_EVENT,Isolation Forest marks this point as unusual,iforest_v1
+2013-07-06 13:40:00,nab_office_temp_sensor_01,14.194,0.8811,HIGH,TEMPERATURE_ANOMALY,CREATE_ALERT_AND_REQUIRE_HUMAN_CHECK,temperature deviates strongly from recent pattern; sudden jump/drop compared with previous reading,iforest_v1
+2013-07-06 13:45:00,nab_office_temp_sensor_01,22.201,0.7924,MEDIUM,TEMPERATURE_ANOMALY,CREATE_WARNING_EVENT,sudden jump/drop compared with previous reading,iforest_v1
+2013-07-06 13:55:00,nab_office_temp_sensor_01,21.022,0.6171,MEDIUM,TEMPERATURE_ANOMALY,CREATE_WARNING_EVENT,Isolation Forest marks this point as unusual,iforest_v1
+2013-07-06 20:20:00,nab_office_temp_sensor_01,24.36,1.0,HIGH,TEMPERATURE_ANOMALY,CREATE_ALERT_AND_REQUIRE_HUMAN_CHECK,temperature deviates strongly from recent pattern; sudden jump/drop compared with previous reading,iforest_v1
+2013-07-06 20:25:00,nab_office_temp_sensor_01,24.478,0.7941,MEDIUM,TEMPERATURE_ANOMALY,CREATE_WARNING_EVENT,temperature deviates strongly from recent pattern,iforest_v1
+2013-07-06 20:30:00,nab_office_temp_sensor_01,23.521,0.7333,MEDIUM,TEMPERATURE_ANOMALY,CREATE_WARNING_EVENT,Isolation Forest marks this point as unusual,iforest_v1
+2013-07-06 20:35:00,nab_office_temp_sensor_01,24.547,0.6736,MEDIUM,TEMPERATURE_ANOMALY,CREATE_WARNING_EVENT,Isolation Forest marks this point as unusual,iforest_v1
+2013-07-06 20:45:00,nab_office_temp_sensor_01,24.636,0.6544,MEDIUM,TEMPERATURE_ANOMALY,CREATE_WARNING_EVENT,Isolation Forest marks this point as unusual,iforest_v1
+2013-07-06 20:55:00,nab_office_temp_sensor_01,25.51,0.7077,MEDIUM,TEMPERATURE_ANOMALY,CREATE_WARNING_EVENT,Isolation Forest marks this point as unusual,iforest_v1
+2013-07-06 21:00:00,nab_office_temp_sensor_01,25.655,0.6578,MEDIUM,TEMPERATURE_ANOMALY,CREATE_WARNING_EVENT,Isolation Forest marks this point as unusual,iforest_v1
+2013-07-06 21:10:00,nab_office_temp_sensor_01,26.094,0.7594,MEDIUM,TEMPERATURE_ANOMALY,CREATE_WARNING_EVENT,Isolation Forest marks this point as unusual,iforest_v1
+2013-07-06 21:15:00,nab_office_temp_sensor_01,26.764,0.675,MEDIUM,TEMPERATURE_ANOMALY,CREATE_WARNING_EVENT,Isolation Forest marks this point as unusual,iforest_v1
+2013-07-06 21:20:00,nab_office_temp_sensor_01,25.223,0.641,MEDIUM,TEMPERATURE_ANOMALY,CREATE_WARNING_EVENT,Isolation Forest marks this point as unusual,iforest_v1
+2013-07-06 22:00:00,nab_office_temp_sensor_01,26.848,0.692,MEDIUM,TEMPERATURE_ANOMALY,CREATE_WARNING_EVENT,Isolation Forest marks this point as unusual,iforest_v1
+2013-07-06 22:05:00,nab_office_temp_sensor_01,25.019,0.6433,MEDIUM,TEMPERATURE_ANOMALY,CREATE_WARNING_EVENT,Isolation Forest marks this point as unusual,iforest_v1
+2013-07-06 22:10:00,nab_office_temp_sensor_01,26.016,0.6993,MEDIUM,TEMPERATURE_ANOMALY,CREATE_WARNING_EVENT,Isolation Forest marks this point as unusual,iforest_v1
+2013-07-06 22:20:00,nab_office_temp_sensor_01,26.549,0.5961,MEDIUM,TEMPERATURE_ANOMALY,CREATE_WARNING_EVENT,Isolation Forest marks this point as unusual,iforest_v1
+2013-07-06 22:25:00,nab_office_temp_sensor_01,27.081,0.6088,MEDIUM,TEMPERATURE_ANOMALY,CREATE_WARNING_EVENT,Isolation Forest marks this point as unusual,iforest_v1
+2013-07-06 22:45:00,nab_office_temp_sensor_01,26.711,0.6419,MEDIUM,TEMPERATURE_ANOMALY,CREATE_WARNING_EVENT,Isolation Forest marks this point as unusual,iforest_v1
+2013-07-06 22:55:00,nab_office_temp_sensor_01,26.947,0.6443,MEDIUM,TEMPERATURE_ANOMALY,CREATE_WARNING_EVENT,Isolation Forest marks this point as unusual,iforest_v1
+2013-07-06 23:40:00,nab_office_temp_sensor_01,22.686,0.9064,HIGH,TEMPERATURE_ANOMALY,CREATE_ALERT_AND_REQUIRE_HUMAN_CHECK,temperature deviates strongly from recent pattern; sudden jump/drop compared with previous reading,iforest_v1
+2013-07-06 23:45:00,nab_office_temp_sensor_01,22.592,0.7526,MEDIUM,TEMPERATURE_ANOMALY,CREATE_WARNING_EVENT,temperature deviates strongly from recent pattern,iforest_v1
+2013-07-06 23:50:00,nab_office_temp_sensor_01,23.143,0.8155,HIGH,TEMPERATURE_ANOMALY,CREATE_ALERT_AND_REQUIRE_HUMAN_CHECK,Isolation Forest marks this point as unusual,iforest_v1
+2013-07-07 07:05:00,nab_office_temp_sensor_01,25.028,0.61,MEDIUM,TEMPERATURE_ANOMALY,CREATE_WARNING_EVENT,temperature deviates strongly from recent pattern,iforest_v1

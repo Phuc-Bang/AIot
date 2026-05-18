@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIoT Smart Lab Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #00f2fe;
+            --secondary: #4facfe;
+            --bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --text: #f8fafc;
+            --accent: #fbbf24;
+            --danger: #ef4444;
+            --success: #10b981;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background: var(--bg);
+            background-image: 
+                radial-gradient(circle at 20% 20%, rgba(79, 172, 254, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 80% 80%, rgba(0, 242, 254, 0.15) 0%, transparent 40%);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 2rem;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .logo-area h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 600;
+        }
+
+        .status-badge {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--success);
+            color: var(--success);
+            padding: 0.5rem 1rem;
+            border-radius: 99px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--success);
+            animation: pulse 2s infinite;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            animation: fadeInUp 0.8s ease-out backwards;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: 0 10px 30px -10px rgba(0, 242, 254, 0.3);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            color: #94a3b8;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .sensor-value {
+            font-size: 3rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .sensor-unit {
+            font-size: 1rem;
+            color: #94a3b8;
+            margin-left: 0.5rem;
+        }
+
+        .ai-card {
+            grid-column: span 2;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: linear-gradient(135deg, rgba(79, 172, 254, 0.1), rgba(0, 242, 254, 0.1));
+            border: 1px solid rgba(0, 242, 254, 0.2);
+        }
+
+        .occupancy-status {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .status-icon {
+            font-size: 4rem;
+            background: var(--card-bg);
+            width: 100px;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 20px;
+            box-shadow: inset 0 0 20px rgba(0, 242, 254, 0.2);
+        }
+
+        .status-text h2 {
+            font-size: 2rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .decision-tag {
+            display: inline-block;
+            padding: 0.4rem 1rem;
+            background: var(--accent);
+            color: #000;
+            border-radius: 8px;
+            font-weight: 600;
+            margin-top: 1rem;
+            font-size: 0.85rem;
+        }
+
+        .chart-container {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border-radius: 24px;
+            padding: 1.5rem;
+            grid-column: span 3;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        button {
+            background: var(--primary);
+            color: var(--bg);
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            opacity: 0.9;
+            transform: scale(1.02);
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .anomaly-warning {
+            color: var(--danger);
+            font-weight: 600;
+            animation: shake 0.5s ease-in-out infinite;
+            display: none;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo-area">
+                <h1>AIoT Smart Hub</h1>
+                <p style="color: #94a3b8;">Hệ thống quản lý phòng thông minh - Lab 2</p>
+            </div>
+            <div class="status-badge">
+                <div class="status-dot"></div>
+                LIVE: AI Inference Active
+            </div>
+        </header>
+
+        <div class="grid">
+            <!-- AI Inference Card -->
+            <div class="card ai-card" style="animation-delay: 0.1s;">
+                <div class="card-header">
+                    <span>AI Model Analysis</span>
+                    <span id="anomaly-label" class="anomaly-warning">⚠️ ANOMALY DETECTED</span>
+                </div>
+                <div class="occupancy-status">
+                    <div class="status-icon" id="occupancy-icon">👤</div>
+                    <div class="status-text">
+                        <h2 id="occupancy-label">Phòng có người</h2>
+                        <p id="probability-text">Xác suất: 99.2%</p>
+                        <div class="decision-tag" id="decision-text">NORMAL_MODE</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sensor Cards -->
+            <div class="card" style="animation-delay: 0.2s;">
+                <div class="card-header">Nhiệt độ</div>
+                <div class="sensor-value" id="temp-val">24.5<span class="sensor-unit">°C</span></div>
+                <p style="color: #94a3b8; font-size: 0.8rem;">Trend: Ổn định</p>
+            </div>
+
+            <div class="card" style="animation-delay: 0.3s;">
+                <div class="card-header">Nồng độ CO2</div>
+                <div class="sensor-value" id="co2-val">450<span class="sensor-unit">ppm</span></div>
+                <p id="co2-status" style="color: var(--success); font-size: 0.8rem;">Chất lượng không khí: Tốt</p>
+            </div>
+
+            <div class="card" style="animation-delay: 0.4s;">
+                <div class="card-header">Ánh sáng</div>
+                <div class="sensor-value" id="light-val">320<span class="sensor-unit">Lux</span></div>
+            </div>
+
+            <!-- Chart -->
+            <div class="chart-container" style="animation-delay: 0.5s;">
+                <div class="card-header">Theo dõi dữ liệu thực tế (Real-time Telemetry)</div>
+                <canvas id="telemetryChart" height="100"></canvas>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button onclick="simulateTelemetry()">Gửi dữ liệu mô phỏng (Test AI)</button>
+            <p style="color: #94a3b8; font-size: 0.9rem; margin-top: 1rem;">Mẹo: Nhấn nút để gửi dữ liệu ngẫu nhiên lên Server và nhận phản hồi từ AI.</p>
+        </div>
+    </div>
+
+    <script>
+        // Chart Initialization
+        const ctx = document.getElementById('telemetryChart').getContext('2d');
+        const chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [
+                    {
+                        label: 'CO2 (ppm)',
+                        borderColor: '#00f2fe',
+                        backgroundColor: 'rgba(0, 242, 254, 0.1)',
+                        data: [],
+                        borderWidth: 3,
+                        tension: 0.4,
+                        fill: true
+                    },
+                    {
+                        label: 'Nhiệt độ (°C)',
+                        borderColor: '#fbbf24',
+                        data: [],
+                        borderWidth: 2,
+                        tension: 0.4,
+                        yAxisID: 'y1'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { labels: { color: '#f8fafc' } } },
+                scales: {
+                    x: { ticks: { color: '#94a3b8' } },
+                    y: { 
+                        ticks: { color: '#94a3b8' },
+                        grid: { color: 'rgba(255,255,255,0.05)' }
+                    },
+                    y1: {
+                        position: 'right',
+                        ticks: { color: '#fbbf24' },
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+
+        async function simulateTelemetry() {
+            // Tạo dữ liệu giả lập ngẫu nhiên
+            const isOccupied = Math.random() > 0.5;
+            // Giả lập tình huống: 30% trường hợp có người nhưng phòng lại tối (để test logic mới)
+            const isDark = Math.random() < 0.3; 
+            
+            const payload = {
+                room_id: "room_101",
+                device_id: "env_node_01",
+                Temperature: 20 + Math.random() * 10 + (isOccupied ? 2 : 0),
+                Humidity: 30 + Math.random() * 20,
+                Light: isOccupied ? (isDark ? 50 : 400 + Math.random() * 200) : (10 + Math.random() * 20),
+                CO2: 400 + Math.random() * 600 + (isOccupied ? 300 : 0),
+                HumidityRatio: 0.001,
+                timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19)
+            };
+
+            try {
+                const response = await fetch('http://127.0.0.1:8000/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await response.json();
+                updateUI(data);
+            } catch (error) {
+                console.error("Error calling API:", error);
+                alert("Không thể kết nối tới server! Hãy chắc chắn uvicorn đang chạy.");
+            }
+        }
+
+        function updateUI(data) {
+            const input = data.input;
+            const output = data.model_output;
+            const decision = data.decision;
+
+            // Update Sensors
+            document.getElementById('temp-val').innerHTML = `${input.Temperature.toFixed(1)}<span class="sensor-unit">°C</span>`;
+            document.getElementById('co2-val').innerHTML = `${input.CO2.toFixed(0)}<span class="sensor-unit">ppm</span>`;
+            document.getElementById('light-val').innerHTML = `${input.Light.toFixed(0)}<span class="sensor-unit">Lux</span>`;
+
+            // Update AI Labels
+            const occLabel = document.getElementById('occupancy-label');
+            const occIcon = document.getElementById('occupancy-icon');
+            if (output.predicted_occupancy === 1) {
+                occLabel.innerText = "Phòng có người";
+                occIcon.innerText = "👤";
+                occIcon.style.boxShadow = "inset 0 0 20px rgba(16, 185, 129, 0.4)";
+            } else {
+                occLabel.innerText = "Phòng trống";
+                occIcon.innerText = "🪑";
+                occIcon.style.boxShadow = "inset 0 0 20px rgba(148, 163, 184, 0.2)";
+            }
+
+            document.getElementById('probability-text').innerText = `Xác suất: ${(output.occupancy_probability * 100).toFixed(1)}%`;
+            document.getElementById('decision-text').innerText = decision.command_hint || decision.decision;
+            
+            // Anomaly Check
+            const anomalyLabel = document.getElementById('anomaly-label');
+            anomalyLabel.style.display = output.is_anomaly ? 'block' : 'none';
+
+            // Update Chart
+            const now = new Date().toLocaleTimeString();
+            chart.data.labels.push(now);
+            chart.data.datasets[0].data.push(input.CO2);
+            chart.data.datasets[1].data.push(input.Temperature);
+
+            if (chart.data.labels.length > 10) {
+                chart.data.labels.shift();
+                chart.data.datasets[0].data.shift();
+                chart.data.datasets[1].data.shift();
+            }
+            chart.update();
+
+            // CO2 Status
+            const co2Status = document.getElementById('co2-status');
+            if (input.CO2 > 1000) {
+                co2Status.innerText = "Chất lượng không khí: Kém (Cần thông gió)";
+                co2Status.style.color = "var(--danger)";
+            } else {
+                co2Status.innerText = "Chất lượng không khí: Tốt";
+                co2Status.style.color = "var(--success)";
+            }
+        }
+    </script>
+</body>
+</html>

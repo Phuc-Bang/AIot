@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Classroom AIoT | Premium Digital Twin</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Fira+Code&display=swap" rel="stylesheet">
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- MQTT.js -->
+    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+</head>
+<body>
+    <div class="dashboard-container">
+        <header>
+            <h1>SMART CLASSROOM AIoT</h1>
+            <p><i class="ph ph-map-pin"></i> Phòng A203 - Hệ Thống Giám Sát Real-time Digital Twin</p>
+        </header>
+
+        <!-- Quick Stats Section -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon"><i class="ph ph-thermometer-hot"></i></div>
+                <div class="stat-info">
+                    <h3>Nhiệt độ</h3>
+                    <div class="stat-value" id="card-temp">--°C</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="color: #60a5fa; background: rgba(96, 165, 250, 0.1);"><i class="ph ph-drop"></i></div>
+                <div class="stat-info">
+                    <h3>Độ ẩm</h3>
+                    <div class="stat-value" id="card-hum">--%</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="color: #f87171; background: rgba(248, 113, 113, 0.1);"><i class="ph ph-users"></i></div>
+                <div class="stat-info">
+                    <h3>Sĩ số</h3>
+                    <div class="stat-value" id="card-people">--</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="color: #fbbf24; background: rgba(251, 191, 36, 0.1);"><i class="ph ph-lightning"></i></div>
+                <div class="stat-info">
+                    <h3>Công suất</h3>
+                    <div class="stat-value" id="card-power">-- kW</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main View: Digital Twin -->
+        <div class="main-view" id="twin-panel">
+            <div class="section-title">LIVE DIGITAL TWIN</div>
+            
+            <svg id="classroom-svg" viewBox="0 0 800 500">
+                <!-- Sàn nhà -->
+                <rect x="50" y="50" width="700" height="400" rx="15" class="room-base" />
+                
+                <!-- Nhãn phòng -->
+                <text x="400" y="80" text-anchor="middle" class="room-label">ROOM A203 - FLOOR PLAN</text>
+
+                <!-- Các vùng thiết bị -->
+                <!-- Điều hòa (AC) -->
+                <g id="ac-unit" class="device-node">
+                    <rect id="ac-glow" x="350" y="60" width="100" height="40" rx="5" class="device-active-glow" fill="#38bdf8" style="display:none;"/>
+                    <rect x="350" y="60" width="100" height="30" rx="5" fill="#334155" stroke="#475569" />
+                    <text x="400" y="80" text-anchor="middle" fill="white" font-size="12" font-weight="600">AC UNIT</text>
+                </g>
+
+                <!-- Đèn 1 -->
+                <g id="light1" class="device-node">
+                    <circle id="light1-glow" cx="200" cy="200" r="40" class="device-active-glow" fill="#fbbf24" style="display:none;"/>
+                    <circle cx="200" cy="200" r="15" fill="#475569" stroke="#64748b" />
+                    <text x="200" y="230" text-anchor="middle" fill="#94a3b8" font-size="10">LIGHT 1</text>
+                </g>
+
+                <!-- Đèn 2 -->
+                <g id="light2" class="device-node">
+                    <circle id="light2-glow" cx="600" cy="200" r="40" class="device-active-glow" fill="#fbbf24" style="display:none;"/>
+                    <circle cx="600" cy="200" r="15" fill="#475569" stroke="#64748b" />
+                    <text x="600" y="230" text-anchor="middle" fill="#94a3b8" font-size="10">LIGHT 2</text>
+                </g>
+
+                <!-- Hiển thị chỉ số trung tâm -->
+                <g transform="translate(400, 250)">
+                    <text id="svg-temp" y="0" text-anchor="middle" fill="#f87171" font-size="48" class="sensor-text">--°C</text>
+                    <text id="svg-people" y="40" text-anchor="middle" fill="#38bdf8" font-size="20">Sĩ số: --</text>
+                </g>
+
+                <!-- Bàn ghế mô phỏng -->
+                <rect x="100" y="320" width="100" height="60" rx="5" fill="#1e293b" stroke="#334155" stroke-dasharray="4"/>
+                <rect x="350" y="320" width="100" height="60" rx="5" fill="#1e293b" stroke="#334155" stroke-dasharray="4"/>
+                <rect x="600" y="320" width="100" height="60" rx="5" fill="#1e293b" stroke="#334155" stroke-dasharray="4"/>
+            </svg>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="panel">
+                <div class="section-title">ĐIỀU KHIỂN</div>
+                <div class="control-buttons">
+                    <button class="btn btn-light" onclick="toggleDevice('light')">
+                        <i class="ph ph-lightbulb"></i> TOGGLE LIGHTS
+                    </button>
+                    <button class="btn btn-ac" onclick="toggleDevice('ac')">
+                        <i class="ph ph-snowflake"></i> TOGGLE AC UNIT
+                    </button>
+                </div>
+                <div style="margin-top: 20px; font-size: 0.9rem;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span color="#94a3b8">Trạng thái AC:</span>
+                        <b id="status-ac" style="color: #94a3b8;">--</b>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span color="#94a3b8">Trạng thái Đèn:</span>
+                        <b id="status-light" style="color: #94a3b8;">--</b>
+                    </div>
+                </div>
+                <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; align-items: center;">
+                    <span style="color: #94a3b8; font-size: 0.85rem;">Chế độ điều khiển:</span>
+                    <button id="mode-btn" onclick="toggleMode()"
+                            style="padding: 6px 14px; font-size: 0.75rem; border: none; border-radius: 6px; cursor: pointer; color: white; font-weight: 600; background: linear-gradient(135deg, #22c55e, #16a34a);">
+                        <i class="ph ph-robot"></i> AUTO
+                    </button>
+                </div>
+            </div>
+
+            <div class="panel" style="flex-grow: 1;">
+                <div class="section-title">HỆ THỐNG LOGS</div>
+                <div id="log-container">
+                    <!-- Logs will appear here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Environment History Chart -->
+        <div class="chart-view">
+            <div class="section-title">LỊCH SỬ MÔI TRƯỜNG</div>
+            <canvas id="tempChart" height="100"></canvas>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

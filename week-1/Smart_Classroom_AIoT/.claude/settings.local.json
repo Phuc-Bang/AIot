@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-ChildItem -Path \"E:\\\\AIoT\\\\Day-1\\\\Smart_Classroom_AIoT\" -Recurse -Force | Select-Object FullName | ForEach-Object { $_.FullName } | Sort-Object)",
+      "Bash(Get-ChildItem -Path \"e:\\\\AIoT\\\\Day-1\\\\Smart_Classroom_AIoT\" -Recurse -Depth 3)",
+      "Bash(Select-Object FullName)",
+      "Bash(Head -100)"
+    ]
+  }
+}
