@@ -1,0 +1,42 @@
+graph TD
+    %% Overall AIoT Architecture
+    subgraph "1. Edge Layer (Cảm biến vật lý)"
+        A1[Smart Meter - Công tơ Wh]
+        A2[DHT22 - Cảm biến T/RH]
+        A3[Weather station - Trạm khí tượng]
+    end
+
+    subgraph "2. Gateway Layer (IoT Gateway)"
+        B1[Mạng Mesh/Zigbee/Wi-Fi]
+        B2[Edge Gateway / MQTT Broker]
+    end
+
+    subgraph "3. Serving Layer (FastAPI Server)"
+        C1[app.py - REST Endpoints]
+        C2[joblib Bundle v1]
+        C3[forecast_log.csv]
+    end
+
+    subgraph "4. Decision Layer (Tầng Quyết định & An toàn)"
+        D1[Risk threshold analyzer]
+        D2[Recommendation engine]
+        D3[Safety hard-coded rules]
+    end
+
+    subgraph "5. Application Layer (Giao diện & Chấp hành)"
+        E1[Smart Home Mobile App]
+        E2[Grafana Dashboard]
+        E3[Smart Plug Rơ-le]
+    end
+
+    A1 & A2 & A3 --> B1
+    B1 --> B2
+    B2 -->|HTTP POST raw JSON| C1
+    C2 -->|RAM serving| C1
+    C1 -->|Save historical logs| C3
+    C1 -->|Inference output| D1
+    D1 --> D2
+    D2 --> D3
+    D3 -->|Lệnh an toàn| E3
+    D3 -->|Cập nhật trạng thái| E1
+    C3 -->|Giám sát đối soát| E2

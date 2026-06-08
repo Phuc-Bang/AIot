@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>09. Đánh giá chất lượng mã nguồn - Lab 4 AIoT Energy Forecasting</title>
+    <style>
+        
+:root {
+    --primary: #4f46e5;
+    --primary-light: #e0e7ff;
+    --primary-hover: #4338ca;
+    --text-dark: #0f172a;
+    --text-muted: #64748b;
+    --bg-slate: #f8fafc;
+    --bg-sidebar: #0f172a;
+    --border-slate: #e2e8f0;
+    --code-bg: #1e293b;
+    --inline-code-bg: #f1f5f9;
+    --inline-code-color: #e11d48;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: var(--text-dark);
+    background-color: var(--bg-slate);
+    line-height: 1.6;
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Sidebar Navigation */
+.sidebar {
+    width: 320px;
+    background-color: var(--bg-sidebar);
+    color: #f8fafc;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 100;
+    box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+}
+
+.sidebar-header {
+    padding: 24px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.sidebar-header h1 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sidebar-header .badge {
+    background-color: var(--primary);
+    color: white;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 9999px;
+    font-weight: 600;
+    margin-top: 4px;
+    display: inline-block;
+}
+
+.sidebar-nav {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 0;
+}
+
+.sidebar-nav-item {
+    display: block;
+    padding: 12px 24px;
+    color: #cbd5e1;
+    text-decoration: none;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    border-left: 4px solid transparent;
+}
+
+.sidebar-nav-item:hover {
+    background-color: rgba(255,255,255,0.05);
+    color: #ffffff;
+    padding-left: 28px;
+}
+
+.sidebar-nav-item.active {
+    background-color: rgba(79, 70, 229, 0.15);
+    color: #ffffff;
+    border-left-color: var(--primary);
+    font-weight: 600;
+}
+
+.sidebar-footer {
+    padding: 16px 24px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    font-size: 11px;
+    color: #94a3b8;
+    text-align: center;
+}
+
+/* Main Content Area */
+.main-wrapper {
+    margin-left: 320px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.top-bar {
+    background-color: #ffffff;
+    border-bottom: 1px solid var(--border-slate);
+    padding: 16px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 90;
+}
+
+.top-bar-title {
+    font-size: 14px;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.top-bar-links a {
+    color: var(--primary);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.top-bar-links a:hover {
+    color: var(--primary-hover);
+    text-decoration: underline;
+}
+
+.content-container {
+    flex: 1;
+    padding: 48px 64px 80px 64px;
+    max-width: 1012px;
+    width: 100%;
+    margin: 0 auto;
+    background-color: #ffffff;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    border-radius: 8px;
+    margin-top: 24px;
+    margin-bottom: 24px;
+}
+
+/* Markdown Styling */
+.markdown-body h1 {
+    font-size: 32px;
+    font-weight: 800;
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--border-slate);
+    color: #0f172a;
+}
+
+.markdown-body h2 {
+    font-size: 22px;
+    font-weight: 700;
+    margin-top: 36px;
+    margin-bottom: 16px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border-slate);
+    color: #1e293b;
+}
+
+.markdown-body h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-top: 28px;
+    margin-bottom: 12px;
+    color: #334155;
+}
+
+.markdown-body h4 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-top: 20px;
+    margin-bottom: 8px;
+    color: #475569;
+}
+
+.markdown-body p {
+    margin-bottom: 16px;
+    color: #334155;
+    text-align: justify;
+}
+
+.markdown-body ul, .markdown-body ol {
+    margin-bottom: 16px;
+    padding-left: 24px;
+}
+
+.markdown-body li {
+    margin-bottom: 8px;
+    color: #334155;
+}
+
+.markdown-body a {
+    color: var(--primary);
+    text-decoration: none;
+    transition: color 0.15s;
+    font-weight: 500;
+}
+
+.markdown-body a:hover {
+    color: var(--primary-hover);
+    text-decoration: underline;
+}
+
+/* Blockquotes */
+.markdown-body blockquote {
+    padding: 12px 24px;
+    border-left: 4px solid var(--border-slate);
+    background-color: var(--bg-slate);
+    margin-bottom: 20px;
+    font-style: italic;
+    color: var(--text-muted);
+}
+
+/* Code block styling */
+.markdown-body pre {
+    background-color: var(--code-bg);
+    padding: 16px;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin-bottom: 20px;
+}
+
+.markdown-body pre code {
+    background-color: transparent;
+    color: #f8fafc;
+    padding: 0;
+    border-radius: 0;
+    font-size: 13.5px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+.markdown-body code {
+    background-color: var(--inline-code-bg);
+    color: var(--inline-code-color);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 85%;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+/* Table styling */
+.markdown-body table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 24px;
+    font-size: 14.5px;
+}
+
+.markdown-body th, .markdown-body td {
+    padding: 12px 16px;
+    border: 1px solid var(--border-slate);
+}
+
+.markdown-body th {
+    background-color: var(--bg-slate);
+    font-weight: 600;
+    text-align: left;
+    color: #1e293b;
+}
+
+.markdown-body tr:nth-child(even) {
+    background-color: #fafbfd;
+}
+
+/* Custom Alert Boxes (GitHub Alerts mapping) */
+.alert {
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    border-radius: 8px;
+    border-left-width: 4px;
+    border-left-style: solid;
+}
+
+.alert-title {
+    font-weight: 700;
+    margin-bottom: 8px;
+    font-size: 14.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.alert-content p {
+    margin-bottom: 0 !important;
+    font-size: 14px;
+    text-align: justify;
+}
+
+.alert-note {
+    background-color: #eff6ff;
+    border-left-color: #3b82f6;
+    color: #1e40af;
+}
+.alert-note .alert-title { color: #1d4ed8; }
+
+.alert-tip {
+    background-color: #f0fdf4;
+    border-left-color: #22c55e;
+    color: #166534;
+}
+.alert-tip .alert-title { color: #15803d; }
+
+.alert-important {
+    background-color: #faf5ff;
+    border-left-color: #a855f7;
+    color: #6b21a8;
+}
+.alert-important .alert-title { color: #7e22ce; }
+
+.alert-warning {
+    background-color: #fffbeb;
+    border-left-color: #f59e0b;
+    color: #92400e;
+}
+.alert-warning .alert-title { color: #b45309; }
+
+.alert-caution {
+    background-color: #fef2f2;
+    border-left-color: #ef4444;
+    color: #991b1b;
+}
+.alert-caution .alert-title { color: #b91c1c; }
+
+/* Mermaid Styling */
+.mermaid {
+    background-color: white !important;
+    border: 1px solid var(--border-slate);
+    border-radius: 8px;
+    padding: 24px;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 24px;
+    overflow-x: auto;
+}
+
+.footer {
+    background-color: #ffffff;
+    border-top: 1px solid var(--border-slate);
+    padding: 24px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: auto;
+}
+
+/* Landing Page Grid */
+.landing-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    margin-top: 24px;
+}
+
+.landing-card {
+    background-color: #ffffff;
+    border: 1px solid var(--border-slate);
+    border-radius: 8px;
+    padding: 20px;
+    text-decoration: none;
+    color: var(--text-dark);
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.landing-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);
+    border-color: var(--primary);
+}
+
+.landing-card h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.landing-card p {
+    font-size: 13.5px;
+    color: var(--text-muted);
+    margin-bottom: 0;
+    text-align: left;
+}
+
+@media (max-width: 1024px) {
+    .sidebar {
+        display: none; /* simple hides sidebar for tablet/mobile to keep script clean */
+    }
+    .main-wrapper {
+        margin-left: 0;
+    }
+    .content-container {
+        padding: 24px;
+        margin-top: 0;
+        margin-bottom: 0;
+        border-radius: 0;
+    }
+}
+
+    </style>
+    <!-- Mermaid.js for drawing diagrams directly in the browser -->
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            securityLevel: 'loose',
+            flowchart: { useMaxWidth: true, htmlLabels: true }
+        });
+    </script>
+</head>
+<body>
+
+    <!-- Left Sidebar Navigation -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h1>🔋 Lab 4 AIoT</h1>
+            <div class="badge">Energy Forecasting</div>
+        </div>
+        <div class="sidebar-nav">
+                    <a href="index.html" class="sidebar-nav-item ">🏡 Trang chủ / Tổng mục lục</a>
+        <a href="00_project_overview.html" class="sidebar-nav-item ">00. Tổng quan dự án</a>
+        <a href="01_architecture.html" class="sidebar-nav-item ">01. Kiến trúc hệ thống AIoT</a>
+        <a href="02_data_flow.html" class="sidebar-nav-item ">02. Luồng dữ liệu tuần tự</a>
+        <a href="03_runtime_and_dependencies.html" class="sidebar-nav-item ">03. Luồng thực thi & Phụ thuộc</a>
+        <a href="04_dataset_and_schema.html" class="sidebar-nav-item ">04. Tập dữ liệu & Điền khuyết</a>
+        <a href="05_feature_engineering.html" class="sidebar-nav-item ">05. Kỹ nghệ đặc trưng thời gian</a>
+        <a href="06_model_training_and_metrics.html" class="sidebar-nav-item ">06. Mô hình hóa & Đo lường sai số</a>
+        <a href="07_decision_layer.html" class="sidebar-nav-item ">07. Tầng ra quyết định & Cảnh báo</a>
+        <a href="08_api_forecast_workflow.html" class="sidebar-nav-item ">08. Triển khai API FastAPI</a>
+        <a href="09_code_review.html" class="sidebar-nav-item active">09. Đánh giá chất lượng mã nguồn</a>
+        <a href="10_safety_fail_safe.html" class="sidebar-nav-item ">10. An toàn & Cơ chế Fail-safe</a>
+        <a href="11_development_roadmap.html" class="sidebar-nav-item ">11. Lộ trình phát triển & Học tập</a>
+        <a href="HANDBOOK.html" class="sidebar-nav-item ">📖 Sách hướng dẫn kỹ thuật (Handbook)</a>
+        </div>
+        <div class="sidebar-footer">
+            Designed by DeepMind Team & Antigravity AI
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="main-wrapper">
+        <div class="top-bar">
+            <div class="top-bar-title">Tài liệu Kỹ thuật Hệ thống Dự báo Phụ tải Điện năng BEMS</div>
+            <div class="top-bar-links">
+                <a href="index.html">🏡 Quay lại Trang chủ</a>
+            </div>
+        </div>
+
+        <div style="padding: 0 40px; flex: 1;">
+            <div class="content-container markdown-body">
+                <h1 id="bao-cao-anh-gia-ma-nguon-cap-o-senior-engineering-code-review">BÁO CÁO ĐÁNH GIÁ MÃ NGUỒN CẤP ĐỘ SENIOR (ENGINEERING CODE REVIEW)</h1>
+<p>Khi xây dựng một hệ thống học máy phục vụ thực tế (Production ML), chất lượng của mã nguồn đóng vai trò sống còn đối với sự ổn định, tính an toàn và khả năng bảo trì của hệ thống. Một mã nguồn chắp vá, thiếu phân tách trách nhiệm rõ ràng sẽ nhanh chóng sụp đổ khi lượng người dùng tăng cao hoặc khi phân phối dữ liệu đầu vào biến động.</p>
+<p>Tài liệu này thực hiện đánh giá mã nguồn (Code Review) toàn diện dự án <strong>Lab 4</strong> dưới lăng kính của một Kỹ sư phần mềm &amp; Kiến trúc sư MLOps cấp cao, chỉ rõ các ưu/khuyết điểm, nhận diện các mẫu chống đối (anti-patterns), logic dễ vỡ và vạch ra chiến lược tái cấu trúc (refactoring) chuẩn doanh nghiệp.</p>
+<hr />
+<h2 id="1-anh-gia-10-chieu-ky-thuat-phan-mem-software-engineering-dimensions">1. Đánh giá 10 Chiều Kỹ thuật Phần mềm (Software Engineering Dimensions)</h2>
+<hr />
+<h3 id="1-to-chuc-ma-nguon-code-organization">1. Tổ chức mã nguồn (Code Organization)</h3>
+<ul>
+<li><strong>Đánh giá</strong>: Khá rõ ràng đối với quy mô một bài thực hành (POC). Các file mã nguồn được đặt gọn trong thư mục <code>src/</code>, dữ liệu trong <code>data/</code>, mô hình trong <code>models/</code> và kết quả trong <code>outputs/</code>.</li>
+<li><strong>Điểm yếu</strong>: Chưa phân tách rõ ràng giữa mã nguồn chạy offline (huấn luyện, vẽ biểu đồ) và mã nguồn chạy online (FastAPI). Việc đặt chung toàn bộ trong một thư mục dễ gây nhầm lẫn về môi trường chạy và thư viện phụ thuộc (dependencies).</li>
+</ul>
+<hr />
+<h3 id="2-tinh-mo-un-hoa-modularity">2. Tính mô-đun hóa (Modularity)</h3>
+<ul>
+<li><strong>Đánh giá</strong>: Tốt. File <code>utils.py</code> đóng vai trò là lõi chia sẻ (Shared Library) chứa toàn bộ logic tiền xử lý và đặc trưng chuỗi thời gian, giúp cả <code>train_forecast.py</code> và <code>app.py</code> tái sử dụng, tránh lỗi lệch dữ liệu đầu vào.</li>
+<li><strong>Điểm yếu</strong>: File <code>utils.py</code> đang gánh vác quá nhiều trách nhiệm (God Object). Nó vừa chứa cấu hình biến toàn cục, logic tiền xử lý, tính toán đặc trưng lượng giác, logic phân cấp rủi ro an toàn và các hàm ghi lưu file JSON.</li>
+</ul>
+<hr />
+<h3 id="3-cach-at-ten-naming-conventions">3. Cách đặt tên (Naming Conventions)</h3>
+<ul>
+<li><strong>Đánh giá</strong>: Rất trực quan và tường minh. Các biến mục tiêu (<code>Appliances</code>), cột ngày (<code>date</code>), chân trời dự báo (<code>HORIZON_STEPS</code>), và các đặc trưng động (<code>appliances_lag_1</code>, <code>appliances_rolling_mean_6</code>) được đặt tên theo chuẩn snake_case và mang rõ ý nghĩa vật lý gốc.</li>
+<li><strong>Điểm yếu</strong>: Một số biến toàn cục trong <code>utils.py</code> (như <code>UCI_COLUMNS</code>, <code>FEATURE_COLUMNS</code>) được viết hoa cố định, nhưng thực tế các đặc trưng đầu vào có thể thay đổi động tùy theo phiên bản mô hình được nạp từ file <code>.joblib</code>.</li>
+</ul>
+<hr />
+<h3 id="4-phan-tach-cac-trach-nhiem-separation-of-concerns-soc">4. Phân tách các Trách nhiệm (Separation of Concerns - SoC)</h3>
+<ul>
+<li><strong>Đánh giá</strong>: Ở mức trung bình. </li>
+<li><strong>Điểm yếu nghiêm trọng</strong>: Có sự đan xen quá sâu giữa <strong>Logic toán học học máy</strong> và <strong>Logic nghiệp vụ web</strong>. Cụ thể, file <code>app.py</code> (vốn chỉ nên chịu trách nhiệm tiếp nhận yêu cầu mạng và validate HTTP) lại trực tiếp thực hiện logic điền khuyết thiếu đặc trưng, ánh xạ rủi ro thống kê và thực hiện ghi đè file log đĩa cứng. Điều này vi phạm nghiêm trọng nguyên lý SoC.</li>
+</ul>
+<hr />
+<h3 id="5-rui-ro-ro-ri-du-lieu-data-leakage-risks">5. Rủi ro rò rỉ dữ liệu (Data Leakage Risks)</h3>
+<ul>
+<li><strong>Đánh giá</strong>: Tuyệt vời. Dự án áp dụng chặt chẽ phép cắt dòng thời gian tuyến tính (<code>time_split</code> chia 75% đầu làm train, 25% sau làm test) và cấm sử dụng xáo trộn shuffle dữ liệu, triệt tiêu hoàn toàn nguy cơ rò rỉ thông tin tương lai về quá khứ.</li>
+<li><strong>Điểm cần lưu ý</strong>: Cần bảo đảm ở môi trường chạy trực tuyến, Client tuyệt đối không gửi nhầm mốc thời gian tương lai lọt vào mảng lịch sử telemetry đầu vào.</li>
+</ul>
+<hr />
+<h3 id="6-kha-nang-mo-rong-quy-mo-scalability">6. Khả năng mở rộng quy mô (Scalability)</h3>
+<ul>
+<li><strong>Đánh giá</strong>: Kém.</li>
+<li><strong>Nguyên nhân</strong>:<ol>
+<li><em>Ghi log đồng thời</em>: Việc mở rộng file <code>forecast_log.csv</code> cục bộ trực tiếp trên ổ đĩa thông qua Pandas là phép toán đơn luồng (Single-thread blocking IO). Khi có hàng nghìn request gọi API đồng thời, hệ thống sẽ bị thắt nút cổ chai tại ổ đĩa (IO Bottleneck) và crash server do xung đột khóa file.</li>
+<li><em>Tính toán đặc trưng lặp</em>: Server API phải tính toán lại toàn bộ Lag/Rolling bằng Pandas trong RAM cho từng request đơn lẻ, gây tiêu tốn CPU nghiêm trọng.</li>
+</ol>
+</li>
+</ul>
+<hr />
+<h3 id="7-kha-nang-bao-tri-maintainability">7. Khả năng bảo trì (Maintainability)</h3>
+<ul>
+<li><strong>Đánh giá</strong>: Dễ bảo trì đối với mã nguồn hiện tại nhờ cấu trúc gọn nhẹ và comment code rất chi tiết.</li>
+<li><strong>Khuyết điểm</strong>: Thiếu hoàn toàn các bài <strong>Unit Tests</strong> cho các hàm lõi trong <code>utils.py</code> (ví dụ không có test kiểm thử xem hàm Sin/Cos có trả về đúng tọa độ lượng giác hay không, điền khuyết thiếu hoạt động đúng không). Khi thay đổi code trong <code>utils.py</code>, không có gì bảo đảm hệ thống không bị lỗi hồi quy (regression bugs).</li>
+</ul>
+<hr />
+<h3 id="8-tinh-san-sang-trien-khai-deployment-readiness">8. Tính sẵn sàng triển khai (Deployment Readiness)</h3>
+<ul>
+<li><strong>Đánh giá</strong>: Ở mức cơ bản (POC).</li>
+<li><strong>Điểm yếu</strong>:<ul>
+<li>Thiếu file cấu hình môi trường bảo mật (như <code>.env</code> hoặc cấu hình Consul). Các đường dẫn tệp tin và cổng kết nối đang được viết cứng (hard-coded) trực tiếp trong file.</li>
+<li>Thiếu file cấu hình Docker (<code>Dockerfile</code>) để đóng gói đồng bộ dịch vụ.</li>
+</ul>
+</li>
+</ul>
+<hr />
+<h3 id="9-chat-luong-thiet-ke-api-api-design-quality">9. Chất lượng Thiết kế API (API Design Quality)</h3>
+<ul>
+<li><strong>Đánh giá</strong>: Rất tốt. Cấu trúc bản tin phản hồi JSON của endpoint <code>/forecast</code> được phân cấp rất mạch lạc: <code>model_output</code> chứa kết quả thô, <code>decision</code> chứa thông tin hành động nghiệp vụ an toàn và <code>api_check</code> phục vụ giám sát độ trễ mạng. Endpoint <code>/health</code> hỗ trợ tốt cho Kubernetes health probes.</li>
+<li><strong>Điểm yếu</strong>: Payload đầu vào bắt buộc gửi mảng lịch sử 24 điểm đo gây lãng phí băng thông mạng di động. Thiết kế REST HTTP truyền thống có độ trễ lớn hơn so với giao thức gọn nhẹ <strong>gRPC</strong> hoặc <strong>WebSockets</strong> trong truyền dữ liệu IoT.</li>
+</ul>
+<hr />
+<h3 id="10-chat-luong-ky-nghe-ac-trung-feature-engineering-quality">10. Chất lượng Kỹ nghệ Đặc trưng (Feature Engineering Quality)</h3>
+<ul>
+<li><strong>Đánh giá</strong>: Đạt điểm tối đa về mặt khoa học dữ liệu chuỗi thời gian. Sự kết hợp giữa Lag, Rolling (Mean &amp; Std), Delta (đo gia tốc) và Cyclic Time (Sin/Cos) thể hiện tư duy học máy chuỗi thời gian xuất sắc và bắt bài được toàn bộ các quán tính vật lý của phụ tải điện.</li>
+</ul>
+<hr />
+<h2 id="2-nhan-dien-cac-mau-chong-oi-anti-patterns-logic-de-gay">2. Nhận diện các Mẫu chống đối (Anti-Patterns) &amp; Logic dễ gãy</h2>
+<ol>
+<li><strong>Anti-Pattern: Concurrent CSV Logging (Ghi file CSV đồng thời)</strong>:<ul>
+<li><em>Mã lỗi</em>: <code>forecast_log.to_csv(OUTPUT_DIR / "forecast_log.csv", mode='a', index=False)</code> trong luồng API trực tuyến.</li>
+<li><em>Rủi ro</em>: Đây là mẫu chống đối kinh điển. File CSV không thể chịu tải đồng thời. Hệ thống chắc chắn crash khi chạy đa luồng trên Kubernetes.</li>
+</ul>
+</li>
+<li><strong>Logic dễ vỡ: Hard-coded training medians</strong>:<ul>
+<li><em>Mã lỗi</em>: Nạp tĩnh <code>raw_medians</code> từ tệp bundle <code>.joblib</code> để điền khuyết thiếu vĩnh viễn.</li>
+<li><em>Rủi ro</em>: Nếu cảm biến hỏng kéo dài nhiều ngày, việc điền mãi một giá trị trung vị tĩnh của quá khứ sẽ làm mô hình liên tục dự báo ra một hằng số phẳng lì, làm mất hoàn toàn độ nhạy của hệ thống cảnh báo.</li>
+</ul>
+</li>
+<li><strong>Thiếu xác thực logic vật lý (Missing Semantic Validation)</strong>:<ul>
+<li><em>Rủi ro</em>: Pydantic chỉ kiểm tra kiểu dữ liệu (<code>float</code>, <code>int</code>). Nếu Gateway bị nhiễu gửi lên giá trị <code>T1: -100.0</code> (Nhiệt độ phòng bếp âm 100 độ C), API vẫn chấp nhận và đưa vào mô hình suy diễn, dẫn đến kết quả dự báo công suất bị bóp méo nghiêm trọng.</li>
+</ul>
+</li>
+<li><strong>Thiếu hệ thống Giám sát &amp; Cảnh báo (Missing Monitoring)</strong>:<ul>
+<li><em>Rủi ro</em>: Hệ thống hoàn toàn "mù" trước hiện tượng trôi lệch dữ liệu (Data Drift) và sụt giảm độ chính xác. Không có cơ chế tự động gửi cảnh báo (Slack, Email) khi mô hình dự báo liên tục lệch quá $50\%$ so với thực tế đo đạc.</li>
+</ul>
+</li>
+</ol>
+<hr />
+<h2 id="3-chien-luoc-tai-cau-truc-chuan-doanh-nghiep-refactoring-strategy">3. Chiến lược Tái cấu trúc chuẩn Doanh nghiệp (Refactoring Strategy)</h2>
+<p>Để chuyển đổi toàn diện dự án lên quy mô lớn, chúng ta áp dụng 3 bước cải tiến kiến trúc:</p>
+<h3 id="buoc-1-tai-cau-truc-thu-muc-du-an-folder-restructuring">Bước 1: Tái cấu trúc Thư mục dự án (Folder Restructuring)</h3>
+<p>Chúng ta chuyển đổi từ thư mục bài lab phẳng dẹt sang cấu trúc thư mục phân tầng chuẩn doanh nghiệp (Enterprise Layout):</p>
+<pre><code class="language-text">lab4_aiot_forecasting_predictive_analytics_uci_appliances/
+├─ config/                                  # Chứa các file cấu hình môi trường (.env, settings.yaml)
+├─ data/                                    # Fallback offline data
+├─ deploy/                                  # Dockerfile, docker-compose, Kubernetes manifests
+├─ docs/                                    # Hệ thống tài liệu kỹ thuật
+├─ models/                                  # Joblib model bundle registry
+├─ src/                                     # Toàn bộ mã nguồn chia phân cấp rõ ràng
+│  ├─ core/                                 # Lõi toán học độc lập
+│  │  ├─ __init__.py
+│  │  ├─ features.py                        # Tách riêng logic tính Lag, Rolling, Sin/Cos
+│  │  └─ preprocessing.py                 # Tách logic làm sạch, điền khuyết raw_medians
+│  ├─ training/                             # Pipeline huấn luyện offline
+│  │  ├─ __init__.py
+│  │  └─ pipeline.py                        # Grid search, cross validation, MLflow tracking
+│  ├─ api/                                   # Lớp phục vụ API thời gian thực
+│  │  ├─ endpoints/                         # REST controllers (/health, /forecast)
+│  │  ├─ schemas/                           # Pydantic models với semantic validation
+│  │  ├─ services/                          # Business logic: gọi model serving, mapping rủi ro
+│  │  ├─ middleware/                        # Rate limiting, Prometheus metrics collector
+│  │  └─ app.py                             # Khởi tạo FastAPI Server chính
+│  ├─ edge/                                 # Nhúng ESP32 C++ Code
+│  │  └─ safety_gateway/
+│  └─ utils/                                # Tiện ích ghi log đĩa, định dạng ngày tháng dùng chung
+├─ tests/                                   # Thư mục kiểm thử Unit test &amp; Integration test
+│  ├─ unit/                                 # Test các hàm toán học trong core/features.py
+│  └─ integration/                          # Test endpoint API giả lập
+├─ requirements.txt
+└─ requirements-dev.txt                     # Thư viện kiểm thử (pytest, httpx) và MLOps (mlflow)
+</code></pre>
+<hr />
+<h3 id="buoc-2-tach-biet-logic-nang-cap-ky-thuat-refactoring-steps">Bước 2: Tách biệt Logic &amp; Nâng cấp Kỹ thuật (Refactoring Steps)</h3>
+<ol>
+<li><strong>Tách <code>utils.py</code> thành các Module chuyên biệt</strong>:<ul>
+<li>Tách toàn bộ logic tạo đặc trưng sang <code>src/core/features.py</code>. File này hoàn toàn thuần khiết (Pure functions), chỉ nhận vào dữ liệu số và trả về đặc trưng, không chứa đường dẫn tệp hay logic nghiệp vụ API, giúp viết Unit Test bằng <strong>PyTest</strong> cực kỳ dễ dàng.</li>
+</ul>
+</li>
+<li><strong>Nâng cấp xác thực dữ liệu đầu vào (Semantic Validation)</strong>:<ul>
+<li>Sử dụng Pydantic <code>Field(..., ge=10.0, le=45.0)</code> cho các cột nhiệt độ phòng để từ chối ngay lập tức các giá trị nhiễu ảo từ biên gửi lên.</li>
+</ul>
+</li>
+<li><strong>Tách logic ghi log ra khỏi luồng API đồng bộ</strong>:<ul>
+<li>Thay thế việc ghi đè file CSV bằng cơ chế đẩy log sự kiện sang một hàng đợi chạy nền không chặn (Asynchronous background task) sử dụng tính năng <code>BackgroundTasks</code> của FastAPI, ghi trực tiếp vào Database thông qua Connection Pool để tối ưu hóa hiệu năng chịu tải.</li>
+</ul>
+</li>
+</ol>
+<hr />
+<h3 id="buoc-3-e-xuat-cai-tien-huong-san-xuat-production-improvements">Bước 3: Đề xuất Cải tiến hướng Sản xuất (Production Improvements)</h3>
+<ol>
+<li><strong>Thay thế cơ chế điền khuyết thiếu tĩnh bằng Imputation động</strong>:<ul>
+<li>Tích hợp giải thuật điền khuyết thiếu chuỗi thời gian thông minh dựa trên giá trị liền kề gần nhất (<strong>Forward Fill</strong>) kết hợp với giá trị trung vị của khung giờ tương ứng trong tuần để đảm bảo dữ liệu điền khuyết phản ánh đúng ngữ cảnh sinh hoạt.</li>
+</ul>
+</li>
+<li><strong>Tích hợp Rate Limiting &amp; API Security</strong>:<ul>
+<li>Sử dụng API Key xác thực (ngăn chặn các Gateway lạ gửi dữ liệu rác tấn công server) và cài đặt <strong>Rate Limiting</strong> (giới hạn mỗi IP Gateway chỉ được phép gửi tối đa 1 request mỗi 10 phút) để bảo vệ API trước nguy cơ bị quá tải DDoS.</li>
+</ul>
+</li>
+<li><strong>Tự động tái huấn luyện khi có cảnh báo Drift</strong>:<ul>
+<li>Cấu hình một tiến trình nền sử dụng <strong>Evidently AI</strong> để tính toán khoảng cách Wasserstein giữa phân phối dữ liệu đầu vào thực tế của tuần này so với tập huấn luyện lịch sử. Nếu chỉ số trôi lệch vượt quá ngưỡng an toàn, kích hoạt lệnh webhook gọi Airflow tự động chạy pipeline huấn luyện lại mô hình và xuất bản phiên bản model mới lên registry.</li>
+</ul>
+</li>
+</ol>
+            </div>
+        </div>
+
+        <div class="footer">
+            © 2026 - Lab 4 AIoT Forecasting & Predictive Analytics - Tài liệu Đào tạo Chuyên sâu
+        </div>
+    </div>
+
+</body>
+</html>

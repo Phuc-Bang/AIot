@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>03. Luồng thực thi & Phụ thuộc - Lab 4 AIoT Energy Forecasting</title>
+    <style>
+        
+:root {
+    --primary: #4f46e5;
+    --primary-light: #e0e7ff;
+    --primary-hover: #4338ca;
+    --text-dark: #0f172a;
+    --text-muted: #64748b;
+    --bg-slate: #f8fafc;
+    --bg-sidebar: #0f172a;
+    --border-slate: #e2e8f0;
+    --code-bg: #1e293b;
+    --inline-code-bg: #f1f5f9;
+    --inline-code-color: #e11d48;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: var(--text-dark);
+    background-color: var(--bg-slate);
+    line-height: 1.6;
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Sidebar Navigation */
+.sidebar {
+    width: 320px;
+    background-color: var(--bg-sidebar);
+    color: #f8fafc;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 100;
+    box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+}
+
+.sidebar-header {
+    padding: 24px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.sidebar-header h1 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sidebar-header .badge {
+    background-color: var(--primary);
+    color: white;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 9999px;
+    font-weight: 600;
+    margin-top: 4px;
+    display: inline-block;
+}
+
+.sidebar-nav {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 0;
+}
+
+.sidebar-nav-item {
+    display: block;
+    padding: 12px 24px;
+    color: #cbd5e1;
+    text-decoration: none;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    border-left: 4px solid transparent;
+}
+
+.sidebar-nav-item:hover {
+    background-color: rgba(255,255,255,0.05);
+    color: #ffffff;
+    padding-left: 28px;
+}
+
+.sidebar-nav-item.active {
+    background-color: rgba(79, 70, 229, 0.15);
+    color: #ffffff;
+    border-left-color: var(--primary);
+    font-weight: 600;
+}
+
+.sidebar-footer {
+    padding: 16px 24px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    font-size: 11px;
+    color: #94a3b8;
+    text-align: center;
+}
+
+/* Main Content Area */
+.main-wrapper {
+    margin-left: 320px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.top-bar {
+    background-color: #ffffff;
+    border-bottom: 1px solid var(--border-slate);
+    padding: 16px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 90;
+}
+
+.top-bar-title {
+    font-size: 14px;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.top-bar-links a {
+    color: var(--primary);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.top-bar-links a:hover {
+    color: var(--primary-hover);
+    text-decoration: underline;
+}
+
+.content-container {
+    flex: 1;
+    padding: 48px 64px 80px 64px;
+    max-width: 1012px;
+    width: 100%;
+    margin: 0 auto;
+    background-color: #ffffff;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    border-radius: 8px;
+    margin-top: 24px;
+    margin-bottom: 24px;
+}
+
+/* Markdown Styling */
+.markdown-body h1 {
+    font-size: 32px;
+    font-weight: 800;
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--border-slate);
+    color: #0f172a;
+}
+
+.markdown-body h2 {
+    font-size: 22px;
+    font-weight: 700;
+    margin-top: 36px;
+    margin-bottom: 16px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border-slate);
+    color: #1e293b;
+}
+
+.markdown-body h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-top: 28px;
+    margin-bottom: 12px;
+    color: #334155;
+}
+
+.markdown-body h4 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-top: 20px;
+    margin-bottom: 8px;
+    color: #475569;
+}
+
+.markdown-body p {
+    margin-bottom: 16px;
+    color: #334155;
+    text-align: justify;
+}
+
+.markdown-body ul, .markdown-body ol {
+    margin-bottom: 16px;
+    padding-left: 24px;
+}
+
+.markdown-body li {
+    margin-bottom: 8px;
+    color: #334155;
+}
+
+.markdown-body a {
+    color: var(--primary);
+    text-decoration: none;
+    transition: color 0.15s;
+    font-weight: 500;
+}
+
+.markdown-body a:hover {
+    color: var(--primary-hover);
+    text-decoration: underline;
+}
+
+/* Blockquotes */
+.markdown-body blockquote {
+    padding: 12px 24px;
+    border-left: 4px solid var(--border-slate);
+    background-color: var(--bg-slate);
+    margin-bottom: 20px;
+    font-style: italic;
+    color: var(--text-muted);
+}
+
+/* Code block styling */
+.markdown-body pre {
+    background-color: var(--code-bg);
+    padding: 16px;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin-bottom: 20px;
+}
+
+.markdown-body pre code {
+    background-color: transparent;
+    color: #f8fafc;
+    padding: 0;
+    border-radius: 0;
+    font-size: 13.5px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+.markdown-body code {
+    background-color: var(--inline-code-bg);
+    color: var(--inline-code-color);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 85%;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+/* Table styling */
+.markdown-body table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 24px;
+    font-size: 14.5px;
+}
+
+.markdown-body th, .markdown-body td {
+    padding: 12px 16px;
+    border: 1px solid var(--border-slate);
+}
+
+.markdown-body th {
+    background-color: var(--bg-slate);
+    font-weight: 600;
+    text-align: left;
+    color: #1e293b;
+}
+
+.markdown-body tr:nth-child(even) {
+    background-color: #fafbfd;
+}
+
+/* Custom Alert Boxes (GitHub Alerts mapping) */
+.alert {
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    border-radius: 8px;
+    border-left-width: 4px;
+    border-left-style: solid;
+}
+
+.alert-title {
+    font-weight: 700;
+    margin-bottom: 8px;
+    font-size: 14.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.alert-content p {
+    margin-bottom: 0 !important;
+    font-size: 14px;
+    text-align: justify;
+}
+
+.alert-note {
+    background-color: #eff6ff;
+    border-left-color: #3b82f6;
+    color: #1e40af;
+}
+.alert-note .alert-title { color: #1d4ed8; }
+
+.alert-tip {
+    background-color: #f0fdf4;
+    border-left-color: #22c55e;
+    color: #166534;
+}
+.alert-tip .alert-title { color: #15803d; }
+
+.alert-important {
+    background-color: #faf5ff;
+    border-left-color: #a855f7;
+    color: #6b21a8;
+}
+.alert-important .alert-title { color: #7e22ce; }
+
+.alert-warning {
+    background-color: #fffbeb;
+    border-left-color: #f59e0b;
+    color: #92400e;
+}
+.alert-warning .alert-title { color: #b45309; }
+
+.alert-caution {
+    background-color: #fef2f2;
+    border-left-color: #ef4444;
+    color: #991b1b;
+}
+.alert-caution .alert-title { color: #b91c1c; }
+
+/* Mermaid Styling */
+.mermaid {
+    background-color: white !important;
+    border: 1px solid var(--border-slate);
+    border-radius: 8px;
+    padding: 24px;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 24px;
+    overflow-x: auto;
+}
+
+.footer {
+    background-color: #ffffff;
+    border-top: 1px solid var(--border-slate);
+    padding: 24px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: auto;
+}
+
+/* Landing Page Grid */
+.landing-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    margin-top: 24px;
+}
+
+.landing-card {
+    background-color: #ffffff;
+    border: 1px solid var(--border-slate);
+    border-radius: 8px;
+    padding: 20px;
+    text-decoration: none;
+    color: var(--text-dark);
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.landing-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);
+    border-color: var(--primary);
+}
+
+.landing-card h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.landing-card p {
+    font-size: 13.5px;
+    color: var(--text-muted);
+    margin-bottom: 0;
+    text-align: left;
+}
+
+@media (max-width: 1024px) {
+    .sidebar {
+        display: none; /* simple hides sidebar for tablet/mobile to keep script clean */
+    }
+    .main-wrapper {
+        margin-left: 0;
+    }
+    .content-container {
+        padding: 24px;
+        margin-top: 0;
+        margin-bottom: 0;
+        border-radius: 0;
+    }
+}
+
+    </style>
+    <!-- Mermaid.js for drawing diagrams directly in the browser -->
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            securityLevel: 'loose',
+            flowchart: { useMaxWidth: true, htmlLabels: true }
+        });
+    </script>
+</head>
+<body>
+
+    <!-- Left Sidebar Navigation -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h1>🔋 Lab 4 AIoT</h1>
+            <div class="badge">Energy Forecasting</div>
+        </div>
+        <div class="sidebar-nav">
+                    <a href="index.html" class="sidebar-nav-item ">🏡 Trang chủ / Tổng mục lục</a>
+        <a href="00_project_overview.html" class="sidebar-nav-item ">00. Tổng quan dự án</a>
+        <a href="01_architecture.html" class="sidebar-nav-item ">01. Kiến trúc hệ thống AIoT</a>
+        <a href="02_data_flow.html" class="sidebar-nav-item ">02. Luồng dữ liệu tuần tự</a>
+        <a href="03_runtime_and_dependencies.html" class="sidebar-nav-item active">03. Luồng thực thi & Phụ thuộc</a>
+        <a href="04_dataset_and_schema.html" class="sidebar-nav-item ">04. Tập dữ liệu & Điền khuyết</a>
+        <a href="05_feature_engineering.html" class="sidebar-nav-item ">05. Kỹ nghệ đặc trưng thời gian</a>
+        <a href="06_model_training_and_metrics.html" class="sidebar-nav-item ">06. Mô hình hóa & Đo lường sai số</a>
+        <a href="07_decision_layer.html" class="sidebar-nav-item ">07. Tầng ra quyết định & Cảnh báo</a>
+        <a href="08_api_forecast_workflow.html" class="sidebar-nav-item ">08. Triển khai API FastAPI</a>
+        <a href="09_code_review.html" class="sidebar-nav-item ">09. Đánh giá chất lượng mã nguồn</a>
+        <a href="10_safety_fail_safe.html" class="sidebar-nav-item ">10. An toàn & Cơ chế Fail-safe</a>
+        <a href="11_development_roadmap.html" class="sidebar-nav-item ">11. Lộ trình phát triển & Học tập</a>
+        <a href="HANDBOOK.html" class="sidebar-nav-item ">📖 Sách hướng dẫn kỹ thuật (Handbook)</a>
+        </div>
+        <div class="sidebar-footer">
+            Designed by DeepMind Team & Antigravity AI
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="main-wrapper">
+        <div class="top-bar">
+            <div class="top-bar-title">Tài liệu Kỹ thuật Hệ thống Dự báo Phụ tải Điện năng BEMS</div>
+            <div class="top-bar-links">
+                <a href="index.html">🏡 Quay lại Trang chủ</a>
+            </div>
+        </div>
+
+        <div style="padding: 0 40px; flex: 1;">
+            <div class="content-container markdown-body">
+                <h1 id="phan-tich-luong-thuc-thi-runtime-va-phu-thuoc-file">PHÂN TÍCH LUỒNG THỰC THI RUNTIME VÀ PHỤ THUỘC FILE</h1>
+<p>Để làm chủ hệ thống mã nguồn <strong>Lab 4</strong>, một kỹ sư hoặc nhà phát triển cần hiểu rõ cách thức hoạt động của chương trình ở thời điểm chạy (Runtime): file nào gọi file nào, luồng dữ liệu biến đổi ra sao trên bộ nhớ RAM, cấu trúc phụ thuộc giữa các module, và các vị trí chốt chặn quan trọng để đặt điểm debug khi gặp sự cố.</p>
+<p>Tài liệu này phân tích chi tiết luồng thực thi runtime, đồ thị phụ thuộc của hệ thống, phân loại mức độ an toàn chỉnh sửa của từng file và cẩm nang debug thực tế trong <strong>Lab 4</strong>.</p>
+<hr />
+<h2 id="1-o-thi-phu-thuoc-giua-cac-file-dependency-graph">1. Đồ thị Phụ thuộc giữa các File (Dependency Graph)</h2>
+<p>Mã nguồn được thiết kế theo nguyên lý mô-đun hóa, trong đó tệp <code>utils.py</code> đóng vai trò là thư viện tiện ích dùng chung (Core Utility Library) cấp thấp nhất, cung cấp logic cho tất cả các kịch bản chạy cấp cao hơn.</p>
+<p>Dưới đây là đồ thị phụ thuộc giữa các file trong hệ thống:</p>
+<pre class="mermaid">graph TD
+    %% Base Utility
+    classDef core fill:#f9f,stroke:#333,stroke-width:2px;
+    classDef script fill:#bbf,stroke:#333,stroke-width:1px;
+    classDef data fill:#fbb,stroke:#333,stroke-width:1px;
+
+    utils[utils.py]:::core
+
+    %% Main Scripts
+    train[train_forecast.py]:::core
+    app[app.py]:::core
+    plot[plot_results.py]:::script
+    dl[download_data.py]:::script
+    test_local[test_api_local.py]:::script
+    test_remote[test_api.py]:::script
+
+    %% Models and Output Artifacts
+    bundle[forecast_model_bundle_v1.joblib]:::data
+    metrics[forecast_metrics.json]:::data
+    log[forecast_log.csv]:::data
+    pred_csv[forecast_test_predictions.csv]:::data
+
+    %% Dependencies mapping
+    dl -->|1. Tải dữ liệu thô| utils
+    train -->|2. Gọi hàm tính đặc trưng| utils
+    train -->|3. Xuất bản model| bundle
+    train -->|4. Lưu sai số| metrics
+    train -->|5. Tạo dự báo thử| pred_csv
+    train -->|6. Ghi log thử nghiệm| log
+
+    plot -->|7. Vẽ biểu đồ| metrics & pred_csv & log
+
+    app -->|8. Gọi hàm điền khuyết & đặc trưng| utils
+    app -->|9. Nạp mô hình vào RAM| bundle
+
+    test_local -->|10. Gọi trực tiếp hàm endpoint| app
+    test_local -->|11. Đọc dữ liệu test| utils
+
+    test_remote -->|12. Gửi HTTP POST request| app
+</pre>
+<hr />
+<h2 id="2-chi-tiet-phu-thuoc-au-vao-au-ra-cua-tung-file">2. Chi tiết Phụ thuộc, Đầu vào &amp; Đầu ra của Từng File</h2>
+<p>Dưới đây là phân tích chi tiết vai trò, các file gọi và dữ liệu đầu vào/đầu ra của tất cả các file mã nguồn chính trong thư mục <code>src/</code>:</p>
+<h3 id="1-utilspy-loi-tinh-toan-tien-ich-dung-chung">1. <code>utils.py</code> (Lõi tính toán &amp; Tiện ích dùng chung)</h3>
+<ul>
+<li><strong>Các phụ thuộc (Imports)</strong>: <code>pandas</code>, <code>numpy</code>, <code>pathlib</code>, <code>json</code>.</li>
+<li><strong>Được gọi bởi</strong>: <code>train_forecast.py</code>, <code>app.py</code>, <code>plot_results.py</code>, <code>test_api_local.py</code>, <code>download_data.py</code>.</li>
+<li><strong>Dữ liệu đầu vào (Input)</strong>: DataFrame thô hoặc mảng dữ liệu chuỗi thời gian.</li>
+<li><strong>Dữ liệu đầu ra (Output)</strong>: DataFrame đã được làm sạch, bổ sung đầy đủ các đặc trưng trễ (Lag), trượt (Rolling), sai phân (Delta), lượng giác tuần hoàn (Cyclic Time), và dịch chuyển nhãn tương lai (<code>target_future</code>).</li>
+<li><strong>Ý nghĩa</strong>: Đây là "lõi toán học" duy nhất của toàn hệ thống. Mọi thay đổi về đặc trưng tại đây sẽ lập tức ảnh hưởng đến cả pha huấn luyện offline và pha chạy online.</li>
+</ul>
+<h3 id="2-train_forecastpy-chay-huan-luyen-ngoai-tuyen">2. <code>train_forecast.py</code> (Chạy huấn luyện ngoại tuyến)</h3>
+<ul>
+<li><strong>Các phụ thuộc (Imports)</strong>: <code>scikit-learn</code> (StandardScaler, LinearRegression, RandomForestRegressor, GradientBoostingRegressor), <code>joblib</code>, <code>utils.py</code>.</li>
+<li><strong>Được gọi bởi</strong>: Kỹ sư chạy thủ công bằng lệnh terminal: <code>python src/train_forecast.py</code>.</li>
+<li><strong>Dữ liệu đầu vào (Input)</strong>: Đọc file dữ liệu thô <code>data/energydata_complete.csv</code> từ đĩa cứng qua hàm <code>load_dataset()</code>.</li>
+<li><strong>Dữ liệu đầu ra (Output)</strong>:<ol>
+<li>Tệp nén mô hình: <code>models/forecast_model_bundle_v1.joblib</code></li>
+<li>Tệp chỉ số sai số: <code>outputs/forecast_metrics.json</code></li>
+<li>Bảng dự báo kiểm thử: <code>outputs/forecast_test_predictions.csv</code></li>
+<li>Nhật ký giả lập: <code>outputs/forecast_log.csv</code></li>
+</ol>
+</li>
+</ul>
+<h3 id="3-apppy-fastapi-server-endpoint-phuc-vu-online">3. <code>app.py</code> (FastAPI Server Endpoint Phục vụ Online)</h3>
+<ul>
+<li><strong>Các phụ thuộc (Imports)</strong>: <code>fastapi</code>, <code>pydantic</code>, <code>joblib</code>, <code>utils.py</code>.</li>
+<li><strong>Được gọi bởi</strong>: Trình chạy ASGI Uvicorn: <code>uvicorn src.app:app --reload</code>.</li>
+<li><strong>Dữ liệu đầu vào (Input)</strong>: Gói tin HTTP POST gửi lên JSON Payload chứa mảng lịch sử telemetry (<code>history</code>).</li>
+<li><strong>Dữ liệu đầu ra (Output)</strong>: Gói tin HTTP response JSON chứa giá trị dự báo Wh, cấp độ rủi ro, khuyến nghị và safety note. Đồng thời ghi thêm 1 dòng nhật ký vào <code>outputs/forecast_log.csv</code>.</li>
+</ul>
+<h3 id="4-plot_resultspy-ve-bieu-o-ket-qua">4. <code>plot_results.py</code> (Vẽ biểu đồ kết quả)</h3>
+<ul>
+<li><strong>Các phụ thuộc (Imports)</strong>: <code>matplotlib</code>, <code>pandas</code>, <code>json</code>, <code>utils.py</code>.</li>
+<li><strong>Được gọi bởi</strong>: Kỹ sư chạy lệnh terminal: <code>python src/plot_results.py</code>.</li>
+<li><strong>Dữ liệu đầu vào (Input)</strong>: Đọc các file kết quả trung gian: <code>outputs/forecast_test_predictions.csv</code>, <code>outputs/forecast_log.csv</code>, và <code>outputs/forecast_metrics.json</code>.</li>
+<li><strong>Dữ liệu đầu ra (Output)</strong>: Xuất ra 3 file ảnh đồ thị lưu tại thư mục <code>figures/</code>:<ul>
+<li><code>forecast_vs_actual.png</code></li>
+<li><code>forecast_error_over_time.png</code></li>
+<li><code>model_comparison_mae.png</code></li>
+</ul>
+</li>
+</ul>
+<h3 id="5-download_datapy-tai-du-lieu-tu-ong">5. <code>download_data.py</code> (Tải dữ liệu tự động)</h3>
+<ul>
+<li><strong>Các phụ thuộc (Imports)</strong>: <code>urllib.request</code>, <code>zipfile</code>, <code>tempfile</code>, <code>shutil</code>, <code>utils.py</code>.</li>
+<li><strong>Được gọi bởi</strong>: Kỹ sư chạy lệnh terminal: <code>python src/download_data.py</code>.</li>
+<li><strong>Dữ liệu đầu vào (Input)</strong>: Tải tệp zip công khai từ kho lưu trữ của UCI qua giao thức HTTP.</li>
+<li><strong>Dữ liệu đầu ra (Output)</strong>: Giải nén và lưu file <code>data/energydata_complete.csv</code>. Nếu không có internet, tự động kích hoạt fallback sử dụng dữ liệu mẫu lớp học.</li>
+</ul>
+<h3 id="6-test_api_localpy-kiem-thu-api-cuc-bo-khong-mo-port">6. <code>test_api_local.py</code> (Kiểm thử API cục bộ không mở port)</h3>
+<ul>
+<li><strong>Các phụ thuộc (Imports)</strong>: <code>utils.py</code>, <code>app.py</code> (gọi trực tiếp hàm Python <code>forecast()</code>, <code>health()</code>, <code>model_info()</code>).</li>
+<li><strong>Được gọi bởi</strong>: Kỹ sư chạy lệnh: <code>python src/test_api_local.py</code>.</li>
+<li><strong>Dữ liệu đầu vào (Input)</strong>: Rút trích 36 dòng cuối cùng của DataFrame thô làm lịch sử giả lập.</li>
+<li><strong>Dữ liệu đầu ra (Output)</strong>: Xác thực Schema trả về của API và ghi kết quả test vào <code>outputs/api_test_result.json</code>.</li>
+</ul>
+<hr />
+<h2 id="3-luong-thuc-thi-runtime-chi-tiet-execution-flow">3. Luồng Thực thi Runtime chi tiết (Execution Flow)</h2>
+<p>Hệ thống có hai luồng chạy runtime độc lập hoàn toàn, phân tách rõ ràng nhiệm vụ của kỹ sư dữ liệu (Offline) và dịch vụ web tự động (Online):</p>
+<h3 id="luong-a-huan-luyen-ngoai-tuyen-offline-training-pipeline-execution">Luồng A: Huấn luyện Ngoại tuyến (Offline Training Pipeline Execution)</h3>
+<p>Chạy tuần tự từ trên xuống dưới khi gọi <code>train_forecast.py</code>:
+1.  <strong>Nạp</strong>: Đọc file dữ liệu từ đĩa $\rightarrow$ tạo Pandas DataFrame.
+2.  <strong>Tính</strong>: Gọi <code>make_supervised_frame</code> thực hiện dịch chuyển mốc giờ tuần hoàn và tính Lag/Rolling/Delta cho toàn bộ hàng vạn dòng.
+3.  <strong>Lọc</strong>: Xóa bỏ các dòng khuyết biên (<code>clean_supervised_frame</code>).
+4.  <strong>Chia</strong>: Chia DataFrame thành 2 phần Train (75% đầu) và Test (25% cuối) theo mốc cắt dòng thời gian tuyến tính.
+5.  <strong>Học</strong>: Khởi tạo 3 mô hình học máy. Gọi phương thức <code>.fit(X_train, y_train)</code> để học trọng số.
+6.  <strong>Đo</strong>: Gọi <code>.predict(X_test)</code> trên tập Test để tính toán MAE/RMSE/MAPE và chọn ra mô hình tối ưu nhất.
+7.  <strong>Lưu</strong>: Đóng gói mô hình tốt nhất cùng với các giá trị trung vị (<code>raw_medians</code>, <code>feature_medians</code>) vào bộ nhớ đĩa thành file <code>.joblib</code>.</p>
+<h3 id="luong-b-phuc-vu-du-bao-truc-tuyen-online-serving-inference-execution">Luồng B: Phục vụ Dự báo Trực tuyến (Online Serving Inference Execution)</h3>
+<p>Chạy tức thời khi có Client gọi HTTP POST lên FastAPI Server <code>/forecast</code>:
+1.  <strong>Tiếp nhận</strong>: FastAPI validate định dạng payload JSON đầu vào qua Pydantic schema <code>ForecastRequest</code>.
+2.  <strong>Chuyển đổi</strong>: Chuyển mảng JSON gồm 24 điểm thô thành Pandas DataFrame gồm 24 dòng.
+3.  <strong>Làm sạch</strong>: Gọi <code>fill_missing_for_api</code> để lấp đầy các cột cảm biến bị thiếu bằng <code>raw_medians</code> đã được nạp sẵn trên RAM từ file <code>.joblib</code>.
+4.  <strong>Kỹ nghệ</strong>: Gọi <code>make_supervised_frame(include_target=False)</code> tính toán Lag, Rolling, Delta thời gian thực.
+5.  <strong>Trích xuất</strong>: Lấy duy nhất hàng cuối cùng của DataFrame (<code>latest_row</code>), đại diện cho thời điểm hiện tại $t$.
+6.  <strong>Điền khuyết đặc trưng</strong>: Điền các giá trị đặc trưng bị rỗng (do chuỗi lịch sử quá ngắn) bằng <code>feature_medians</code> từ RAM.
+7.  <strong>Suy diễn</strong>: Chuyển ma trận đặc trưng qua mô hình tốt nhất: <code>model.predict(X)</code> $\rightarrow$ trả về <code>predicted_value</code> Wh.
+8.  <strong>Ánh xạ quyết định</strong>: Đưa <code>predicted_value</code> qua bộ phân tích ngưỡng để gán nhãn <code>risk_level</code> và khuyến nghị <code>recommendation</code>.
+9.  <strong>Ghi log</strong>: Ghi thêm 1 dòng nhật ký vào <code>outputs/forecast_log.csv</code>.
+10. <strong>Phản hồi</strong>: Trả về gói tin JSON cấu trúc cho Client.</p>
+<hr />
+<h2 id="4-cac-iem-at-debug-quan-trong-khi-gap-su-co-debugging-checkpoints">4. Các điểm đặt Debug quan trọng khi gặp Sự cố (Debugging Checkpoints)</h2>
+<p>Khi hệ thống gặp lỗi hoặc kết quả dự báo sai lệch bất thường, kỹ sư nên đặt điểm dừng (breakpoint) hoặc chèn lệnh in dữ liệu (<code>print()</code>) tại 4 chốt chặn runtime dưới đây:</p>
+<pre class="mermaid">graph TD
+    A[Telemetry thô từ Client] -->|Chốt chặn 1: Điền khuyết thô| B(utils.py - fill_missing_for_api)
+    B -->|Chốt chặn 2: Trích xuất đặc trưng| C(app.py - latest_row)
+    C -->|Chốt chặn 3: Kiểm tra ma trận suy diễn| D(app.py - model.predict)
+    D -->|Chốt chặn 4: Ánh xạ rủi ro| E(utils.py - risk_from_prediction)
+</pre>
+<h3 id="chot-chan-1-kiem-tra-du-lieu-tho-sau-lam-sach">Chốt chặn 1: Kiểm tra Dữ liệu thô sau làm sạch</h3>
+<ul>
+<li><em>Vị trí</em>: Cuối hàm <code>fill_missing_for_api</code> trong <code>utils.py</code>.</li>
+<li><em>Mục đích debug</em>: Kiểm tra xem dữ liệu thô gửi lên có bị khuyết thiếu quá nhiều hay không, và bộ trung vị <code>raw_medians</code> có điền chính xác giá trị hợp lý vật lý hay không.</li>
+<li><em>Lệnh debug</em>: <code>print(out.isnull().sum())</code> (Đảm bảo kết quả in ra toàn bộ là <code>0</code> - không còn giá trị rỗng).</li>
+</ul>
+<h3 id="chot-chan-2-kiem-tra-ac-trung-ong-tai-thoi-iem-hien-tai-t">Chốt chặn 2: Kiểm tra Đặc trưng động tại thời điểm hiện tại $t$</h3>
+<ul>
+<li><em>Vị trí</em>: Ngay sau dòng <code>latest = features_df.iloc[[-1]].copy()</code> trong file <code>app.py</code>.</li>
+<li><em>Mục đích debug</em>: Xác thực xem các đặc trưng trễ lớn (như <code>appliances_rolling_mean_24</code>) có bị rỗng <code>NaN</code> hay không (nếu rỗng nghĩa là client gửi chuỗi lịch sử ngắn hơn 24 điểm).</li>
+<li><em>Lệnh debug</em>: <code>print(latest[FEATURE_COLUMNS].to_dict(orient='records')[0])</code>.</li>
+</ul>
+<h3 id="chot-chan-3-kiem-tra-ma-tran-au-vao-truoc-khi-goi-predict">Chốt chặn 3: Kiểm tra Ma trận đầu vào trước khi gọi predict</h3>
+<ul>
+<li><em>Vị trí</em>: Ngay trước dòng <code>predicted_value = float(model.predict(X)[0])</code> trong file <code>app.py</code>.</li>
+<li><em>Mục đích debug</em>: Đảm bảo ma trận <code>X</code> có số lượng cột và thứ tự cột hoàn toàn trùng khớp với danh sách đặc trưng đầu vào <code>FEATURE_COLUMNS</code> mà mô hình yêu cầu. Nếu lệch thứ tự hoặc thiếu cột, scikit-learn sẽ crash hệ thống.</li>
+<li><em>Lệnh debug</em>: <code>print(X.shape)</code> (Đảm bảo kích thước là <code>(1, 52)</code> - 1 hàng và 52 cột đặc trưng).</li>
+</ul>
+<h3 id="chot-chan-4-kiem-tra-logic-phan-cap-rui-ro">Chốt chặn 4: Kiểm tra Logic phân cấp rủi ro</h3>
+<ul>
+<li><em>Vị trí</em>: Trong hàm <code>risk_from_prediction</code> của <code>utils.py</code>.</li>
+<li><em>Mục đích debug</em>: Xác minh xem ngưỡng tĩnh <code>thresholds</code> nạp từ file bundle có khớp với giá trị phân vị tính toán lúc huấn luyện hay không.</li>
+<li><em>Lệnh debug</em>: <code>print("Pred:", predicted_value, "Thresholds:", thresholds)</code>.</li>
+</ul>
+<hr />
+<h2 id="5-ban-o-phan-loai-an-toan-chinh-sua-file-file-modifiability-guide">5. Bản đồ Phân loại An toàn Chỉnh sửa File (File Modifiability Guide)</h2>
+<p>Để tránh làm sập hệ thống (break pipeline) khi phát triển mở rộng, hãy tuân thủ bảng phân loại cấp độ an toàn dưới đây:</p>
+<h3 id="cap-o-1-cuc-ky-nguy-hiem-core-pipeline-files">🔴 CẬP ĐỘ 1: CỰC KỲ NGUY HIỂM (Core Pipeline Files)</h3>
+<ul>
+<li><strong>Tệp tin</strong>: <strong><code>src/utils.py</code></strong> và <strong><code>src/train_forecast.py</code></strong>.</li>
+<li><strong>Lý do</strong>: Đây là các file cốt lõi chứa logic toán học của cả hệ thống. Một thay đổi nhỏ tại đây (ví dụ: đổi tên cột đặc trưng trong <code>FEATURE_COLUMNS</code> hoặc thay đổi cách tính sin/cos) sẽ lập tức làm mất tính tương thích giữa mô hình đã huấn luyện và API thời gian thực.</li>
+<li><strong>Quy tắc</strong>: Tuyệt đối không chỉnh sửa trực tiếp trên môi trường chạy thực tế. Mọi thay đổi bắt buộc phải được thử nghiệm đồng bộ trong Jupyter Notebook trước, sau đó tiến hành tái huấn luyện toàn bộ hệ thống để xuất bản file <code>.joblib</code> mới tương thích.</li>
+</ul>
+<h3 id="cap-o-2-can-than-trong-deployment-files">🟡 CẤP ĐỘ 2: CẦN THẬN TRỌNG (Deployment Files)</h3>
+<ul>
+<li><strong>Tệp tin</strong>: <strong><code>src/app.py</code></strong>.</li>
+<li><strong>Lý do</strong>: File này chịu trách nhiệm phục vụ API trực tuyến. Chỉnh sửa tại đây không làm hỏng mô hình học máy, nhưng có thể làm thay đổi Schema JSON phản hồi, gây crash ứng dụng client (Gateway hoặc Mobile App) đang kết nối gọi API.</li>
+<li><strong>Quy tắc</strong>: Cho phép bổ sung thêm các endpoint phụ trợ (như <code>/health</code> hoặc endpoints cấu hình), nhưng hạn chế tối đa việc chỉnh sửa cấu trúc của payload yêu cầu <code>/forecast</code> trừ khi có sự đồng bộ từ phía phần cứng biên.</li>
+</ul>
+<h3 id="cap-o-3-an-toan-tuyet-oi-scripts-visuals">🟢 CẤP ĐỘ 3: AN TOÀN TUYỆT ĐỐI (Scripts &amp; Visuals)</h3>
+<ul>
+<li><strong>Tệp tin</strong>: <strong><code>src/plot_results.py</code></strong>, <strong><code>src/test_api_local.py</code></strong>, <strong><code>src/test_api.py</code></strong>, <strong><code>src/download_data.py</code></strong>.</li>
+<li><strong>Lý do</strong>: Đây là các file kịch bản (scripts) chạy độc lập bên ngoài pipeline chính, chỉ có nhiệm vụ vẽ biểu đồ, tải file hoặc gọi thử nghiệm API.</li>
+<li><strong>Quy tắc</strong>: Tự do chỉnh sửa, tối ưu hóa hoặc viết lại hoàn toàn để phục vụ nhu cầu làm báo cáo hoặc kiểm thử mở rộng hệ thống mà không sợ làm ảnh hưởng đến hoạt động dự báo của API thời gian thực.</li>
+</ul>
+            </div>
+        </div>
+
+        <div class="footer">
+            © 2026 - Lab 4 AIoT Forecasting & Predictive Analytics - Tài liệu Đào tạo Chuyên sâu
+        </div>
+    </div>
+
+</body>
+</html>

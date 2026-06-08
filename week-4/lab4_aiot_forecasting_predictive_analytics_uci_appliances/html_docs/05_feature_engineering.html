@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>05. Kỹ nghệ đặc trưng thời gian - Lab 4 AIoT Energy Forecasting</title>
+    <style>
+        
+:root {
+    --primary: #4f46e5;
+    --primary-light: #e0e7ff;
+    --primary-hover: #4338ca;
+    --text-dark: #0f172a;
+    --text-muted: #64748b;
+    --bg-slate: #f8fafc;
+    --bg-sidebar: #0f172a;
+    --border-slate: #e2e8f0;
+    --code-bg: #1e293b;
+    --inline-code-bg: #f1f5f9;
+    --inline-code-color: #e11d48;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: var(--text-dark);
+    background-color: var(--bg-slate);
+    line-height: 1.6;
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Sidebar Navigation */
+.sidebar {
+    width: 320px;
+    background-color: var(--bg-sidebar);
+    color: #f8fafc;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 100;
+    box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+}
+
+.sidebar-header {
+    padding: 24px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.sidebar-header h1 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sidebar-header .badge {
+    background-color: var(--primary);
+    color: white;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 9999px;
+    font-weight: 600;
+    margin-top: 4px;
+    display: inline-block;
+}
+
+.sidebar-nav {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 0;
+}
+
+.sidebar-nav-item {
+    display: block;
+    padding: 12px 24px;
+    color: #cbd5e1;
+    text-decoration: none;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    border-left: 4px solid transparent;
+}
+
+.sidebar-nav-item:hover {
+    background-color: rgba(255,255,255,0.05);
+    color: #ffffff;
+    padding-left: 28px;
+}
+
+.sidebar-nav-item.active {
+    background-color: rgba(79, 70, 229, 0.15);
+    color: #ffffff;
+    border-left-color: var(--primary);
+    font-weight: 600;
+}
+
+.sidebar-footer {
+    padding: 16px 24px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    font-size: 11px;
+    color: #94a3b8;
+    text-align: center;
+}
+
+/* Main Content Area */
+.main-wrapper {
+    margin-left: 320px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.top-bar {
+    background-color: #ffffff;
+    border-bottom: 1px solid var(--border-slate);
+    padding: 16px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 90;
+}
+
+.top-bar-title {
+    font-size: 14px;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.top-bar-links a {
+    color: var(--primary);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.top-bar-links a:hover {
+    color: var(--primary-hover);
+    text-decoration: underline;
+}
+
+.content-container {
+    flex: 1;
+    padding: 48px 64px 80px 64px;
+    max-width: 1012px;
+    width: 100%;
+    margin: 0 auto;
+    background-color: #ffffff;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    border-radius: 8px;
+    margin-top: 24px;
+    margin-bottom: 24px;
+}
+
+/* Markdown Styling */
+.markdown-body h1 {
+    font-size: 32px;
+    font-weight: 800;
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--border-slate);
+    color: #0f172a;
+}
+
+.markdown-body h2 {
+    font-size: 22px;
+    font-weight: 700;
+    margin-top: 36px;
+    margin-bottom: 16px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border-slate);
+    color: #1e293b;
+}
+
+.markdown-body h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-top: 28px;
+    margin-bottom: 12px;
+    color: #334155;
+}
+
+.markdown-body h4 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-top: 20px;
+    margin-bottom: 8px;
+    color: #475569;
+}
+
+.markdown-body p {
+    margin-bottom: 16px;
+    color: #334155;
+    text-align: justify;
+}
+
+.markdown-body ul, .markdown-body ol {
+    margin-bottom: 16px;
+    padding-left: 24px;
+}
+
+.markdown-body li {
+    margin-bottom: 8px;
+    color: #334155;
+}
+
+.markdown-body a {
+    color: var(--primary);
+    text-decoration: none;
+    transition: color 0.15s;
+    font-weight: 500;
+}
+
+.markdown-body a:hover {
+    color: var(--primary-hover);
+    text-decoration: underline;
+}
+
+/* Blockquotes */
+.markdown-body blockquote {
+    padding: 12px 24px;
+    border-left: 4px solid var(--border-slate);
+    background-color: var(--bg-slate);
+    margin-bottom: 20px;
+    font-style: italic;
+    color: var(--text-muted);
+}
+
+/* Code block styling */
+.markdown-body pre {
+    background-color: var(--code-bg);
+    padding: 16px;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin-bottom: 20px;
+}
+
+.markdown-body pre code {
+    background-color: transparent;
+    color: #f8fafc;
+    padding: 0;
+    border-radius: 0;
+    font-size: 13.5px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+.markdown-body code {
+    background-color: var(--inline-code-bg);
+    color: var(--inline-code-color);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 85%;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+/* Table styling */
+.markdown-body table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 24px;
+    font-size: 14.5px;
+}
+
+.markdown-body th, .markdown-body td {
+    padding: 12px 16px;
+    border: 1px solid var(--border-slate);
+}
+
+.markdown-body th {
+    background-color: var(--bg-slate);
+    font-weight: 600;
+    text-align: left;
+    color: #1e293b;
+}
+
+.markdown-body tr:nth-child(even) {
+    background-color: #fafbfd;
+}
+
+/* Custom Alert Boxes (GitHub Alerts mapping) */
+.alert {
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    border-radius: 8px;
+    border-left-width: 4px;
+    border-left-style: solid;
+}
+
+.alert-title {
+    font-weight: 700;
+    margin-bottom: 8px;
+    font-size: 14.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.alert-content p {
+    margin-bottom: 0 !important;
+    font-size: 14px;
+    text-align: justify;
+}
+
+.alert-note {
+    background-color: #eff6ff;
+    border-left-color: #3b82f6;
+    color: #1e40af;
+}
+.alert-note .alert-title { color: #1d4ed8; }
+
+.alert-tip {
+    background-color: #f0fdf4;
+    border-left-color: #22c55e;
+    color: #166534;
+}
+.alert-tip .alert-title { color: #15803d; }
+
+.alert-important {
+    background-color: #faf5ff;
+    border-left-color: #a855f7;
+    color: #6b21a8;
+}
+.alert-important .alert-title { color: #7e22ce; }
+
+.alert-warning {
+    background-color: #fffbeb;
+    border-left-color: #f59e0b;
+    color: #92400e;
+}
+.alert-warning .alert-title { color: #b45309; }
+
+.alert-caution {
+    background-color: #fef2f2;
+    border-left-color: #ef4444;
+    color: #991b1b;
+}
+.alert-caution .alert-title { color: #b91c1c; }
+
+/* Mermaid Styling */
+.mermaid {
+    background-color: white !important;
+    border: 1px solid var(--border-slate);
+    border-radius: 8px;
+    padding: 24px;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 24px;
+    overflow-x: auto;
+}
+
+.footer {
+    background-color: #ffffff;
+    border-top: 1px solid var(--border-slate);
+    padding: 24px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: auto;
+}
+
+/* Landing Page Grid */
+.landing-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    margin-top: 24px;
+}
+
+.landing-card {
+    background-color: #ffffff;
+    border: 1px solid var(--border-slate);
+    border-radius: 8px;
+    padding: 20px;
+    text-decoration: none;
+    color: var(--text-dark);
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.landing-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);
+    border-color: var(--primary);
+}
+
+.landing-card h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.landing-card p {
+    font-size: 13.5px;
+    color: var(--text-muted);
+    margin-bottom: 0;
+    text-align: left;
+}
+
+@media (max-width: 1024px) {
+    .sidebar {
+        display: none; /* simple hides sidebar for tablet/mobile to keep script clean */
+    }
+    .main-wrapper {
+        margin-left: 0;
+    }
+    .content-container {
+        padding: 24px;
+        margin-top: 0;
+        margin-bottom: 0;
+        border-radius: 0;
+    }
+}
+
+    </style>
+    <!-- Mermaid.js for drawing diagrams directly in the browser -->
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            securityLevel: 'loose',
+            flowchart: { useMaxWidth: true, htmlLabels: true }
+        });
+    </script>
+</head>
+<body>
+
+    <!-- Left Sidebar Navigation -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h1>🔋 Lab 4 AIoT</h1>
+            <div class="badge">Energy Forecasting</div>
+        </div>
+        <div class="sidebar-nav">
+                    <a href="index.html" class="sidebar-nav-item ">🏡 Trang chủ / Tổng mục lục</a>
+        <a href="00_project_overview.html" class="sidebar-nav-item ">00. Tổng quan dự án</a>
+        <a href="01_architecture.html" class="sidebar-nav-item ">01. Kiến trúc hệ thống AIoT</a>
+        <a href="02_data_flow.html" class="sidebar-nav-item ">02. Luồng dữ liệu tuần tự</a>
+        <a href="03_runtime_and_dependencies.html" class="sidebar-nav-item ">03. Luồng thực thi & Phụ thuộc</a>
+        <a href="04_dataset_and_schema.html" class="sidebar-nav-item ">04. Tập dữ liệu & Điền khuyết</a>
+        <a href="05_feature_engineering.html" class="sidebar-nav-item active">05. Kỹ nghệ đặc trưng thời gian</a>
+        <a href="06_model_training_and_metrics.html" class="sidebar-nav-item ">06. Mô hình hóa & Đo lường sai số</a>
+        <a href="07_decision_layer.html" class="sidebar-nav-item ">07. Tầng ra quyết định & Cảnh báo</a>
+        <a href="08_api_forecast_workflow.html" class="sidebar-nav-item ">08. Triển khai API FastAPI</a>
+        <a href="09_code_review.html" class="sidebar-nav-item ">09. Đánh giá chất lượng mã nguồn</a>
+        <a href="10_safety_fail_safe.html" class="sidebar-nav-item ">10. An toàn & Cơ chế Fail-safe</a>
+        <a href="11_development_roadmap.html" class="sidebar-nav-item ">11. Lộ trình phát triển & Học tập</a>
+        <a href="HANDBOOK.html" class="sidebar-nav-item ">📖 Sách hướng dẫn kỹ thuật (Handbook)</a>
+        </div>
+        <div class="sidebar-footer">
+            Designed by DeepMind Team & Antigravity AI
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="main-wrapper">
+        <div class="top-bar">
+            <div class="top-bar-title">Tài liệu Kỹ thuật Hệ thống Dự báo Phụ tải Điện năng BEMS</div>
+            <div class="top-bar-links">
+                <a href="index.html">🏡 Quay lại Trang chủ</a>
+            </div>
+        </div>
+
+        <div style="padding: 0 40px; flex: 1;">
+            <div class="content-container markdown-body">
+                <h1 id="ky-nghe-ac-trung-chuoi-thoi-gian-feature-engineering-cho-aiot">KỸ NGHỆ ĐẶC TRƯNG CHUỖI THỜI GIAN (FEATURE ENGINEERING CHO AIoT)</h1>
+<p>Trong các bài toán học máy thông thường, các bản ghi dữ liệu được coi là độc lập và có cùng phân phối (I.I.D). Tuy nhiên, dữ liệu IoT bản chất là <strong>Chuỗi thời gian (Time-series)</strong>. Các giá trị đo đạc có sự liên kết chặt chẽ và phụ thuộc nặng nề vào quá khứ. </p>
+<p>Tài liệu này giải thích chi tiết cơ chế hoạt động, công thức toán học, ví dụ trực quan bằng bảng nhỏ và ý nghĩa vận hành của các loại đặc trưng chuỗi thời gian trong <strong>Lab 4</strong>, giúp sinh viên thấu hiểu sâu sắc cách "chuẩn bị tri thức" cho mô hình trước khi dự báo.</p>
+<hr />
+<h2 id="1-tai-sao-telemetry-iot-tho-la-khong-u-e-du-bao">1. Tại sao Telemetry IoT thô là KHÔNG ĐỦ để Dự báo?</h2>
+<p>Nếu ta chỉ đưa các giá trị cảm biến tại thời điểm hiện tại $t$ vào mô hình (ví dụ: nhiệt độ bếp đang là 25°C, công suất điện đang là 80 Wh), mô hình sẽ hoàn toàn <strong>"mù lòa"</strong> trước xu hướng vận hành.</p>
+<h3 id="ly-do-1-thieu-ngu-canh-lich-su-temporal-context">Lý do 1: Thiếu ngữ cảnh Lịch sử (Temporal Context)</h3>
+<p>Một giá trị thô $80$ Wh ở hiện tại không cho mô hình biết hệ thống đang ở trạng thái nào:
+*   <em>Kịch bản A</em>: 10 phút trước là $20$ Wh $\rightarrow$ Phụ tải đang <strong>tăng vọt</strong> dữ dội (kích hoạt thiết bị công suất cao).
+*   <em>Kịch bản B</em>: 10 phút trước là $300$ Wh $\rightarrow$ Phụ tải đang <strong>lao dốc</strong> mạnh (vừa tắt thiết bị lớn).
+Nếu chỉ nhìn con số $80$ Wh hiện tại, mô hình sẽ đưa ra cùng một dự báo cho cả hai kịch bản trái ngược này, dẫn đến sai số rất lớn.</p>
+<h3 id="ly-do-2-thieu-thong-tin-ong-hoc-tuan-hoan">Lý do 2: Thiếu thông tin động học &amp; tuần hoàn</h3>
+<p>Nhiệt độ phòng tăng 1°C có thể là do thời tiết bên ngoài ấm lên (từ từ), hoặc do bếp từ vừa được bật (đột ngột). Sự thiếu hụt gia tốc (sai phân) và mốc thời gian tuần hoàn (giờ cao điểm/thấp điểm) khiến các thuật toán học máy không thể phân biệt được hành vi sinh hoạt của con người.</p>
+<hr />
+<h2 id="2-ac-trung-o-tre-lag-features">2. Đặc trưng Độ trễ (Lag Features)</h2>
+<h3 id="inh-nghia-co-che">Định nghĩa &amp; Cơ chế</h3>
+<p>Đặc trưng độ trễ (Lag) lấy giá trị của biến mục tiêu trong quá khứ làm đặc trưng đầu vào cho thời điểm hiện tại.
+$$\text{Lag}<em t-k="t-k">k(y_t) = y</em>$$</p>
+<h3 id="vi-du-truc-quan-bang-bang-nho-k1-va-k2">Ví dụ trực quan bằng Bảng nhỏ ($k=1$ và $k=2$):</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Thời gian ($t$)</th>
+<th style="text-align: left;">Appliances thô ($y_t$)</th>
+<th style="text-align: left;">appliances_lag_1 ($y_{t-1}$)</th>
+<th style="text-align: left;">appliances_lag_2 ($y_{t-2}$)</th>
+<th style="text-align: left;">Ghi chú</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">12:00:00</td>
+<td style="text-align: left;"><strong>50 Wh</strong></td>
+<td style="text-align: left;">NaN</td>
+<td style="text-align: left;">NaN</td>
+<td style="text-align: left;">Chưa đủ lịch sử quá khứ.</td>
+</tr>
+<tr>
+<td style="text-align: left;">12:10:00</td>
+<td style="text-align: left;"><strong>60 Wh</strong></td>
+<td style="text-align: left;"><strong>50 Wh</strong></td>
+<td style="text-align: left;">NaN</td>
+<td style="text-align: left;"><code>lag_1</code> lấy giá trị lúc 12:00.</td>
+</tr>
+<tr>
+<td style="text-align: left;">12:20:00</td>
+<td style="text-align: left;"><strong>90 Wh</strong></td>
+<td style="text-align: left;"><strong>60 Wh</strong></td>
+<td style="text-align: left;"><strong>50 Wh</strong></td>
+<td style="text-align: left;"><code>lag_1</code> lấy 12:10, <code>lag_2</code> lấy 12:00.</td>
+</tr>
+<tr>
+<td style="text-align: left;">12:30:00</td>
+<td style="text-align: left;"><strong>80 Wh</strong></td>
+<td style="text-align: left;"><strong>90 Wh</strong></td>
+<td style="text-align: left;"><strong>60 Wh</strong></td>
+<td style="text-align: left;">Đẩy dịch chuyển tuần tự xuôi dòng.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="y-nghia-trong-aiot">Ý nghĩa trong AIoT</h3>
+<p>Công suất tiêu thụ điện có tính <strong>quán tính hành vi</strong>. Nếu điều hòa đang bật ở thời điểm $t-1$ (10 phút trước) và $t-2$ (20 phút trước), khả năng rất cao là nó vẫn đang tiếp tục hoạt động ở thời điểm hiện tại $t$.</p>
+<hr />
+<h2 id="3-ac-trung-cua-so-truot-rolling-features">3. Đặc trưng Cửa sổ trượt (Rolling Features)</h2>
+<h3 id="inh-nghia-co-che_1">Định nghĩa &amp; Cơ chế</h3>
+<p>Tính toán một chỉ số thống kê (trung bình hoặc độ lệch chuẩn) trên một cửa sổ thời gian trượt về quá khứ có độ rộng cố định $W$.
+$$\text{Rolling Mean}<em i="0">W(y_t) = \frac{1}{W} \sum</em>$$}^{W-1} y_{t-i</p>
+<h3 id="vi-du-truc-quan-bang-bang-nho-rolling-mean-voi-cua-so-w3">Ví dụ trực quan bằng Bảng nhỏ (Rolling Mean với cửa sổ $W=3$):</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Thời gian ($t$)</th>
+<th style="text-align: left;">Appliances thô ($y_t$)</th>
+<th style="text-align: left;">appliances_rolling_mean_3</th>
+<th style="text-align: left;">Phép toán tính trung vị</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">12:00:00</td>
+<td style="text-align: left;"><strong>50 Wh</strong></td>
+<td style="text-align: left;">NaN</td>
+<td style="text-align: left;">Chưa đủ 3 phần tử.</td>
+</tr>
+<tr>
+<td style="text-align: left;">12:10:00</td>
+<td style="text-align: left;"><strong>60 Wh</strong></td>
+<td style="text-align: left;">NaN</td>
+<td style="text-align: left;">Chưa đủ 3 phần tử.</td>
+</tr>
+<tr>
+<td style="text-align: left;">12:20:00</td>
+<td style="text-align: left;"><strong>100 Wh</strong></td>
+<td style="text-align: left;"><strong>70.0 Wh</strong></td>
+<td style="text-align: left;">$(50 + 60 + 100) / 3 = 70.0$</td>
+</tr>
+<tr>
+<td style="text-align: left;">12:30:00</td>
+<td style="text-align: left;"><strong>90 Wh</strong></td>
+<td style="text-align: left;"><strong>83.3 Wh</strong></td>
+<td style="text-align: left;">$(60 + 100 + 90) / 3 = 83.3$</td>
+</tr>
+</tbody>
+</table>
+<h3 id="y-nghia-trong-aiot_1">Ý nghĩa trong AIoT</h3>
+<ul>
+<li><strong>Rolling Mean</strong>: Lọc bỏ các đỉnh nhọn bất thường mang tính tức thời (nhiễu gai), giúp mô hình nắm bắt xu hướng nền của phụ tải trong 1 tiếng hoặc 4 tiếng gần nhất.</li>
+<li><strong>Rolling Std</strong>: Đo lường sự biến động. STD cao cho thấy các thiết bị công suất lớn đang liên tục được bật/tắt (hệ thống không ổn định).</li>
+</ul>
+<hr />
+<h2 id="4-ac-trung-sai-phan-delta-features">4. Đặc trưng Sai phân (Delta Features)</h2>
+<h3 id="inh-nghia-co-che_2">Định nghĩa &amp; Cơ chế</h3>
+<p>Đo lường mức độ thay đổi phụ tải điện năng so với thời điểm quá khứ cách đó $k$ bước:
+$$\Delta_k(y_t) = y_t - y_{t-k}$$</p>
+<h3 id="vi-du-truc-quan-bang-bang-nho-delta_1-va-delta_2">Ví dụ trực quan bằng Bảng nhỏ ($\Delta_1$ và $\Delta_2$):</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Thời gian ($t$)</th>
+<th style="text-align: left;">Appliances thô ($y_t$)</th>
+<th style="text-align: left;">appliances_delta_1</th>
+<th style="text-align: left;">appliances_delta_2</th>
+<th style="text-align: left;">Phép toán</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">12:00:00</td>
+<td style="text-align: left;"><strong>50 Wh</strong></td>
+<td style="text-align: left;">NaN</td>
+<td style="text-align: left;">NaN</td>
+<td style="text-align: left;">Không có quá khứ đối chiếu.</td>
+</tr>
+<tr>
+<td style="text-align: left;">12:10:00</td>
+<td style="text-align: left;"><strong>60 Wh</strong></td>
+<td style="text-align: left;"><strong>+10 Wh</strong></td>
+<td style="text-align: left;">NaN</td>
+<td style="text-align: left;">$60 - 50 = +10$ Wh</td>
+</tr>
+<tr>
+<td style="text-align: left;">12:20:00</td>
+<td style="text-align: left;"><strong>100 Wh</strong></td>
+<td style="text-align: left;"><strong>+40 Wh</strong></td>
+<td style="text-align: left;"><strong>+50 Wh</strong></td>
+<td style="text-align: left;">$\Delta_1=100-60$; $\Delta_2=100-50$</td>
+</tr>
+<tr>
+<td style="text-align: left;">12:30:00</td>
+<td style="text-align: left;"><strong>70 Wh</strong></td>
+<td style="text-align: left;"><strong>-30 Wh</strong></td>
+<td style="text-align: left;"><strong>+10 Wh</strong></td>
+<td style="text-align: left;">Phụ tải giảm mạnh $70 - 100 = -30$ Wh</td>
+</tr>
+</tbody>
+</table>
+<h3 id="y-nghia-trong-aiot_2">Ý nghĩa trong AIoT</h3>
+<p>Cung cấp <strong>gia tốc (hướng và cường độ thay đổi)</strong>. Gia trị $\Delta_1$ dương rất lớn cho biết một thiết bị công suất cao vừa mới được bật lên, giúp mô hình dự báo xu hướng tiếp tục tăng hoặc bão hòa tiếp theo.</p>
+<hr />
+<h2 id="5-ac-trung-thoi-gian-tuan-hoan-cyclic-time-features">5. Đặc trưng Thời gian Tuần hoàn (Cyclic Time Features)</h2>
+<h3 id="han-che-cua-so-thuong">Hạn chế của số thường</h3>
+<p>Nếu biểu diễn giờ từ $0$ đến $23$, mốc <strong>23:50</strong> ($23.83$) và <strong>00:10</strong> ($0.17$) về mặt số học cách nhau rất xa ($|23.83 - 0.17| = 23.66$), nhưng thực tế vật lý sinh hoạt chỉ cách nhau đúng <strong>20 phút</strong>.</p>
+<h3 id="giai-phap-luong-giac-sincos-projection">Giải pháp Lượng giác (Sin/Cos Projection)</h3>
+<p>Chiếu giờ lên vòng tròn lượng giác có chu kỳ 24 giờ:
+$$\theta = \frac{2\pi \cdot \text{Hour}}{24.0}, \quad x = \sin(\theta), \quad y = \cos(\theta)$$</p>
+<h3 id="vi-du-truc-quan-bang-bang-nho">Ví dụ trực quan bằng Bảng nhỏ:</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Thời gian thực</th>
+<th style="text-align: left;">Giờ số thực (Hour)</th>
+<th style="text-align: left;">Góc $\theta$ (Radian)</th>
+<th style="text-align: left;">hour_sin ($x$)</th>
+<th style="text-align: left;">hour_cos ($y$)</th>
+<th style="text-align: left;">Khoảng cách hình học</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>23:50:00</strong></td>
+<td style="text-align: left;">$23.83$</td>
+<td style="text-align: left;">$6.24$ Rad</td>
+<td style="text-align: left;"><strong>-0.043</strong></td>
+<td style="text-align: left;"><strong>+0.999</strong></td>
+<td style="text-align: left;"><strong>Cực kỳ gần nhau</strong> trên vòng tròn lượng giác (Cos tiệm cận 1, Sin tiệm cận 0).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>00:00:00</strong></td>
+<td style="text-align: left;">$0.00$</td>
+<td style="text-align: left;">$0.00$ Rad</td>
+<td style="text-align: left;"><strong>0.000</strong></td>
+<td style="text-align: left;"><strong>+1.000</strong></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>00:10:00</strong></td>
+<td style="text-align: left;">$0.17$</td>
+<td style="text-align: left;">$0.04$ Rad</td>
+<td style="text-align: left;"><strong>+0.043</strong></td>
+<td style="text-align: left;"><strong>+0.999</strong></td>
+<td style="text-align: left;"></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="6-cach-tao-nhan-target_future-bang-ky-thuat-shifting">6. Cách Tạo nhãn <code>target_future</code> bằng Kỹ thuật Shifting</h2>
+<p>Để biến bài toán chuỗi thời gian thành bài toán Học có giám sát, ta dịch nhãn ngược lại tương lai $h$ bước (Horizon Steps = 1):
+$$\text{target_future}<em t_h="t+h">t = y</em>$$</p>
+<h3 id="vi-du-truc-quan-bang-bang-nho-h1">Ví dụ trực quan bằng Bảng nhỏ ($h=1$):</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Thời gian ($t$)</th>
+<th style="text-align: left;">Đặc trưng hiện tại $X_t$ (Lag_1)</th>
+<th style="text-align: left;">Appliances thực tế ($y_t$)</th>
+<th style="text-align: left;">target_future ($y_{t+1}$)</th>
+<th style="text-align: left;">Cặp dữ liệu huấn luyện học máy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">12:00:00</td>
+<td style="text-align: left;">NaN</td>
+<td style="text-align: left;"><strong>50 Wh</strong></td>
+<td style="text-align: left;"><strong>60 Wh</strong></td>
+<td style="text-align: left;">(Không dùng vì đặc trưng bị NaN)</td>
+</tr>
+<tr>
+<td style="text-align: left;">12:10:00</td>
+<td style="text-align: left;">50 Wh</td>
+<td style="text-align: left;"><strong>60 Wh</strong></td>
+<td style="text-align: left;"><strong>100 Wh</strong></td>
+<td style="text-align: left;">Đầu vào: $[60, 50] \rightarrow$ Nhãn: <strong>100</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;">12:20:00</td>
+<td style="text-align: left;">60 Wh</td>
+<td style="text-align: left;"><strong>100 Wh</strong></td>
+<td style="text-align: left;"><strong>90 Wh</strong></td>
+<td style="text-align: left;">Đầu vào: $[100, 60] \rightarrow$ Nhãn: <strong>90</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;">12:30:00</td>
+<td style="text-align: left;">100 Wh</td>
+<td style="text-align: left;"><strong>90 Wh</strong></td>
+<td style="text-align: left;"><em>NaN</em> (chưa xảy ra)</td>
+<td style="text-align: left;">(Dòng này bị loại bỏ khỏi tập Train)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="7-lam-the-nao-e-tranh-loi-ro-ri-du-lieu-tuong-lai-data-leakage">7. Làm thế nào để Tránh lỗi Rò rỉ Dữ liệu tương lai (Data Leakage)?</h2>
+<p>Rò rỉ dữ liệu tương lai xảy ra khi mô hình vô tình biết trước thông tin của tương lai $t+1$ khi đang thực hiện tính toán đặc trưng tại thời điểm $t$.</p>
+<h3 id="3-nguyen-tac-vang-phong-chong-data-leakage-trong-lab-4">3 Nguyên tắc Vàng phòng chống Data Leakage trong Lab 4:</h3>
+<ol>
+<li><strong>Duy nhất dịch nhãn ngược</strong>: Chỉ duy nhất cột nhãn <code>target_future</code> được phép sử dụng shift âm (<code>.shift(-1)</code>).</li>
+<li><strong>Đặc trưng tuyệt đối không hướng tương lai</strong>: Tất cả các đặc trưng Lag, Rolling, Delta bắt buộc phải dùng shift dương hoặc trượt về quá khứ để bảo đảm mối quan hệ nhân quả vật lý:
+    $$\text{Đặc trưng}<em _le="\le" t="t">t = f(\text{Dữ_liệu}</em>)$$</li>
+<li><strong>Chia dữ liệu theo mốc thời gian (Time-series Split)</strong>: Cắt bảng dữ liệu theo chiều dọc tuyến tính thời gian. Tuyệt đối không dùng <code>train_test_split(..., shuffle=True)</code> làm trộn lẫn xáo trộn các dòng dữ liệu.</li>
+</ol>
+<hr />
+<h2 id="8-cac-ac-trung-quan-trong-nhat-e-du-bao-ien-nang-tieu-thu">8. Các Đặc trưng Quan trọng nhất để Dự báo Điện năng Tiêu thụ</h2>
+<p>Trong quá trình phân tích huấn luyện offline, các đặc trưng được mô hình đánh giá quan trọng nhất (Feature Importances) đối với bài toán phụ tải điện bao gồm:</p>
+<ol>
+<li><strong><code>appliances_lag_1</code> và <code>appliances_lag_2</code> (Độ trễ gần nhất)</strong>: Chiếm trọng số quan trọng nhất (&gt; 60% mức độ đóng góp). Phản ánh trạng thái liền kề của thiết bị (Đang bật thì khả năng bật tiếp là cực cao).</li>
+<li><strong><code>appliances_rolling_mean_3</code> và <code>rolling_mean_6</code> (Trend ngắn hạn)</strong>: Giúp mô hình nhận biết xu thế nền đang tăng hay giảm của cả ngôi nhà.</li>
+<li><strong><code>hour_sin</code> và <code>hour_cos</code> (Chu kỳ ngày/đêm)</strong>: Xác định rõ ràng các khung giờ sinh hoạt cao điểm (18:00 - 21:00) và thấp điểm (đêm muộn).</li>
+<li><strong><code>T_out</code> và <code>RH_out</code> (Thông số thời tiết ngoài trời)</strong>: Tác động gián tiếp nhưng rất mạnh mẽ đến hoạt động của các thiết bị sưởi ấm hoặc làm mát (HVAC).</li>
+</ol>
+<hr />
+<h2 id="9-phuong-phap-mo-rong-ac-trung-cho-he-thong-aiot-thuc-te-production">9. Phương pháp Mở rộng Đặc trưng cho Hệ thống AIoT Thực tế (Production)</h2>
+<p>Để nâng cấp độ chính xác của mô hình lên cấp độ thương mại, ta cần bổ sung thêm 4 nhóm đặc trưng nâng cao:</p>
+<h3 id="1-ac-trung-tuong-tac-nhiet-interaction-features">1. Đặc trưng Tương tác nhiệt (Interaction Features)</h3>
+<ul>
+<li><em>Mô tả</em>: Sự chênh lệch giữa nhiệt độ trong nhà và ngoài trời ảnh hưởng trực tiếp đến công suất làm lạnh của điều hòa.</li>
+<li><em>Đặc trưng mới</em>: <code>temp_diff = T_indoor - T_out</code> hoặc <code>T_out * RH_out</code> (chỉ số cảm giác nhiệt thực tế).</li>
+</ul>
+<h3 id="2-ac-trung-cua-so-truot-cua-thoi-tiet-weather-rolling-features">2. Đặc trưng Cửa sổ trượt của Thời tiết (Weather Rolling Features)</h3>
+<ul>
+<li><em>Mô tả</em>: Ngôi nhà không phản ứng tức thời với thời tiết ngoài trời mà có quán tính hấp thụ nhiệt chậm (khoảng 1 - 2 tiếng).</li>
+<li><em>Đặc trưng mới</em>: <code>T_out_rolling_mean_6</code> (Trung bình nhiệt độ ngoài trời trong 1 tiếng trước).</li>
+</ul>
+<h3 id="3-ac-trung-lich-va-ngay-le-ac-biet-calendar-events-features">3. Đặc trưng Lịch và Ngày lễ đặc biệt (Calendar Events Features)</h3>
+<ul>
+<li><em>Mô tả</em>: Hành vi sử dụng điện ngày Tết, ngày nghỉ lễ quốc khánh, hoặc ngày nắng nóng kỷ lục hoàn toàn khác ngày thường.</li>
+<li><em>Đặc trưng mới</em>: <code>is_holiday</code> (nhị phân), <code>is_summer_peak</code> (khung giờ mùa hè cao điểm).</li>
+</ul>
+<h3 id="4-ac-trung-trang-thai-hoat-ong-thiet-bi-device-actuator-state">4. Đặc trưng Trạng thái hoạt động thiết bị (Device Actuator State)</h3>
+<ul>
+<li><em>Mô tả</em>: Nếu hệ thống có kết nối thông tin phản hồi từ Smart Plug.</li>
+<li><em>Đặc trưng mới</em>: <code>hvac_state_lag_1</code> (<code>0</code> - đang tắt, <code>1</code> - đang bật), phản ánh trực tiếp sự thay đổi tải mà không cần đoán gián tiếp qua dòng điện.</li>
+</ul>
+            </div>
+        </div>
+
+        <div class="footer">
+            © 2026 - Lab 4 AIoT Forecasting & Predictive Analytics - Tài liệu Đào tạo Chuyên sâu
+        </div>
+    </div>
+
+</body>
+</html>

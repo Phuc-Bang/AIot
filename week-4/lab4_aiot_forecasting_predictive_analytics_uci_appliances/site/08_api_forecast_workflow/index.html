@@ -1,0 +1,2000 @@
+
+<!doctype html>
+<html lang="vi" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Tài liệu kỹ thuật chuyên sâu về dự báo phụ tải điện năng và phân tích dự đoán trong hệ thống AIoT">
+      
+      
+        <meta name="author" content="DeepMind team & Antigravity AI">
+      
+      
+      
+        <link rel="prev" href="../07_decision_layer/">
+      
+      
+        <link rel="next" href="../09_code_review/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>08. Triển khai FastAPI Serving - Lab 4: AIoT Energy Forecasting & Predictive Analytics</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#trien-khai-va-van-hanh-endpoint-du-bao-tren-fastapi-api" class="md-skip">
+          Bỏ qua
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Đầu trang">
+    <a href=".." title="Lab 4: AIoT Energy Forecasting &amp; Predictive Analytics" class="md-header__button md-logo" aria-label="Lab 4: AIoT Energy Forecasting & Predictive Analytics" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Lab 4: AIoT Energy Forecasting & Predictive Analytics
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              08. Triển khai FastAPI Serving
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Chuyển sang chế độ Dark Mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Chuyển sang chế độ Dark Mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Chuyển sang chế độ Light Mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Chuyển sang chế độ Light Mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Tìm kiếm" placeholder="Tìm kiếm" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Tìm kiếm">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Xoá" aria-label="Xoá" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Trang chủ
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../00_project_overview/" class="md-tabs__link">
+          
+  
+  
+  Học phần I: Tổng quan & Kiến trúc
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../04_dataset_and_schema/" class="md-tabs__link">
+          
+  
+  
+  Học phần II: Dữ liệu & Đặc trưng
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../06_model_training_and_metrics/" class="md-tabs__link">
+          
+  
+  
+  Học phần III: Mô hình & API Serving
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../09_code_review/" class="md-tabs__link">
+          
+  
+  
+  Học phần IV: Chất lượng mã & An toàn
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../11_development_roadmap/" class="md-tabs__link">
+          
+  
+  
+  Học phần V: Lộ trình & Handbook
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../README_HTML_EXPORT/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Hướng dẫn xuất bản HTML
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../README_MKDOCS/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Hướng dẫn cấu hình MkDocs
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Thanh điều hướng" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Lab 4: AIoT Energy Forecasting &amp; Predictive Analytics" class="md-nav__button md-logo" aria-label="Lab 4: AIoT Energy Forecasting & Predictive Analytics" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Lab 4: AIoT Energy Forecasting & Predictive Analytics
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Trang chủ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Học phần I: Tổng quan & Kiến trúc
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Học phần I: Tổng quan & Kiến trúc
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../00_project_overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    00. Tổng quan bài toán
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../01_architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    01. Kiến trúc hệ thống
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02_data_flow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    02. Luồng dữ liệu tuần tự
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03_runtime_and_dependencies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    03. Luồng thực thi & Phụ thuộc
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Học phần II: Dữ liệu & Đặc trưng
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Học phần II: Dữ liệu & Đặc trưng
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04_dataset_and_schema/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    04. Tập dữ liệu & Điền khuyết
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../05_feature_engineering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    05. Kỹ nghệ đặc trưng chuỗi thời gian
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Học phần III: Mô hình & API Serving
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Học phần III: Mô hình & API Serving
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../06_model_training_and_metrics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    06. Mô hình hóa & Đo lường sai số
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../07_decision_layer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    07. Tầng ra quyết định & Cảnh báo
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    08. Triển khai FastAPI Serving
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    08. Triển khai FastAPI Serving
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Mục lục">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Mục lục
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-co-che-ong-goi-mo-hinh-thanh-file-joblib" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Cơ chế đóng gói Mô hình thành file .joblib
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Cơ chế đóng gói Mô hình thành file .joblib">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#tai-sao-lai-ong-goi-dang-bundle" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tại sao lại đóng gói dạng Bundle?
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-cach-fastapi-nap-va-quan-ly-mo-hinh-bundle" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Cách FastAPI nạp và quản lý Mô hình Bundle
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Cách FastAPI nạp và quản lý Mô hình Bundle">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#uu-iem-ky-thuat-van-hanh" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ưu điểm kỹ thuật vận hành:
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-chi-tiet-3-endpoints-cua-he-thong-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Chi tiết 3 Endpoints của Hệ thống API
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Chi tiết 3 Endpoints của Hệ thống API">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-endpoint-health-kiem-tra-suc-khoe" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Endpoint /health (Kiểm tra sức khỏe)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-endpoint-model-info-thong-tin-chi-tiet-mo-hinh" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Endpoint /model-info (Thông tin chi tiết mô hình)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-endpoint-forecast-suy-dien-thoi-gian-thuc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Endpoint /forecast (Suy diễn thời gian thực)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-goi-tin-yeu-cau-mau-example-input-json-payload" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Gói tin Yêu cầu mẫu (Example Input JSON Payload)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Gói tin Yêu cầu mẫu (Example Input JSON Payload)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#json-request-payload-gui-len-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        JSON Request Payload gửi lên API:
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-goi-tin-phan-hoi-mau-example-output-json-response" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Gói tin Phản hồi mẫu (Example Output JSON Response)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Gói tin Phản hồi mẫu (Example Output JSON Response)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#json-response-tra-ve-tu-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        JSON Response trả về từ API:
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-giai-thich-y-nghia-cac-truong-thong-tin-quyet-inh" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Giải thích Ý nghĩa các Trường thông tin Quyết định
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-khac-biet-cot-loi-thu-nghiem-trong-notebook-vs-trien-khai-qua-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Khác biệt cốt lõi: Thử nghiệm trong Notebook vs Triển khai qua API
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-phuong-phap-ket-noi-api-vao-cac-he-thong-ben-thu-ba" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Phương pháp Kết nối API vào các Hệ thống bên thứ ba
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. Phương pháp Kết nối API vào các Hệ thống bên thứ ba">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-ket-noi-en-giao-dien-giam-sat-dashboard-grafana" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Kết nối đến Giao diện Giám sát (Dashboard / Grafana)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-ket-noi-en-bo-thu-nhan-mqtt-mqtt-gateway-listener-bridge" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Kết nối đến Bộ thu nhận MQTT (MQTT Gateway Listener Bridge)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-ket-noi-en-he-thong-quan-tri-trung-tam-backend-db-audit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Kết nối đến Hệ thống Quản trị trung tâm (Backend DB Audit)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Học phần IV: Chất lượng mã & An toàn
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Học phần IV: Chất lượng mã & An toàn
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../09_code_review/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    09. Đánh giá chất lượng mã nguồn
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../10_safety_fail_safe/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    10. An toàn & Cơ chế Fail-safe
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Học phần V: Lộ trình & Handbook
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Học phần V: Lộ trình & Handbook
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../11_development_roadmap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    11. Lộ trình phát triển
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../HANDBOOK/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📖 Sách hướng dẫn kỹ thuật (Handbook)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../README_HTML_EXPORT/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hướng dẫn xuất bản HTML
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../README_MKDOCS/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hướng dẫn cấu hình MkDocs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Mục lục">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Mục lục
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-co-che-ong-goi-mo-hinh-thanh-file-joblib" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Cơ chế đóng gói Mô hình thành file .joblib
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Cơ chế đóng gói Mô hình thành file .joblib">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#tai-sao-lai-ong-goi-dang-bundle" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tại sao lại đóng gói dạng Bundle?
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-cach-fastapi-nap-va-quan-ly-mo-hinh-bundle" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Cách FastAPI nạp và quản lý Mô hình Bundle
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Cách FastAPI nạp và quản lý Mô hình Bundle">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#uu-iem-ky-thuat-van-hanh" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ưu điểm kỹ thuật vận hành:
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-chi-tiet-3-endpoints-cua-he-thong-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Chi tiết 3 Endpoints của Hệ thống API
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Chi tiết 3 Endpoints của Hệ thống API">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-endpoint-health-kiem-tra-suc-khoe" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Endpoint /health (Kiểm tra sức khỏe)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-endpoint-model-info-thong-tin-chi-tiet-mo-hinh" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Endpoint /model-info (Thông tin chi tiết mô hình)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-endpoint-forecast-suy-dien-thoi-gian-thuc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Endpoint /forecast (Suy diễn thời gian thực)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-goi-tin-yeu-cau-mau-example-input-json-payload" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Gói tin Yêu cầu mẫu (Example Input JSON Payload)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Gói tin Yêu cầu mẫu (Example Input JSON Payload)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#json-request-payload-gui-len-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        JSON Request Payload gửi lên API:
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-goi-tin-phan-hoi-mau-example-output-json-response" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Gói tin Phản hồi mẫu (Example Output JSON Response)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Gói tin Phản hồi mẫu (Example Output JSON Response)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#json-response-tra-ve-tu-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        JSON Response trả về từ API:
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-giai-thich-y-nghia-cac-truong-thong-tin-quyet-inh" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Giải thích Ý nghĩa các Trường thông tin Quyết định
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-khac-biet-cot-loi-thu-nghiem-trong-notebook-vs-trien-khai-qua-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Khác biệt cốt lõi: Thử nghiệm trong Notebook vs Triển khai qua API
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-phuong-phap-ket-noi-api-vao-cac-he-thong-ben-thu-ba" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Phương pháp Kết nối API vào các Hệ thống bên thứ ba
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. Phương pháp Kết nối API vào các Hệ thống bên thứ ba">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-ket-noi-en-giao-dien-giam-sat-dashboard-grafana" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Kết nối đến Giao diện Giám sát (Dashboard / Grafana)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-ket-noi-en-bo-thu-nhan-mqtt-mqtt-gateway-listener-bridge" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Kết nối đến Bộ thu nhận MQTT (MQTT Gateway Listener Bridge)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-ket-noi-en-he-thong-quan-tri-trung-tam-backend-db-audit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Kết nối đến Hệ thống Quản trị trung tâm (Backend DB Audit)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="trien-khai-va-van-hanh-endpoint-du-bao-tren-fastapi-api">TRIỂN KHAI VÀ VẬN HÀNH ENDPOINT DỰ BÁO TRÊN FASTAPI API<a class="headerlink" href="#trien-khai-va-van-hanh-endpoint-du-bao-tren-fastapi-api" title="Permanent link">&para;</a></h1>
+<p>Khi đưa mô hình học máy vào vận hành thực tế trong hệ sinh thái AIoT, ta cần đóng gói mô hình dưới dạng một <strong>Dịch vụ Web (Web Service API)</strong> gọn nhẹ nhưng mạnh mẽ. API đóng vai trò là cầu nối tiếp nhận dữ liệu đo đạc trực tuyến từ các Gateway ở biên, thực hiện tính toán đặc trưng động, suy diễn mô hình và trả về các chỉ đạo vận hành tức thời.</p>
+<p>Tài liệu này giải thích chi tiết quy trình đóng gói mô hình, cách FastAPI nạp và phục vụ suy diễn thời gian thực, chi tiết các endpoint, cấu trúc các gói tin JSON mẫu, sự khác biệt giữa pha thử nghiệm và triển khai, cùng phương pháp kết nối API vào các hệ thống bên thứ ba.</p>
+<hr />
+<h2 id="1-co-che-ong-goi-mo-hinh-thanh-file-joblib">1. Cơ chế đóng gói Mô hình thành file <code>.joblib</code><a class="headerlink" href="#1-co-che-ong-goi-mo-hinh-thanh-file-joblib" title="Permanent link">&para;</a></h2>
+<p>Trong học máy chuỗi thời gian, mô hình dự báo không thể chạy đơn độc. Nó luôn cần đi kèm với các siêu tham số phụ trợ được tính toán trong pha huấn luyện offline.</p>
+<p>Trong file <code>train_forecast.py</code>, hệ thống không chỉ lưu một mô hình học máy duy nhất, mà đóng gói toàn bộ các cấu phần liên quan thành một <strong>Model Bundle</strong> (dạng Dictionary của Python) và xuất ra file nhị phân nén bằng thư viện <code>joblib</code>:</p>
+<div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">model_bundle</span> <span class="o">=</span> <span class="p">{</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="n">trained_models</span><span class="p">[</span><span class="n">best_model_name</span><span class="p">],</span>               <span class="c1"># Mô hình học máy tốt nhất (Gradient Boosting...)</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="s2">&quot;trained_models&quot;</span><span class="p">:</span> <span class="n">trained_models</span><span class="p">,</span>                       <span class="c1"># Lưu tất cả các mô hình để phục vụ so sánh A/B</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="s2">&quot;feature_columns&quot;</span><span class="p">:</span> <span class="n">FEATURE_COLUMNS</span><span class="p">,</span>                     <span class="c1"># Danh sách các đặc trưng đầu vào chuẩn tắc</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="s2">&quot;feature_medians&quot;</span><span class="p">:</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">feature_medians</span><span class="o">.</span><span class="n">items</span><span class="p">()},</span> <span class="c1"># Trung vị đặc trưng để điền khuyết thế</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="s2">&quot;raw_medians&quot;</span><span class="p">:</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">raw_medians</span><span class="o">.</span><span class="n">items</span><span class="p">()},</span>         <span class="c1"># Trung vị dữ liệu cảm biến thô</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="s2">&quot;risk_thresholds&quot;</span><span class="p">:</span> <span class="n">risk_thresholds</span><span class="p">,</span>                     <span class="c1"># Các ngưỡng phân vị cảnh báo rủi ro động</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    <span class="s2">&quot;target&quot;</span><span class="p">:</span> <span class="n">TARGET_COL</span><span class="p">,</span>                                   <span class="c1"># Tên cột biến mục tiêu (Appliances)</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    <span class="s2">&quot;forecast_horizon_steps&quot;</span><span class="p">:</span> <span class="n">HORIZON_STEPS</span><span class="p">,</span>                <span class="c1"># Số bước chân trời dự báo (1 bước)</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>    <span class="s2">&quot;forecast_horizon_minutes&quot;</span><span class="p">:</span> <span class="n">HORIZON_MINUTES</span><span class="p">,</span>            <span class="c1"># Số phút chân trời dự báo (10 phút)</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>    <span class="s2">&quot;model_version&quot;</span><span class="p">:</span> <span class="n">best_model_name</span><span class="p">,</span>                       <span class="c1"># Phiên bản mô hình được chọn</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>    <span class="s2">&quot;lab_version&quot;</span><span class="p">:</span> <span class="n">MODEL_VERSION</span><span class="p">,</span>                           <span class="c1"># Phiên bản Lab</span>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>    <span class="s2">&quot;metrics_by_model&quot;</span><span class="p">:</span> <span class="n">metrics</span><span class="p">,</span>                            <span class="c1"># Sai số chi tiết của từng mô hình</span>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="p">}</span>
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="n">joblib</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">model_bundle</span><span class="p">,</span> <span class="n">MODEL_BUNDLE_PATH</span><span class="p">)</span>
+</span></code></pre></div>
+<h3 id="tai-sao-lai-ong-goi-dang-bundle">Tại sao lại đóng gói dạng Bundle?<a class="headerlink" href="#tai-sao-lai-ong-goi-dang-bundle" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Tránh Training-Serving Skew (Lệch dữ liệu)</strong>: Giúp đảm bảo rằng các tham số điền khuyết thiếu (<code>raw_medians</code>) dùng ở thời điểm chạy trực tuyến hoàn toàn trùng khớp với các tham số đã tính toán trong pha huấn luyện ngoại tuyến.</li>
+<li><strong>Dễ dàng bảo trì &amp; xuất bản</strong>: Khi muốn nâng cấp mô hình mới (ví dụ thay đổi ngưỡng rủi ro hoặc đặc trưng đầu vào), ta chỉ cần ghi đè file <code>.joblib</code> mới mà không cần phải thay đổi một dòng code logic nào của Server API.</li>
+</ul>
+<hr />
+<h2 id="2-cach-fastapi-nap-va-quan-ly-mo-hinh-bundle">2. Cách FastAPI nạp và quản lý Mô hình Bundle<a class="headerlink" href="#2-cach-fastapi-nap-va-quan-ly-mo-hinh-bundle" title="Permanent link">&para;</a></h2>
+<p>Trong file <code>src/app.py</code>, việc nạp mô hình được thực hiện ở mức độ phạm vi toàn cục (Global Scope) của tiến trình ngay khi khởi động Server (<strong>Cold Start</strong>):</p>
+<div class="highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">MODEL_BUNDLE_PATH</span> <span class="o">=</span> <span class="n">MODEL_DIR</span> <span class="o">/</span> <span class="s2">&quot;forecast_model_bundle_v1.joblib&quot;</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">model_bundle</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="k">if</span> <span class="n">MODEL_BUNDLE_PATH</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    <span class="n">model_bundle</span> <span class="o">=</span> <span class="n">joblib</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">MODEL_BUNDLE_PATH</span><span class="p">)</span>
+</span></code></pre></div>
+<h3 id="uu-iem-ky-thuat-van-hanh">Ưu điểm kỹ thuật vận hành:<a class="headerlink" href="#uu-iem-ky-thuat-van-hanh" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Độ trễ phản hồi siêu thấp (Low Latency Serving)</strong>: Việc nạp tệp nhị phân từ ổ đĩa cứng vào bộ nhớ RAM mất khoảng vài trăm mili-giây. Bằng cách nạp mô hình một lần duy nhất khi khởi động, các yêu cầu suy diễn API sau đó chỉ cần truy xuất trực tiếp mô hình trên RAM, giúp thời gian xử lý cực kỳ nhanh (&lt; 50ms).</li>
+<li><strong>Quản lý luồng an toàn (Thread Safe)</strong>: Đối với các mô hình của <code>scikit-learn</code>, phương thức <code>.predict()</code> hoàn toàn an toàn khi xử lý đồng thời nhiều luồng request gọi đến (multi-threading), giúp Server chịu tải tốt khi scale.</li>
+</ol>
+<hr />
+<h2 id="3-chi-tiet-3-endpoints-cua-he-thong-api">3. Chi tiết 3 Endpoints của Hệ thống API<a class="headerlink" href="#3-chi-tiet-3-endpoints-cua-he-thong-api" title="Permanent link">&para;</a></h2>
+<p>FastAPI cung cấp 3 endpoint chuẩn phục vụ cho các mục đích quản lý và vận hành:</p>
+<h3 id="1-endpoint-health-kiem-tra-suc-khoe">1. Endpoint <code>/health</code> (Kiểm tra sức khỏe)<a class="headerlink" href="#1-endpoint-health-kiem-tra-suc-khoe" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Phương thức</strong>: <code>GET</code></li>
+<li><strong>Mục đích</strong>: Dùng cho các bộ giám sát tự động (Load Balancer, Kubernetes Probe) để kiểm tra xem microservice có đang sống và mô hình đã được nạp thành công vào bộ nhớ hay chưa.</li>
+<li><strong>Phản hồi mẫu</strong>:
+    <div class="highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="p">{</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ok&quot;</span><span class="p">,</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">  </span><span class="nt">&quot;model_loaded&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">  </span><span class="nt">&quot;model_bundle_path&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;E:\\AIoT\\Day-4\\lab4_aiot_forecasting_predictive_analytics_uci_appliances_code\\lab4_aiot_forecasting_predictive_analytics_uci_appliances\\models\\forecast_model_bundle_v1.joblib&quot;</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="p">}</span>
+</span></code></pre></div></li>
+</ul>
+<h3 id="2-endpoint-model-info-thong-tin-chi-tiet-mo-hinh">2. Endpoint <code>/model-info</code> (Thông tin chi tiết mô hình)<a class="headerlink" href="#2-endpoint-model-info-thong-tin-chi-tiet-mo-hinh" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Phương thức</strong>: <code>GET</code></li>
+<li><strong>Mục đích</strong>: Cung cấp tri thức cho kỹ sư vận hành về cấu hình chi tiết của mô hình đang chạy trực tuyến, các ngưỡng rủi ro hiện tại và bảng sai số đối chứng thu được lúc kiểm thử ngoại tuyến.</li>
+<li><strong>Nội dung phản hồi</strong>: Tên thuật toán, phiên bản, chân trời dự báo (10 phút), số lượng đặc trưng đầu vào, các ngưỡng rủi ro thống kê và toàn bộ ma trận sai số MAE/RMSE/MAPE của tất cả các mô hình.</li>
+</ul>
+<h3 id="3-endpoint-forecast-suy-dien-thoi-gian-thuc">3. Endpoint <code>/forecast</code> (Suy diễn thời gian thực)<a class="headerlink" href="#3-endpoint-forecast-suy-dien-thoi-gian-thuc" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Phương thức</strong>: <code>POST</code></li>
+<li><strong>Mục đích</strong>: Điểm tiếp nhận dữ liệu lịch sử thô từ Gateway gửi lên để tính toán và trả về kết quả dự báo an toàn.</li>
+<li><strong>Logic xử lý</strong>:<ol>
+<li>Nhận gói tin JSON lịch sử telemetry gần nhất.</li>
+<li>Chuyển thành DataFrame, sắp xếp thời gian.</li>
+<li>Làm sạch và điền khuyết thiếu dữ liệu thô bằng <code>raw_medians</code>.</li>
+<li>Tính toán các đặc trưng chuỗi thời gian (Lag, Rolling, Delta, Cyclic).</li>
+<li>Rút trích bản ghi cuối cùng tại thời điểm <span class="arithmatex">\(t\)</span> và điền khuyết đặc trưng bằng <code>feature_medians</code>.</li>
+<li>Gọi <code>model.predict(X)</code> để suy diễn công suất.</li>
+<li>Ánh xạ sang rủi ro, khuyến nghị và phản hồi.</li>
+</ol>
+</li>
+</ul>
+<hr />
+<h2 id="4-goi-tin-yeu-cau-mau-example-input-json-payload">4. Gói tin Yêu cầu mẫu (Example Input JSON Payload)<a class="headerlink" href="#4-goi-tin-yeu-cau-mau-example-input-json-payload" title="Permanent link">&para;</a></h2>
+<p>Client (Edge Gateway) cần gửi HTTP POST lên <code>/forecast</code> kèm body chứa chuỗi lịch sử đo đạc gần nhất (khuyến nghị <span class="arithmatex">\(\ge 24\)</span> điểm dữ liệu thô để đảm bảo tính toán đầy đủ các đặc trưng trễ/trượt 4 tiếng).</p>
+<h3 id="json-request-payload-gui-len-api">JSON Request Payload gửi lên API:<a class="headerlink" href="#json-request-payload-gui-len-api" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="p">{</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span><span class="nt">&quot;history&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">    </span><span class="p">{</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">      </span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2016-01-21 11:00:00&quot;</span><span class="p">,</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">      </span><span class="nt">&quot;Appliances&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">80.0</span><span class="p">,</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">      </span><span class="nt">&quot;lights&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">10.0</span><span class="p">,</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">      </span><span class="nt">&quot;T1&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">21.5</span><span class="p">,</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">      </span><span class="nt">&quot;RH_1&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">45.2</span><span class="p">,</span>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="w">      </span><span class="nt">&quot;T_out&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">6.2</span>
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="w">    </span><span class="p">},</span>
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="w">    </span><span class="p">{</span>
+</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="w">      </span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2016-01-21 11:10:00&quot;</span><span class="p">,</span>
+</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="w">      </span><span class="nt">&quot;Appliances&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">90.0</span><span class="p">,</span>
+</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a><span class="w">      </span><span class="nt">&quot;lights&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">10.0</span><span class="p">,</span>
+</span><span id="__span-3-15"><a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a><span class="w">      </span><span class="nt">&quot;T1&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">21.6</span><span class="p">,</span>
+</span><span id="__span-3-16"><a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a><span class="w">      </span><span class="nt">&quot;RH_1&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">45.3</span><span class="p">,</span>
+</span><span id="__span-3-17"><a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a><span class="w">      </span><span class="nt">&quot;T_out&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">6.5</span>
+</span><span id="__span-3-18"><a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a><span class="w">    </span><span class="p">},</span>
+</span><span id="__span-3-19"><a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a><span class="w">    </span><span class="s2">&quot;...[Gửi tiếp 21 điểm trung gian từ 11:20 đến 14:40 để đủ cửa sổ lịch sử]...&quot;</span><span class="p">,</span>
+</span><span id="__span-3-20"><a id="__codelineno-3-20" name="__codelineno-3-20" href="#__codelineno-3-20"></a><span class="w">    </span><span class="p">{</span>
+</span><span id="__span-3-21"><a id="__codelineno-3-21" name="__codelineno-3-21" href="#__codelineno-3-21"></a><span class="w">      </span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2016-01-21 14:50:00&quot;</span><span class="p">,</span>
+</span><span id="__span-3-22"><a id="__codelineno-3-22" name="__codelineno-3-22" href="#__codelineno-3-22"></a><span class="w">      </span><span class="nt">&quot;Appliances&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">120.0</span><span class="p">,</span>
+</span><span id="__span-3-23"><a id="__codelineno-3-23" name="__codelineno-3-23" href="#__codelineno-3-23"></a><span class="w">      </span><span class="nt">&quot;lights&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">20.0</span><span class="p">,</span>
+</span><span id="__span-3-24"><a id="__codelineno-3-24" name="__codelineno-3-24" href="#__codelineno-3-24"></a><span class="w">      </span><span class="nt">&quot;T1&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">22.1</span><span class="p">,</span>
+</span><span id="__span-3-25"><a id="__codelineno-3-25" name="__codelineno-3-25" href="#__codelineno-3-25"></a><span class="w">      </span><span class="nt">&quot;RH_1&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">46.1</span><span class="p">,</span>
+</span><span id="__span-3-26"><a id="__codelineno-3-26" name="__codelineno-3-26" href="#__codelineno-3-26"></a><span class="w">      </span><span class="nt">&quot;T_out&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">7.8</span>
+</span><span id="__span-3-27"><a id="__codelineno-3-27" name="__codelineno-3-27" href="#__codelineno-3-27"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-3-28"><a id="__codelineno-3-28" name="__codelineno-3-28" href="#__codelineno-3-28"></a><span class="w">  </span><span class="p">]</span>
+</span><span id="__span-3-29"><a id="__codelineno-3-29" name="__codelineno-3-29" href="#__codelineno-3-29"></a><span class="p">}</span>
+</span></code></pre></div>
+<hr />
+<h2 id="5-goi-tin-phan-hoi-mau-example-output-json-response">5. Gói tin Phản hồi mẫu (Example Output JSON Response)<a class="headerlink" href="#5-goi-tin-phan-hoi-mau-example-output-json-response" title="Permanent link">&para;</a></h2>
+<p>Sau khi xử lý, API trả về gói tin JSON cấu trúc cực kỳ trực quan chứa đầy đủ thông tin mô hình và chỉ dẫn an toàn vận hành:</p>
+<h3 id="json-response-tra-ve-tu-api">JSON Response trả về từ API:<a class="headerlink" href="#json-response-tra-ve-tu-api" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="p">{</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="nt">&quot;model_output&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">    </span><span class="nt">&quot;target&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Appliances&quot;</span><span class="p">,</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">    </span><span class="nt">&quot;forecast_horizon_minutes&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">    </span><span class="nt">&quot;predicted_value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">135.4215</span><span class="p">,</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">    </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Wh per 10-minute interval&quot;</span><span class="p">,</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">    </span><span class="nt">&quot;model_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;gradient_boosting_advanced_v1&quot;</span>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="w">  </span><span class="p">},</span>
+</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="w">  </span><span class="nt">&quot;evaluation_hint&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="w">    </span><span class="nt">&quot;metrics_file&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;outputs/forecast_metrics.json&quot;</span><span class="p">,</span>
+</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="w">    </span><span class="nt">&quot;best_model_mae&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">32.4512</span><span class="p">,</span>
+</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a><span class="w">    </span><span class="nt">&quot;best_model_rmse&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">52.1245</span>
+</span><span id="__span-4-13"><a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a><span class="w">  </span><span class="p">},</span>
+</span><span id="__span-4-14"><a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a><span class="w">  </span><span class="nt">&quot;decision&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-4-15"><a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a><span class="w">    </span><span class="nt">&quot;risk_level&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;WARNING&quot;</span><span class="p">,</span>
+</span><span id="__span-4-16"><a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a><span class="w">    </span><span class="nt">&quot;recommendation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;MONITOR_AND_PREPARE_ENERGY_SAVING_ACTION&quot;</span><span class="p">,</span>
+</span><span id="__span-4-17"><a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a><span class="w">    </span><span class="nt">&quot;reason&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Predicted appliance energy is 135.42 Wh; warning/high/critical thresholds are 80.25/142.10/225.40 Wh.&quot;</span><span class="p">,</span>
+</span><span id="__span-4-18"><a id="__codelineno-4-18" name="__codelineno-4-18" href="#__codelineno-4-18"></a><span class="w">    </span><span class="nt">&quot;safety_note&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Forecast output is a recommendation signal, not an automatic actuator command. Apply safety rules and human confirmation before control.&quot;</span>
+</span><span id="__span-4-19"><a id="__codelineno-4-19" name="__codelineno-4-19" href="#__codelineno-4-19"></a><span class="w">  </span><span class="p">},</span>
+</span><span id="__span-4-20"><a id="__codelineno-4-20" name="__codelineno-4-20" href="#__codelineno-4-20"></a><span class="w">  </span><span class="nt">&quot;api_check&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-4-21"><a id="__codelineno-4-21" name="__codelineno-4-21" href="#__codelineno-4-21"></a><span class="w">    </span><span class="nt">&quot;latency_ms&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">14.25</span><span class="p">,</span>
+</span><span id="__span-4-22"><a id="__codelineno-4-22" name="__codelineno-4-22" href="#__codelineno-4-22"></a><span class="w">    </span><span class="nt">&quot;input_points&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">24</span><span class="p">,</span>
+</span><span id="__span-4-23"><a id="__codelineno-4-23" name="__codelineno-4-23" href="#__codelineno-4-23"></a><span class="w">    </span><span class="nt">&quot;warnings&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span>
+</span><span id="__span-4-24"><a id="__codelineno-4-24" name="__codelineno-4-24" href="#__codelineno-4-24"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-4-25"><a id="__codelineno-4-25" name="__codelineno-4-25" href="#__codelineno-4-25"></a><span class="p">}</span>
+</span></code></pre></div>
+<hr />
+<h2 id="6-giai-thich-y-nghia-cac-truong-thong-tin-quyet-inh">6. Giải thích Ý nghĩa các Trường thông tin Quyết định<a class="headerlink" href="#6-giai-thich-y-nghia-cac-truong-thong-tin-quyet-inh" title="Permanent link">&para;</a></h2>
+<ol>
+<li><strong><code>predicted_value</code></strong>: Lượng điện tiêu thụ dự báo của các thiết bị gia dụng trong 10 phút tiếp theo, đo bằng đơn vị Watt-giờ (Wh). Đây là đầu ra số thực liên tục của mô hình học máy.</li>
+<li><strong><code>forecast_horizon_minutes</code></strong>: Chân trời dự báo (đặt là <span class="arithmatex">\(10\)</span> phút). Cho biết mô hình đang nhìn xa bao lâu vào tương lai.</li>
+<li><strong><code>risk_level</code></strong>: Cấp độ rủi ro tương ứng với công suất dự báo (<code>NORMAL</code>, <code>WARNING</code>, <code>HIGH</code>, <code>CRITICAL</code>), tính toán bằng cách so sánh <code>predicted_value</code> với các phân vị xác suất thống kê của tập huấn luyện.</li>
+<li><strong><code>recommendation</code></strong>: Hành động khuyến nghị vận hành chi tiết tương ứng với cấp rủi ro (ví dụ: ngắt bớt tải phụ để tránh quá tải điện năng).</li>
+<li><strong><code>safety_note</code></strong>: Dòng lưu ý pháp lý bắt buộc kỹ sư vận hành phải tuân thủ: Tuyệt đối không được thiết lập cho mô hình AI trực tiếp ngắt điện phần cứng tự động mà không qua con người xác nhận hoặc qua các quy tắc khóa cứng (HITL).</li>
+</ol>
+<hr />
+<h2 id="7-khac-biet-cot-loi-thu-nghiem-trong-notebook-vs-trien-khai-qua-api">7. Khác biệt cốt lõi: Thử nghiệm trong Notebook vs Triển khai qua API<a class="headerlink" href="#7-khac-biet-cot-loi-thu-nghiem-trong-notebook-vs-trien-khai-qua-api" title="Permanent link">&para;</a></h2>
+<p>Sự khác biệt giữa việc huấn luyện trong Notebook và chạy API thời gian thực phản ánh khoảng cách giữa môi trường nghiên cứu (R&amp;D) và môi trường vận hành thực tế (Production):</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Tiêu chí</th>
+<th style="text-align: left;">Pha Thử nghiệm (Jupyter Notebook)</th>
+<th style="text-align: left;">Giai đoạn Triển khai (FastAPI Web Service)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Bản chất luồng</strong></td>
+<td style="text-align: left;"><strong>Batch Processing (Xử lý theo lô)</strong>: Mô hình thực hiện nạp toàn bộ một file lớn chứa hàng vạn dòng dữ liệu thô cùng lúc.</td>
+<td style="text-align: left;"><strong>Stream/Point Processing (Xử lý đơn điểm)</strong>: API chỉ tiếp nhận một chuỗi lịch sử cực ngắn chứa 24 dòng của một ngôi nhà duy nhất tại thời điểm hiện tại <span class="arithmatex">\(t\)</span>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Tính năng động</strong></td>
+<td style="text-align: left;">Các đặc trưng Lag, Rolling được tính toán tĩnh một lần trên toàn bộ tập dữ liệu (nhìn được cả tương lai nếu dùng shift ngẫu nhiên).</td>
+<td style="text-align: left;">Các đặc trưng phải tính toán hoàn toàn động trên RAM tại điểm biên chuỗi thời gian của mốc hiện tại <span class="arithmatex">\(t\)</span> mà không biết trước tương lai <span class="arithmatex">\(t+1\)</span>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Yêu cầu làm sạch</strong></td>
+<td style="text-align: left;">Loại bỏ dễ dàng các dòng NaN bằng cách xóa nguyên cột hoặc xóa nguyên dòng của file CSV lớn.</td>
+<td style="text-align: left;">Không thể xóa dòng khuyết thiếu biên. Bắt buộc phải dùng chiến lược <strong>imputation</strong> (điền khuyết thông minh) để đảm bảo mô hình luôn có đủ đầu vào.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Độ trễ (Latency)</strong></td>
+<td style="text-align: left;">Không yêu cầu (huấn luyện và kiểm thử có thể chạy mất vài phút đến vài tiếng).</td>
+<td style="text-align: left;">Yêu cầu nghiêm ngặt về thời gian thực: Thời gian phản hồi API bắt buộc phải <strong>&lt; 50 mili-giây</strong> để đảm bảo không bị nghẽn mạng.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Mục đích sử dụng</strong></td>
+<td style="text-align: left;">Phân tích hồi quy, so sánh thuật toán, vẽ biểu đồ nghiên cứu khoa học.</td>
+<td style="text-align: left;">Ra quyết định điều khiển thiết bị, cảnh báo rủi ro an toàn cho người dùng cuối thời gian thực.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="8-phuong-phap-ket-noi-api-vao-cac-he-thong-ben-thu-ba">8. Phương pháp Kết nối API vào các Hệ thống bên thứ ba<a class="headerlink" href="#8-phuong-phap-ket-noi-api-vao-cac-he-thong-ben-thu-ba" title="Permanent link">&para;</a></h2>
+<p>FastAPI API có thể dễ dàng tích hợp vào hệ thống AIoT Smart Building quy mô lớn thông qua 3 kênh kết nối chuẩn:</p>
+<pre class="mermaid"><code>graph LR
+    subgraph "Hệ thống Edge &amp; Gateway"
+        A[Smart Meter ESP32] --&gt;|1. MQTT raw telemetry| B[MQTT Gateway Listener]
+    end
+
+    subgraph "Hạ tầng AI Server (Lab 4 API)"
+        B --&gt;|2. HTTP POST /forecast| C[FastAPI Server - app.py]
+    end
+
+    subgraph "Tầng Ứng dụng &amp; Người dùng"
+        C --&gt;|3. HTTP response JSON| D[Smart Home Mobile App]
+        C --&gt;|4. Push predictions| E[Database - InfluxDB]
+        E --&gt;|5. Query &amp; Display| F[Grafana Dashboard]
+    end</code></pre>
+<h3 id="1-ket-noi-en-giao-dien-giam-sat-dashboard-grafana">1. Kết nối đến Giao diện Giám sát (Dashboard / Grafana)<a class="headerlink" href="#1-ket-noi-en-giao-dien-giam-sat-dashboard-grafana" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Cách thức</strong>: Sau khi nhận kết quả JSON từ API, một script phụ trợ sẽ tự động ghi cả giá trị thực tế lẫn giá trị dự báo vào cơ sở dữ liệu chuỗi thời gian như <strong>InfluxDB</strong> hoặc <strong>TimescaleDB</strong>.</li>
+<li><strong>Hiển thị</strong>: <strong>Grafana Dashboard</strong> được cấu hình để truy vấn hai Database này và hiển thị hai đường đồ thị đè lên nhau (Actual vs Forecasted). Kỹ sư trực ca có thể nhìn trực quan thấy sai số mô hình tức thời trên màn hình điều khiển trung tâm.</li>
+</ul>
+<h3 id="2-ket-noi-en-bo-thu-nhan-mqtt-mqtt-gateway-listener-bridge">2. Kết nối đến Bộ thu nhận MQTT (MQTT Gateway Listener Bridge)<a class="headerlink" href="#2-ket-noi-en-bo-thu-nhan-mqtt-mqtt-gateway-listener-bridge" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Cách thức</strong>: Viết một script listener chạy nền (ví dụ bằng thư viện <code>paho-mqtt</code> của Python) đóng vai trò là cầu nối (Bridge):<ol>
+<li>Listener đăng ký nhận dữ liệu từ cảm biến gửi lên MQTT broker.</li>
+<li>Khi nhận được bản tin thô, Listener tích lũy 24 điểm vào một cache cục bộ (hoặc bộ nhớ Redis).</li>
+<li>Listener thực hiện một cú gọi REST API (HTTP POST JSON) lên endpoint <code>/forecast</code> của FastAPI.</li>
+<li>Nhận phản hồi JSON, kiểm tra nếu <code>risk_level</code> là <code>CRITICAL</code> <span class="arithmatex">\(\rightarrow\)</span> Gửi thông báo đẩy khẩn cấp lên điện thoại của chủ nhà và xuất bản một lệnh MQTT xuống rơ-le để ngắt tải an toàn.</li>
+</ol>
+</li>
+</ul>
+<h3 id="3-ket-noi-en-he-thong-quan-tri-trung-tam-backend-db-audit">3. Kết nối đến Hệ thống Quản trị trung tâm (Backend DB Audit)<a class="headerlink" href="#3-ket-noi-en-he-thong-quan-tri-trung-tam-backend-db-audit" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Cách thức</strong>: Kết quả dự báo của FastAPI được ghi đè liên tục vào một hàng đợi tin nhắn (Message Queue như Apache Kafka hoặc RabbitMQ).</li>
+<li><strong>Tác dụng</strong>: Lớp Backend trung tâm tiêu thụ tin nhắn này và lưu vào hệ thống kho dữ liệu lớn (Elasticsearch / ClickHouse) để phục vụ cho các thuật toán hậu kiểm tự động (Audit checking) và phát hiện lệch mô hình (Model Drift Tracking).</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Trở lại mục lục
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u0110\u00e3 sao ch\u00e9p", "clipboard.copy": "Sao ch\u00e9p v\u00e0o b\u1ed9 nh\u1edb t\u1ea1m", "search.result.more.one": "1 t\u1eeb kh\u00e1c trong trang", "search.result.more.other": "# t\u1eeb kh\u00e1c trong trang", "search.result.none": "Kh\u00f4ng t\u00ecm th\u1ea5y t\u00e0i li\u1ec7u li\u00ean quan", "search.result.one": "1 t\u00e0i li\u1ec7u li\u00ean quan", "search.result.other": "# t\u00e0i li\u1ec7u li\u00ean quan", "search.result.placeholder": "Nh\u1eadp \u0111\u1ec3 b\u1eaft \u0111\u1ea7u t\u00ecm ki\u1ebfm", "search.result.term.missing": "Kh\u00f4ng", "select.version": "Ch\u1ecdn phi\u00ean b\u1ea3n"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="../javascripts/mathjax.js"></script>
+      
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>

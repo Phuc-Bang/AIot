@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>11. Lộ trình phát triển & Học tập - Lab 4 AIoT Energy Forecasting</title>
+    <style>
+        
+:root {
+    --primary: #4f46e5;
+    --primary-light: #e0e7ff;
+    --primary-hover: #4338ca;
+    --text-dark: #0f172a;
+    --text-muted: #64748b;
+    --bg-slate: #f8fafc;
+    --bg-sidebar: #0f172a;
+    --border-slate: #e2e8f0;
+    --code-bg: #1e293b;
+    --inline-code-bg: #f1f5f9;
+    --inline-code-color: #e11d48;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: var(--text-dark);
+    background-color: var(--bg-slate);
+    line-height: 1.6;
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Sidebar Navigation */
+.sidebar {
+    width: 320px;
+    background-color: var(--bg-sidebar);
+    color: #f8fafc;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 100;
+    box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+}
+
+.sidebar-header {
+    padding: 24px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.sidebar-header h1 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sidebar-header .badge {
+    background-color: var(--primary);
+    color: white;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 9999px;
+    font-weight: 600;
+    margin-top: 4px;
+    display: inline-block;
+}
+
+.sidebar-nav {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 0;
+}
+
+.sidebar-nav-item {
+    display: block;
+    padding: 12px 24px;
+    color: #cbd5e1;
+    text-decoration: none;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    border-left: 4px solid transparent;
+}
+
+.sidebar-nav-item:hover {
+    background-color: rgba(255,255,255,0.05);
+    color: #ffffff;
+    padding-left: 28px;
+}
+
+.sidebar-nav-item.active {
+    background-color: rgba(79, 70, 229, 0.15);
+    color: #ffffff;
+    border-left-color: var(--primary);
+    font-weight: 600;
+}
+
+.sidebar-footer {
+    padding: 16px 24px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    font-size: 11px;
+    color: #94a3b8;
+    text-align: center;
+}
+
+/* Main Content Area */
+.main-wrapper {
+    margin-left: 320px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.top-bar {
+    background-color: #ffffff;
+    border-bottom: 1px solid var(--border-slate);
+    padding: 16px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 90;
+}
+
+.top-bar-title {
+    font-size: 14px;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.top-bar-links a {
+    color: var(--primary);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.top-bar-links a:hover {
+    color: var(--primary-hover);
+    text-decoration: underline;
+}
+
+.content-container {
+    flex: 1;
+    padding: 48px 64px 80px 64px;
+    max-width: 1012px;
+    width: 100%;
+    margin: 0 auto;
+    background-color: #ffffff;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    border-radius: 8px;
+    margin-top: 24px;
+    margin-bottom: 24px;
+}
+
+/* Markdown Styling */
+.markdown-body h1 {
+    font-size: 32px;
+    font-weight: 800;
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--border-slate);
+    color: #0f172a;
+}
+
+.markdown-body h2 {
+    font-size: 22px;
+    font-weight: 700;
+    margin-top: 36px;
+    margin-bottom: 16px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border-slate);
+    color: #1e293b;
+}
+
+.markdown-body h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-top: 28px;
+    margin-bottom: 12px;
+    color: #334155;
+}
+
+.markdown-body h4 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-top: 20px;
+    margin-bottom: 8px;
+    color: #475569;
+}
+
+.markdown-body p {
+    margin-bottom: 16px;
+    color: #334155;
+    text-align: justify;
+}
+
+.markdown-body ul, .markdown-body ol {
+    margin-bottom: 16px;
+    padding-left: 24px;
+}
+
+.markdown-body li {
+    margin-bottom: 8px;
+    color: #334155;
+}
+
+.markdown-body a {
+    color: var(--primary);
+    text-decoration: none;
+    transition: color 0.15s;
+    font-weight: 500;
+}
+
+.markdown-body a:hover {
+    color: var(--primary-hover);
+    text-decoration: underline;
+}
+
+/* Blockquotes */
+.markdown-body blockquote {
+    padding: 12px 24px;
+    border-left: 4px solid var(--border-slate);
+    background-color: var(--bg-slate);
+    margin-bottom: 20px;
+    font-style: italic;
+    color: var(--text-muted);
+}
+
+/* Code block styling */
+.markdown-body pre {
+    background-color: var(--code-bg);
+    padding: 16px;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin-bottom: 20px;
+}
+
+.markdown-body pre code {
+    background-color: transparent;
+    color: #f8fafc;
+    padding: 0;
+    border-radius: 0;
+    font-size: 13.5px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+.markdown-body code {
+    background-color: var(--inline-code-bg);
+    color: var(--inline-code-color);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 85%;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+/* Table styling */
+.markdown-body table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 24px;
+    font-size: 14.5px;
+}
+
+.markdown-body th, .markdown-body td {
+    padding: 12px 16px;
+    border: 1px solid var(--border-slate);
+}
+
+.markdown-body th {
+    background-color: var(--bg-slate);
+    font-weight: 600;
+    text-align: left;
+    color: #1e293b;
+}
+
+.markdown-body tr:nth-child(even) {
+    background-color: #fafbfd;
+}
+
+/* Custom Alert Boxes (GitHub Alerts mapping) */
+.alert {
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    border-radius: 8px;
+    border-left-width: 4px;
+    border-left-style: solid;
+}
+
+.alert-title {
+    font-weight: 700;
+    margin-bottom: 8px;
+    font-size: 14.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.alert-content p {
+    margin-bottom: 0 !important;
+    font-size: 14px;
+    text-align: justify;
+}
+
+.alert-note {
+    background-color: #eff6ff;
+    border-left-color: #3b82f6;
+    color: #1e40af;
+}
+.alert-note .alert-title { color: #1d4ed8; }
+
+.alert-tip {
+    background-color: #f0fdf4;
+    border-left-color: #22c55e;
+    color: #166534;
+}
+.alert-tip .alert-title { color: #15803d; }
+
+.alert-important {
+    background-color: #faf5ff;
+    border-left-color: #a855f7;
+    color: #6b21a8;
+}
+.alert-important .alert-title { color: #7e22ce; }
+
+.alert-warning {
+    background-color: #fffbeb;
+    border-left-color: #f59e0b;
+    color: #92400e;
+}
+.alert-warning .alert-title { color: #b45309; }
+
+.alert-caution {
+    background-color: #fef2f2;
+    border-left-color: #ef4444;
+    color: #991b1b;
+}
+.alert-caution .alert-title { color: #b91c1c; }
+
+/* Mermaid Styling */
+.mermaid {
+    background-color: white !important;
+    border: 1px solid var(--border-slate);
+    border-radius: 8px;
+    padding: 24px;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 24px;
+    overflow-x: auto;
+}
+
+.footer {
+    background-color: #ffffff;
+    border-top: 1px solid var(--border-slate);
+    padding: 24px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: auto;
+}
+
+/* Landing Page Grid */
+.landing-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    margin-top: 24px;
+}
+
+.landing-card {
+    background-color: #ffffff;
+    border: 1px solid var(--border-slate);
+    border-radius: 8px;
+    padding: 20px;
+    text-decoration: none;
+    color: var(--text-dark);
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.landing-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);
+    border-color: var(--primary);
+}
+
+.landing-card h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.landing-card p {
+    font-size: 13.5px;
+    color: var(--text-muted);
+    margin-bottom: 0;
+    text-align: left;
+}
+
+@media (max-width: 1024px) {
+    .sidebar {
+        display: none; /* simple hides sidebar for tablet/mobile to keep script clean */
+    }
+    .main-wrapper {
+        margin-left: 0;
+    }
+    .content-container {
+        padding: 24px;
+        margin-top: 0;
+        margin-bottom: 0;
+        border-radius: 0;
+    }
+}
+
+    </style>
+    <!-- Mermaid.js for drawing diagrams directly in the browser -->
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            securityLevel: 'loose',
+            flowchart: { useMaxWidth: true, htmlLabels: true }
+        });
+    </script>
+</head>
+<body>
+
+    <!-- Left Sidebar Navigation -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h1>🔋 Lab 4 AIoT</h1>
+            <div class="badge">Energy Forecasting</div>
+        </div>
+        <div class="sidebar-nav">
+                    <a href="index.html" class="sidebar-nav-item ">🏡 Trang chủ / Tổng mục lục</a>
+        <a href="00_project_overview.html" class="sidebar-nav-item ">00. Tổng quan dự án</a>
+        <a href="01_architecture.html" class="sidebar-nav-item ">01. Kiến trúc hệ thống AIoT</a>
+        <a href="02_data_flow.html" class="sidebar-nav-item ">02. Luồng dữ liệu tuần tự</a>
+        <a href="03_runtime_and_dependencies.html" class="sidebar-nav-item ">03. Luồng thực thi & Phụ thuộc</a>
+        <a href="04_dataset_and_schema.html" class="sidebar-nav-item ">04. Tập dữ liệu & Điền khuyết</a>
+        <a href="05_feature_engineering.html" class="sidebar-nav-item ">05. Kỹ nghệ đặc trưng thời gian</a>
+        <a href="06_model_training_and_metrics.html" class="sidebar-nav-item ">06. Mô hình hóa & Đo lường sai số</a>
+        <a href="07_decision_layer.html" class="sidebar-nav-item ">07. Tầng ra quyết định & Cảnh báo</a>
+        <a href="08_api_forecast_workflow.html" class="sidebar-nav-item ">08. Triển khai API FastAPI</a>
+        <a href="09_code_review.html" class="sidebar-nav-item ">09. Đánh giá chất lượng mã nguồn</a>
+        <a href="10_safety_fail_safe.html" class="sidebar-nav-item ">10. An toàn & Cơ chế Fail-safe</a>
+        <a href="11_development_roadmap.html" class="sidebar-nav-item active">11. Lộ trình phát triển & Học tập</a>
+        <a href="HANDBOOK.html" class="sidebar-nav-item ">📖 Sách hướng dẫn kỹ thuật (Handbook)</a>
+        </div>
+        <div class="sidebar-footer">
+            Designed by DeepMind Team & Antigravity AI
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="main-wrapper">
+        <div class="top-bar">
+            <div class="top-bar-title">Tài liệu Kỹ thuật Hệ thống Dự báo Phụ tải Điện năng BEMS</div>
+            <div class="top-bar-links">
+                <a href="index.html">🏡 Quay lại Trang chủ</a>
+            </div>
+        </div>
+
+        <div style="padding: 0 40px; flex: 1;">
+            <div class="content-container markdown-body">
+                <h1 id="lo-trinh-phat-trien-uong-dan-hoc-tap-aiot-forecasting">LỘ TRÌNH PHÁT TRIỂN &amp; ĐƯỜNG DẪN HỌC TẬP AIoT FORECASTING</h1>
+<p>Để nâng cấp toàn diện dự án từ một mô hình giả lập lớp học thử nghiệm (POC) lên một hệ thống <strong>Học máy vận hành thực tế chuẩn công nghiệp (Production MLOps AIoT)</strong>, kỹ sư cần có lộ trình rõ ràng. </p>
+<p>Tài liệu này tích hợp hai cấu phần quan trọng nhất: <strong>Lộ trình nâng cấp hệ thống MLOps 3 cấp độ</strong> dành cho doanh nghiệp, và <strong>Đường dẫn học tập phễu 4 giai đoạn</strong> dành cho học viên muốn mở rộng nghiên cứu phát triển dự án.</p>
+<hr />
+<h2 id="phan-i-so-o-pheu-uong-dan-hoc-tap-learning-funnel">🗺️ PHẦN I: SƠ ĐỒ PHỄU ĐƯỜNG DẪN HỌC TẬP (LEARNING FUNNEL)</h2>
+<p>Dưới đây là sơ đồ rèn luyện năng lực của học viên từ người mới bắt đầu đến chuyên gia MLOps AIoT thông qua 4 giai đoạn phát triển:</p>
+<pre class="mermaid">graph TD
+    classDef beg fill:#fbb,stroke:#333,stroke-width:1px;
+    classDef inter fill:#f9f,stroke:#333,stroke-width:1px;
+    classDef adv fill:#bbf,stroke:#333,stroke-width:1px;
+    classDef prod fill:#bfb,stroke:#333,stroke-width:2px;
+
+    B[Giai đoạn 1: BẮT ĐẦU - Beginner<br>Hiểu mã nguồn & Lý thuyết chuỗi thời gian] --> I[Giai đoạn 2: TRUNG CẤP - Intermediate<br>Kỹ nghệ đặc trưng nâng cao & REST API]
+    I --> A[Giai đoạn 3: CAO CẤP - Advanced<br>Hồi quy phân vị, Fail-safe & Docker]
+    A --> P[Giai đoạn 4: THỰC TẾ - Production-level<br>MQTT nhúng ESP32, Feast Feature Store & MLOps Drift]
+
+    class B beg;
+    class I inter;
+    class A adv;
+    class P prod;
+</pre>
+<hr />
+<h2 id="chi-tiet-4-giai-oan-phat-trien-nang-luc-hoc-vien">CHI TIẾT 4 GIAI ĐOẠN PHÁT TRIỂN NĂNG LỰC HỌC VIÊN</h2>
+<h3 id="giai-oan-1-bat-au-beginner-phase">GIAI ĐOẠN 1: BẮT ĐẦU (BEGINNER PHASE)</h3>
+<p><em>Mục tiêu: Đọc hiểu trọn vẹn mã nguồn bài mẫu, giải thích được các phép biến đổi toán học cơ bản và chạy thành công pipeline ngoại tuyến.</em></p>
+<ul>
+<li><strong>Các khái niệm cần nghiên cứu</strong>: Tự tương quan (Autocorrelation) chuỗi thời gian, bài toán hồi quy (Regression) vs phân loại, ý nghĩa vật lý của MAE/RMSE/MAPE/Bias, rò rỉ dữ liệu (Data Leakage) và Time-series Split.</li>
+<li><strong>Các file cần đọc hiểu</strong>: <code>notebooks/01_forecasting_predictive_analytics.ipynb</code>, <code>src/utils.py</code>, <code>docs/00_project_overview.md</code>, <code>docs/06_model_training_and_metrics.md</code>.</li>
+<li><strong>Các thử nghiệm cần làm</strong>: Chạy huấn luyện offline để tạo tệp <code>.joblib</code> và chạy script <code>plot_results.py</code> xuất ảnh đồ thị trong <code>figures/</code>.</li>
+<li><strong>Bài tập lập trình</strong>: Viết thêm chỉ số R-squared vào hàm <code>regression_metrics</code> trong <code>utils.py</code> và in kết quả.</li>
+<li><strong>Bài tập gỡ lỗi</strong>: Đổi hàm chia dữ liệu thành <code>train_test_split(..., shuffle=True)</code> để quan sát hiện tượng tụt giảm MAE ảo (rò rỉ dữ liệu).</li>
+<li><strong>Bài tập thiết kế kiến trúc</strong>: Vẽ lại sơ đồ luồng luân chuyển của một telemetry point từ khi nạp CSV đến khi API phản hồi.</li>
+<li><strong>Bài tập triển khai</strong>: Chạy thành công Server FastAPI bằng uvicorn cục bộ, sử dụng <code>/docs</code> Swagger UI để xem 3 endpoints.</li>
+</ul>
+<hr />
+<h3 id="giai-oan-2-trung-cap-intermediate-phase">GIAI ĐOẠN 2: TRUNG CẤP (INTERMEDIATE PHASE)</h3>
+<p><em>Mục tiêu: Biết cách chỉnh sửa đặc trưng chuỗi thời gian, cải tiến logic phân cấp rủi ro quyết định và kiểm thử API thời gian thực.</em></p>
+<ul>
+<li><strong>Các khái niệm cần nghiên cứu</strong>: Cơ chế lượng giác Sin/Cos của Cyclic Time, logic điền khuyết dữ liệu thô (<code>raw_medians</code>) và đặc trưng (<code>feature_medians</code>), Pydantic request validation, và phân vị thống kê rủi ro.</li>
+<li><strong>Các file cần đọc hiểu</strong>: <code>src/utils.py</code> (hàm Lag, Rolling, Delta), <code>src/app.py</code> (schema &amp; endpoint <code>/forecast</code>), <code>src/test_api_local.py</code>.</li>
+<li><strong>Các thử nghiệm cần làm</strong>: Đổi window rolling từ 6 lên 12 bước, huấn luyện lại mô hình và ghi nhận MAE biến động. Gửi thử payload rỗng cột cảm biến lên API Swagger UI xem điền khuyết thiếu hoạt động.</li>
+<li><strong>Bài tập lập trình</strong>: <ol>
+<li>Bổ sung đặc trưng tương tác nhiệt độ <code>temp_diff = T_indoor - T_out</code> vào hàm <code>add_lag_rolling_features</code> trong <code>utils.py</code>.</li>
+<li>Hạ thấp ngưỡng WARNING vào giờ cao điểm điện đắt (18:00 - 21:00) trong hàm <code>risk_from_prediction</code>.</li>
+</ol>
+</li>
+<li><strong>Bài tập gỡ lỗi</strong>: Gửi chuỗi lịch sử cực ngắn (10 điểm đo), đặt breakpoint tại <code>app.py</code> để xem <code>fillna</code> đặc trưng bằng <code>feature_medians</code> hoạt động cứu nguy sập mô hình.</li>
+<li><strong>Bài tập thiết kế kiến trúc</strong>: Thiết kế cấu trúc bảng Database PostgreSQL/TimescaleDB lưu telemetry và nhật ký dự báo.</li>
+<li><strong>Bài tập triển khai</strong>: Chạy script test API trực tuyến <code>python src/test_api.py</code> qua giao thức mạng HTTP thực tế.</li>
+</ul>
+<hr />
+<h3 id="giai-oan-3-cao-cap-advanced-phase">GIAI ĐOẠN 3: CAO CẤP (ADVANCED PHASE)</h3>
+<p><em>Mục tiêu: Đóng gói container hóa ứng dụng, nâng cấp giải thuật khoảng tin cậy và viết Unit Test cho toàn bộ lõi toán học.</em></p>
+<ul>
+<li><strong>Các khái niệm cần nghiên cứu</strong>: Hồi quy phân vị (Quantile Regression), Prediction Intervals, khóa chốt quy tắc cứng an toàn nhúng, Docker containerization, và Unit Testing với PyTest.</li>
+<li><strong>Các file cần đọc hiểu</strong>: <code>docs/09_safety_and_risk.md</code> (HITL), <code>docs/code_review.md</code> (Restructuring).</li>
+<li><strong>Các thử nghiệm cần làm</strong>: Huấn luyện Gradient Boosting với <code>loss="quantile"</code> để lấy cận trên dự báo an toàn <code>pred_high</code>, mô phỏng sập mạng kiểm thử logic Edge Fallback nội hạt.</li>
+<li><strong>Bài tập lập trình</strong>: <ol>
+<li>Viết <code>Dockerfile</code> và <code>docker-compose.yml</code> đóng gói dịch vụ API chạy trên cổng 8000.</li>
+<li>Viết 5 bài Unit Tests trong thư mục <code>tests/</code> sử dụng <code>pytest</code> kiểm định hàm Sin/Cos và điền khuyết thiếu của <code>utils.py</code>.</li>
+</ol>
+</li>
+<li><strong>Bài tập gỡ lỗi</strong>: Gửi giá trị nhiệt độ kitchen nhiễu ảo âm 100°C và viết Pydantic validator từ chối request, bảo vệ mô hình khỏi dữ liệu rác.</li>
+<li><strong>Bài tập thiết kế kiến trúc</strong>: Thiết kế kiến trúc chốt chốt chặn an toàn phối hợp ngắt nguồn khẩn cấp (RCD/Smoke sensor) độc lập biên.</li>
+<li><strong>Bài tập triển khai</strong>: Build Docker image thành công và chạy container FastAPI phục vụ dự báo Wh trên cloud server AWS EC2.</li>
+</ul>
+<hr />
+<h3 id="giai-oan-4-van-hanh-thuc-te-production-level-phase">GIAI ĐOẠN 4: VẬN HÀNH THỰC TẾ (PRODUCTION-LEVEL PHASE)</h3>
+<p><em>Mục tiêu: Tích hợp ESP32 thực tế qua MQTT broker EMQX, thiết lập Feature Store Feast (Redis) và xây dựng quy trình tự động MLOps khép kín.</em></p>
+<ul>
+<li><strong>Các khái niệm cần nghiên cứu</strong>: MQTT EMQX, Feast Feature Store, Apache Flink / Faust Stream processing, đo lường trôi lệch dữ liệu ( Wasserstein Distance ), và MLflow Model Registry.</li>
+<li><strong>Các file cần đọc hiểu</strong>: <code>docs/11_development_roadmap.md</code>, <code>docs/reverse_engineering_analysis.md</code>.</li>
+<li><strong>Các thử nghiệm cần làm</strong>: So sánh độ trễ truy vấn đặc trưng giữa Feast Feature Store (Redis) so với tính Pandas trong RAM.</li>
+<li><strong>Bài tập lập trình</strong>:<ol>
+<li>Viết mã nhúng C++ cho <strong>ESP32</strong> đo CT dòng điện, đóng gói JSON và Publish lên EMQX Broker 10 phút một lần.</li>
+<li>Viết listener bridge Subscribe nhận tin MQTT, lưu TimescaleDB, gọi API dự báo Wh và Publish lệnh Smart Plug phản hồi.</li>
+</ol>
+</li>
+<li><strong>Bài tập gỡ lỗi</strong>: Sử dụng <strong>Evidently AI</strong> viết script chạy nền định kỳ kiểm tra trôi lệch dữ liệu (Data Drift).</li>
+<li><strong>Bài tập thiết kế kiến trúc</strong>: Thiết kế kiến trúc MLOps khép kín: Kafka $\rightarrow$ Feast $\rightarrow$ Triton serving $\rightarrow$ MLflow $\rightarrow$ Prometheus/Grafana.</li>
+<li><strong>Bài tập triển khai</strong>: Triển khai cụm EMQX, TimescaleDB, Redis Cluster và Feast Feature Store phân tán. Thiết lập Alert Manager tự động gửi cảnh báo Slack/Telegram khi phát hiện model drift.</li>
+</ul>
+<h2 id="-">---</h2>
+<h2 id="phan-ii-lo-trinh-cai-tien-he-thong-mlops-doanh-nghiep">🚀 PHẦN II: LỘ TRÌNH CẢI TIẾN HỆ THỐNG MLOps DOANH NGHIỆP</h2>
+<p>Đối với doanh nghiệp muốn phát triển mã nguồn hiện tại thành một nền tảng quy mô lớn thương mại, dưới đây là các cấu phần cần nâng cấp trong 3 cấp độ:</p>
+<h3 id="cap-o-1-bai-tap-mo-rong-cho-sinh-vien-student-extension">CẤP ĐỘ 1: BÀI TẬP MỞ RỘNG CHO SINH VIÊN (STUDENT EXTENSION)</h3>
+<h4 id="1-thay-oi-chan-troi-du-bao-change-forecast-horizon">1. Thay đổi Chân trời dự báo (Change Forecast Horizon)</h4>
+<ul>
+<li><strong>Mục đích</strong>: Thay đổi chân trời dự báo $h$ để dự đoán xa hơn (dự báo trước 1 tiếng, tương ứng $h = 6$ bước thời gian).</li>
+<li><strong>Tại sao lại quan trọng</strong>: Giúp người quản lý tòa nhà có đủ thời gian (1 tiếng) chuẩn bị kịch bản tối ưu hóa phụ tải hoặc huy động pin dự trữ.</li>
+<li><strong>Các file gợi ý chỉnh sửa</strong>: <code>src/utils.py</code> (sửa <code>HORIZON_STEPS = 6</code>), <code>src/train_forecast.py</code>.</li>
+<li><strong>Độ khó</strong>: Thấp.</li>
+<li><strong>Sản phẩm mong đợi</strong>: Mô hình huấn luyện thành công đoán trước 1 tiếng, sai số MAE được cập nhật trên tập kiểm thử mới.</li>
+</ul>
+<h4 id="2-bo-sung-ac-trung-nang-cao-add-more-features">2. Bổ sung đặc trưng nâng cao (Add More Features)</h4>
+<ul>
+<li><strong>Mục đích</strong>: Tạo ra đặc trưng chênh lệch nhiệt độ trong/ngoài nhà <code>temp_diff = T_indoor - T_out</code>.</li>
+<li><strong>Tại sao lại quan trọng</strong>: Cho thấy tương tác vật lý trực tiếp lên hiệu năng tiêu thụ điện của điều hòa HVAC.</li>
+<li><strong>Các file gợi ý chỉnh sửa</strong>: <code>src/utils.py</code> (hàm <code>add_lag_rolling_features</code>).</li>
+<li><strong>Độ khó</strong>: Trung bình.</li>
+<li><strong>Sản phẩm mong đợi</strong>: Mô hình học máy Gradient Boosting giảm MAE nhờ đặc trưng tương tác nhiệt chất lượng.</li>
+</ul>
+<hr />
+<h3 id="cap-o-2-mo-rong-quy-mo-ky-thuat-he-thong-engineering-extension">CẤP ĐỘ 2: MỞ RỘNG QUY MÔ KỸ THUẬT HỆ THỐNG (ENGINEERING EXTENSION)</h3>
+<h4 id="1-endpoint-du-bao-hang-loat-batch-forecast-endpoint">1. Endpoint dự báo hàng loạt (Batch Forecast Endpoint)</h4>
+<ul>
+<li><strong>Mục đích</strong>: Tạo endpoint REST <code>/forecast-batch</code> cho phép Gateway gửi lên mảng JSON lịch sử của hàng trăm ngôi nhà đồng thời.</li>
+<li><strong>Tại sao lại quan trọng</strong>: Giảm số lượng request HTTP mạng, tối ưu hóa suy diễn song song của CPU/GPU.</li>
+<li><strong>Các file gợi ý chỉnh sửa</strong>: <code>src/app.py</code>.</li>
+<li><strong>Độ khó</strong>: Trung bình.</li>
+<li><strong>Sản phẩm mong đợi</strong>: API <code>/forecast-batch</code> chấp nhận payload đa chiều và trả phản hồi song song ổn định.</li>
+</ul>
+<h4 id="2-ong-goi-container-hoa-voi-docker-docker-deployment">2. Đóng gói Container hóa với Docker (Docker Deployment)</h4>
+<ul>
+<li><strong>Mục đích</strong>: Đóng gói microservice FastAPI thành container chạy độc lập qua Dockerfile và docker-compose.yml.</li>
+<li><strong>Tại sao lại quan trọng</strong>: Bảo đảm tính đồng nhất môi trường thư viện Python khi deploy lên Edge Gateway biên hoặc Cloud Server.</li>
+<li><strong>Các file gợi ý chỉnh sửa</strong>: Tạo file <code>Dockerfile</code> và <code>docker-compose.yml</code> ở thư mục gốc.</li>
+<li><strong>Độ khó</strong>: Thấp.</li>
+<li><strong>Sản phẩm mong đợi</strong>: Container Docker chạy dịch vụ API dự báo Wh mượt mà trên cổng 8000.</li>
+</ul>
+<hr />
+<h3 id="cap-o-3-mo-rong-cong-nghiep-thuc-te-production-aiot-extension">CẤP ĐỘ 3: MỞ RỘNG CÔNG NGHIỆP THỰC TẾ (PRODUCTION AIoT EXTENSION)</h3>
+<h4 id="1-thu-thap-telemetry-qua-mqtt-thuc-te-mqtt-telemetry-ingestion">1. Thu thập Telemetry qua MQTT thực tế (MQTT Telemetry Ingestion)</h4>
+<ul>
+<li><strong>Mục đích</strong>: Kết nối truyền tin không dây không chạm từ ESP32 vật lý lên MQTT Broker EMQX và Bridge Listener.</li>
+<li><strong>Tại sao lại quan trọng</strong>: Tiết kiệm 90% băng thông truyền dẫn và năng lượng tiêu thụ của Edge Gateway so với HTTP REST truyền thống.</li>
+<li><strong>Các file gợi ý chỉnh sửa</strong>: Tạo file mới <code>src/mqtt_bridge.py</code>.</li>
+<li><strong>Độ khó</strong>: Cao.</li>
+<li><strong>Sản phẩm mong đợi</strong>: Luồng MQTT gửi nhận Wh thô $\rightarrow$ gọi API dự báo $\rightarrow$ trả chỉ thị đóng ngắt Smart Plug khép kín thời gian thực.</li>
+</ul>
+<h4 id="2-giam-sat-troi-lech-du-lieu-tu-ong-retrain-drift-auto-retrain-ct">2. Giám sát trôi lệch dữ liệu &amp; tự động retrain (Drift &amp; Auto Retrain CT)</h4>
+<ul>
+<li><strong>Mục đích</strong>: Tích hợp công cụ giám sát drift (Wasserstein Distance) và cron job tự động (Apache Airflow) huấn luyện lại mô hình mỗi tháng.</li>
+<li><strong>Tại sao lại quan trọng</strong>: Bảo đảm mô hình không bị giảm sút độ chính xác theo mùa và tự thích ứng thích nghi 100% tự động.</li>
+<li><strong>Các file gợi ý chỉnh sửa</strong>: Tạo file mới <code>src/retrain_pipeline.py</code> và <code>src/monitor_drift.py</code>.</li>
+<li><strong>Độ khó</strong>: Cao.</li>
+<li><strong>Sản phẩm mong đợi</strong>: Pipeline MLOps CT tự chạy định kỳ, Grafana Dashboard hiển thị cảnh báo Drift khi p-value sụt giảm dưới ngưỡng an toàn.</li>
+</ul>
+            </div>
+        </div>
+
+        <div class="footer">
+            © 2026 - Lab 4 AIoT Forecasting & Predictive Analytics - Tài liệu Đào tạo Chuyên sâu
+        </div>
+    </div>
+
+</body>
+</html>

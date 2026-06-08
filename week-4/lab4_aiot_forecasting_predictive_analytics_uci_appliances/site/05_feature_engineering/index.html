@@ -1,0 +1,2331 @@
+
+<!doctype html>
+<html lang="vi" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Tài liệu kỹ thuật chuyên sâu về dự báo phụ tải điện năng và phân tích dự đoán trong hệ thống AIoT">
+      
+      
+        <meta name="author" content="DeepMind team & Antigravity AI">
+      
+      
+      
+        <link rel="prev" href="../04_dataset_and_schema/">
+      
+      
+        <link rel="next" href="../06_model_training_and_metrics/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>05. Kỹ nghệ đặc trưng chuỗi thời gian - Lab 4: AIoT Energy Forecasting & Predictive Analytics</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#ky-nghe-ac-trung-chuoi-thoi-gian-feature-engineering-cho-aiot" class="md-skip">
+          Bỏ qua
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Đầu trang">
+    <a href=".." title="Lab 4: AIoT Energy Forecasting &amp; Predictive Analytics" class="md-header__button md-logo" aria-label="Lab 4: AIoT Energy Forecasting & Predictive Analytics" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Lab 4: AIoT Energy Forecasting & Predictive Analytics
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              05. Kỹ nghệ đặc trưng chuỗi thời gian
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Chuyển sang chế độ Dark Mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Chuyển sang chế độ Dark Mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Chuyển sang chế độ Light Mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Chuyển sang chế độ Light Mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Tìm kiếm" placeholder="Tìm kiếm" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Tìm kiếm">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Xoá" aria-label="Xoá" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Trang chủ
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../00_project_overview/" class="md-tabs__link">
+          
+  
+  
+  Học phần I: Tổng quan & Kiến trúc
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../04_dataset_and_schema/" class="md-tabs__link">
+          
+  
+  
+  Học phần II: Dữ liệu & Đặc trưng
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../06_model_training_and_metrics/" class="md-tabs__link">
+          
+  
+  
+  Học phần III: Mô hình & API Serving
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../09_code_review/" class="md-tabs__link">
+          
+  
+  
+  Học phần IV: Chất lượng mã & An toàn
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../11_development_roadmap/" class="md-tabs__link">
+          
+  
+  
+  Học phần V: Lộ trình & Handbook
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../README_HTML_EXPORT/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Hướng dẫn xuất bản HTML
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../README_MKDOCS/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Hướng dẫn cấu hình MkDocs
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Thanh điều hướng" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Lab 4: AIoT Energy Forecasting &amp; Predictive Analytics" class="md-nav__button md-logo" aria-label="Lab 4: AIoT Energy Forecasting & Predictive Analytics" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Lab 4: AIoT Energy Forecasting & Predictive Analytics
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Trang chủ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Học phần I: Tổng quan & Kiến trúc
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Học phần I: Tổng quan & Kiến trúc
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../00_project_overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    00. Tổng quan bài toán
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../01_architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    01. Kiến trúc hệ thống
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02_data_flow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    02. Luồng dữ liệu tuần tự
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03_runtime_and_dependencies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    03. Luồng thực thi & Phụ thuộc
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Học phần II: Dữ liệu & Đặc trưng
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Học phần II: Dữ liệu & Đặc trưng
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04_dataset_and_schema/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    04. Tập dữ liệu & Điền khuyết
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    05. Kỹ nghệ đặc trưng chuỗi thời gian
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    05. Kỹ nghệ đặc trưng chuỗi thời gian
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Mục lục">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Mục lục
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-tai-sao-telemetry-iot-tho-la-khong-u-e-du-bao" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Tại sao Telemetry IoT thô là KHÔNG ĐỦ để Dự báo?
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Tại sao Telemetry IoT thô là KHÔNG ĐỦ để Dự báo?">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ly-do-1-thieu-ngu-canh-lich-su-temporal-context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lý do 1: Thiếu ngữ cảnh Lịch sử (Temporal Context)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ly-do-2-thieu-thong-tin-ong-hoc-tuan-hoan" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lý do 2: Thiếu thông tin động học &amp; tuần hoàn
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-ac-trung-o-tre-lag-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Đặc trưng Độ trễ (Lag Features)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Đặc trưng Độ trễ (Lag Features)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#inh-nghia-co-che" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Định nghĩa &amp; Cơ chế
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vi-du-truc-quan-bang-bang-nho-k1-va-k2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ví dụ trực quan bằng Bảng nhỏ (\(k=1\) và \(k=2\)):
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#y-nghia-trong-aiot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ý nghĩa trong AIoT
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-ac-trung-cua-so-truot-rolling-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Đặc trưng Cửa sổ trượt (Rolling Features)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Đặc trưng Cửa sổ trượt (Rolling Features)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#inh-nghia-co-che_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Định nghĩa &amp; Cơ chế
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vi-du-truc-quan-bang-bang-nho-rolling-mean-voi-cua-so-w3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ví dụ trực quan bằng Bảng nhỏ (Rolling Mean với cửa sổ \(W=3\)):
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#y-nghia-trong-aiot_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ý nghĩa trong AIoT
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-ac-trung-sai-phan-delta-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Đặc trưng Sai phân (Delta Features)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Đặc trưng Sai phân (Delta Features)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#inh-nghia-co-che_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Định nghĩa &amp; Cơ chế
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vi-du-truc-quan-bang-bang-nho-delta_1-va-delta_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ví dụ trực quan bằng Bảng nhỏ (\(\Delta_1\) và \(\Delta_2\)):
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#y-nghia-trong-aiot_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ý nghĩa trong AIoT
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-ac-trung-thoi-gian-tuan-hoan-cyclic-time-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Đặc trưng Thời gian Tuần hoàn (Cyclic Time Features)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Đặc trưng Thời gian Tuần hoàn (Cyclic Time Features)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#han-che-cua-so-thuong" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hạn chế của số thường
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#giai-phap-luong-giac-sincos-projection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Giải pháp Lượng giác (Sin/Cos Projection)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vi-du-truc-quan-bang-bang-nho" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ví dụ trực quan bằng Bảng nhỏ:
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-cach-tao-nhan-target_future-bang-ky-thuat-shifting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Cách Tạo nhãn target_future bằng Kỹ thuật Shifting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Cách Tạo nhãn target_future bằng Kỹ thuật Shifting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#vi-du-truc-quan-bang-bang-nho-h1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ví dụ trực quan bằng Bảng nhỏ (\(h=1\)):
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-lam-the-nao-e-tranh-loi-ro-ri-du-lieu-tuong-lai-data-leakage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Làm thế nào để Tránh lỗi Rò rỉ Dữ liệu tương lai (Data Leakage)?
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. Làm thế nào để Tránh lỗi Rò rỉ Dữ liệu tương lai (Data Leakage)?">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#3-nguyen-tac-vang-phong-chong-data-leakage-trong-lab-4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3 Nguyên tắc Vàng phòng chống Data Leakage trong Lab 4:
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-cac-ac-trung-quan-trong-nhat-e-du-bao-ien-nang-tieu-thu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Các Đặc trưng Quan trọng nhất để Dự báo Điện năng Tiêu thụ
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-phuong-phap-mo-rong-ac-trung-cho-he-thong-aiot-thuc-te-production" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Phương pháp Mở rộng Đặc trưng cho Hệ thống AIoT Thực tế (Production)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9. Phương pháp Mở rộng Đặc trưng cho Hệ thống AIoT Thực tế (Production)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-ac-trung-tuong-tac-nhiet-interaction-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Đặc trưng Tương tác nhiệt (Interaction Features)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-ac-trung-cua-so-truot-cua-thoi-tiet-weather-rolling-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Đặc trưng Cửa sổ trượt của Thời tiết (Weather Rolling Features)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-ac-trung-lich-va-ngay-le-ac-biet-calendar-events-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Đặc trưng Lịch và Ngày lễ đặc biệt (Calendar Events Features)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-ac-trung-trang-thai-hoat-ong-thiet-bi-device-actuator-state" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Đặc trưng Trạng thái hoạt động thiết bị (Device Actuator State)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Học phần III: Mô hình & API Serving
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Học phần III: Mô hình & API Serving
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../06_model_training_and_metrics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    06. Mô hình hóa & Đo lường sai số
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../07_decision_layer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    07. Tầng ra quyết định & Cảnh báo
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../08_api_forecast_workflow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    08. Triển khai FastAPI Serving
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Học phần IV: Chất lượng mã & An toàn
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Học phần IV: Chất lượng mã & An toàn
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../09_code_review/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    09. Đánh giá chất lượng mã nguồn
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../10_safety_fail_safe/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    10. An toàn & Cơ chế Fail-safe
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Học phần V: Lộ trình & Handbook
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Học phần V: Lộ trình & Handbook
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../11_development_roadmap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    11. Lộ trình phát triển
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../HANDBOOK/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📖 Sách hướng dẫn kỹ thuật (Handbook)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../README_HTML_EXPORT/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hướng dẫn xuất bản HTML
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../README_MKDOCS/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hướng dẫn cấu hình MkDocs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Mục lục">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Mục lục
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-tai-sao-telemetry-iot-tho-la-khong-u-e-du-bao" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Tại sao Telemetry IoT thô là KHÔNG ĐỦ để Dự báo?
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Tại sao Telemetry IoT thô là KHÔNG ĐỦ để Dự báo?">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ly-do-1-thieu-ngu-canh-lich-su-temporal-context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lý do 1: Thiếu ngữ cảnh Lịch sử (Temporal Context)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ly-do-2-thieu-thong-tin-ong-hoc-tuan-hoan" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lý do 2: Thiếu thông tin động học &amp; tuần hoàn
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-ac-trung-o-tre-lag-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Đặc trưng Độ trễ (Lag Features)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Đặc trưng Độ trễ (Lag Features)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#inh-nghia-co-che" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Định nghĩa &amp; Cơ chế
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vi-du-truc-quan-bang-bang-nho-k1-va-k2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ví dụ trực quan bằng Bảng nhỏ (\(k=1\) và \(k=2\)):
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#y-nghia-trong-aiot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ý nghĩa trong AIoT
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-ac-trung-cua-so-truot-rolling-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Đặc trưng Cửa sổ trượt (Rolling Features)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Đặc trưng Cửa sổ trượt (Rolling Features)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#inh-nghia-co-che_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Định nghĩa &amp; Cơ chế
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vi-du-truc-quan-bang-bang-nho-rolling-mean-voi-cua-so-w3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ví dụ trực quan bằng Bảng nhỏ (Rolling Mean với cửa sổ \(W=3\)):
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#y-nghia-trong-aiot_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ý nghĩa trong AIoT
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-ac-trung-sai-phan-delta-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Đặc trưng Sai phân (Delta Features)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Đặc trưng Sai phân (Delta Features)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#inh-nghia-co-che_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Định nghĩa &amp; Cơ chế
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vi-du-truc-quan-bang-bang-nho-delta_1-va-delta_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ví dụ trực quan bằng Bảng nhỏ (\(\Delta_1\) và \(\Delta_2\)):
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#y-nghia-trong-aiot_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ý nghĩa trong AIoT
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-ac-trung-thoi-gian-tuan-hoan-cyclic-time-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Đặc trưng Thời gian Tuần hoàn (Cyclic Time Features)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Đặc trưng Thời gian Tuần hoàn (Cyclic Time Features)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#han-che-cua-so-thuong" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hạn chế của số thường
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#giai-phap-luong-giac-sincos-projection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Giải pháp Lượng giác (Sin/Cos Projection)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vi-du-truc-quan-bang-bang-nho" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ví dụ trực quan bằng Bảng nhỏ:
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-cach-tao-nhan-target_future-bang-ky-thuat-shifting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Cách Tạo nhãn target_future bằng Kỹ thuật Shifting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Cách Tạo nhãn target_future bằng Kỹ thuật Shifting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#vi-du-truc-quan-bang-bang-nho-h1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ví dụ trực quan bằng Bảng nhỏ (\(h=1\)):
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-lam-the-nao-e-tranh-loi-ro-ri-du-lieu-tuong-lai-data-leakage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Làm thế nào để Tránh lỗi Rò rỉ Dữ liệu tương lai (Data Leakage)?
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. Làm thế nào để Tránh lỗi Rò rỉ Dữ liệu tương lai (Data Leakage)?">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#3-nguyen-tac-vang-phong-chong-data-leakage-trong-lab-4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3 Nguyên tắc Vàng phòng chống Data Leakage trong Lab 4:
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-cac-ac-trung-quan-trong-nhat-e-du-bao-ien-nang-tieu-thu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Các Đặc trưng Quan trọng nhất để Dự báo Điện năng Tiêu thụ
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-phuong-phap-mo-rong-ac-trung-cho-he-thong-aiot-thuc-te-production" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Phương pháp Mở rộng Đặc trưng cho Hệ thống AIoT Thực tế (Production)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9. Phương pháp Mở rộng Đặc trưng cho Hệ thống AIoT Thực tế (Production)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-ac-trung-tuong-tac-nhiet-interaction-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Đặc trưng Tương tác nhiệt (Interaction Features)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-ac-trung-cua-so-truot-cua-thoi-tiet-weather-rolling-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Đặc trưng Cửa sổ trượt của Thời tiết (Weather Rolling Features)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-ac-trung-lich-va-ngay-le-ac-biet-calendar-events-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Đặc trưng Lịch và Ngày lễ đặc biệt (Calendar Events Features)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-ac-trung-trang-thai-hoat-ong-thiet-bi-device-actuator-state" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Đặc trưng Trạng thái hoạt động thiết bị (Device Actuator State)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="ky-nghe-ac-trung-chuoi-thoi-gian-feature-engineering-cho-aiot">KỸ NGHỆ ĐẶC TRƯNG CHUỖI THỜI GIAN (FEATURE ENGINEERING CHO AIoT)<a class="headerlink" href="#ky-nghe-ac-trung-chuoi-thoi-gian-feature-engineering-cho-aiot" title="Permanent link">&para;</a></h1>
+<p>Trong các bài toán học máy thông thường, các bản ghi dữ liệu được coi là độc lập và có cùng phân phối (I.I.D). Tuy nhiên, dữ liệu IoT bản chất là <strong>Chuỗi thời gian (Time-series)</strong>. Các giá trị đo đạc có sự liên kết chặt chẽ và phụ thuộc nặng nề vào quá khứ. </p>
+<p>Tài liệu này giải thích chi tiết cơ chế hoạt động, công thức toán học, ví dụ trực quan bằng bảng nhỏ và ý nghĩa vận hành của các loại đặc trưng chuỗi thời gian trong <strong>Lab 4</strong>, giúp sinh viên thấu hiểu sâu sắc cách "chuẩn bị tri thức" cho mô hình trước khi dự báo.</p>
+<hr />
+<h2 id="1-tai-sao-telemetry-iot-tho-la-khong-u-e-du-bao">1. Tại sao Telemetry IoT thô là KHÔNG ĐỦ để Dự báo?<a class="headerlink" href="#1-tai-sao-telemetry-iot-tho-la-khong-u-e-du-bao" title="Permanent link">&para;</a></h2>
+<p>Nếu ta chỉ đưa các giá trị cảm biến tại thời điểm hiện tại <span class="arithmatex">\(t\)</span> vào mô hình (ví dụ: nhiệt độ bếp đang là 25°C, công suất điện đang là 80 Wh), mô hình sẽ hoàn toàn <strong>"mù lòa"</strong> trước xu hướng vận hành.</p>
+<h3 id="ly-do-1-thieu-ngu-canh-lich-su-temporal-context">Lý do 1: Thiếu ngữ cảnh Lịch sử (Temporal Context)<a class="headerlink" href="#ly-do-1-thieu-ngu-canh-lich-su-temporal-context" title="Permanent link">&para;</a></h3>
+<p>Một giá trị thô <span class="arithmatex">\(80\)</span> Wh ở hiện tại không cho mô hình biết hệ thống đang ở trạng thái nào:
+*   <em>Kịch bản A</em>: 10 phút trước là <span class="arithmatex">\(20\)</span> Wh <span class="arithmatex">\(\rightarrow\)</span> Phụ tải đang <strong>tăng vọt</strong> dữ dội (kích hoạt thiết bị công suất cao).
+*   <em>Kịch bản B</em>: 10 phút trước là <span class="arithmatex">\(300\)</span> Wh <span class="arithmatex">\(\rightarrow\)</span> Phụ tải đang <strong>lao dốc</strong> mạnh (vừa tắt thiết bị lớn).
+Nếu chỉ nhìn con số <span class="arithmatex">\(80\)</span> Wh hiện tại, mô hình sẽ đưa ra cùng một dự báo cho cả hai kịch bản trái ngược này, dẫn đến sai số rất lớn.</p>
+<h3 id="ly-do-2-thieu-thong-tin-ong-hoc-tuan-hoan">Lý do 2: Thiếu thông tin động học &amp; tuần hoàn<a class="headerlink" href="#ly-do-2-thieu-thong-tin-ong-hoc-tuan-hoan" title="Permanent link">&para;</a></h3>
+<p>Nhiệt độ phòng tăng 1°C có thể là do thời tiết bên ngoài ấm lên (từ từ), hoặc do bếp từ vừa được bật (đột ngột). Sự thiếu hụt gia tốc (sai phân) và mốc thời gian tuần hoàn (giờ cao điểm/thấp điểm) khiến các thuật toán học máy không thể phân biệt được hành vi sinh hoạt của con người.</p>
+<hr />
+<h2 id="2-ac-trung-o-tre-lag-features">2. Đặc trưng Độ trễ (Lag Features)<a class="headerlink" href="#2-ac-trung-o-tre-lag-features" title="Permanent link">&para;</a></h2>
+<h3 id="inh-nghia-co-che">Định nghĩa &amp; Cơ chế<a class="headerlink" href="#inh-nghia-co-che" title="Permanent link">&para;</a></h3>
+<p>Đặc trưng độ trễ (Lag) lấy giá trị của biến mục tiêu trong quá khứ làm đặc trưng đầu vào cho thời điểm hiện tại.
+$<span class="arithmatex">\(\text{Lag}_k(y_t) = y_{t-k}\)</span>$</p>
+<h3 id="vi-du-truc-quan-bang-bang-nho-k1-va-k2">Ví dụ trực quan bằng Bảng nhỏ (<span class="arithmatex">\(k=1\)</span> và <span class="arithmatex">\(k=2\)</span>):<a class="headerlink" href="#vi-du-truc-quan-bang-bang-nho-k1-va-k2" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Thời gian (<span class="arithmatex">\(t\)</span>)</th>
+<th style="text-align: left;">Appliances thô (<span class="arithmatex">\(y_t\)</span>)</th>
+<th style="text-align: left;">appliances_lag_1 (<span class="arithmatex">\(y_{t-1}\)</span>)</th>
+<th style="text-align: left;">appliances_lag_2 (<span class="arithmatex">\(y_{t-2}\)</span>)</th>
+<th style="text-align: left;">Ghi chú</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">12:00:00</td>
+<td style="text-align: left;"><strong>50 Wh</strong></td>
+<td style="text-align: left;">NaN</td>
+<td style="text-align: left;">NaN</td>
+<td style="text-align: left;">Chưa đủ lịch sử quá khứ.</td>
+</tr>
+<tr>
+<td style="text-align: left;">12:10:00</td>
+<td style="text-align: left;"><strong>60 Wh</strong></td>
+<td style="text-align: left;"><strong>50 Wh</strong></td>
+<td style="text-align: left;">NaN</td>
+<td style="text-align: left;"><code>lag_1</code> lấy giá trị lúc 12:00.</td>
+</tr>
+<tr>
+<td style="text-align: left;">12:20:00</td>
+<td style="text-align: left;"><strong>90 Wh</strong></td>
+<td style="text-align: left;"><strong>60 Wh</strong></td>
+<td style="text-align: left;"><strong>50 Wh</strong></td>
+<td style="text-align: left;"><code>lag_1</code> lấy 12:10, <code>lag_2</code> lấy 12:00.</td>
+</tr>
+<tr>
+<td style="text-align: left;">12:30:00</td>
+<td style="text-align: left;"><strong>80 Wh</strong></td>
+<td style="text-align: left;"><strong>90 Wh</strong></td>
+<td style="text-align: left;"><strong>60 Wh</strong></td>
+<td style="text-align: left;">Đẩy dịch chuyển tuần tự xuôi dòng.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="y-nghia-trong-aiot">Ý nghĩa trong AIoT<a class="headerlink" href="#y-nghia-trong-aiot" title="Permanent link">&para;</a></h3>
+<p>Công suất tiêu thụ điện có tính <strong>quán tính hành vi</strong>. Nếu điều hòa đang bật ở thời điểm <span class="arithmatex">\(t-1\)</span> (10 phút trước) và <span class="arithmatex">\(t-2\)</span> (20 phút trước), khả năng rất cao là nó vẫn đang tiếp tục hoạt động ở thời điểm hiện tại <span class="arithmatex">\(t\)</span>.</p>
+<hr />
+<h2 id="3-ac-trung-cua-so-truot-rolling-features">3. Đặc trưng Cửa sổ trượt (Rolling Features)<a class="headerlink" href="#3-ac-trung-cua-so-truot-rolling-features" title="Permanent link">&para;</a></h2>
+<h3 id="inh-nghia-co-che_1">Định nghĩa &amp; Cơ chế<a class="headerlink" href="#inh-nghia-co-che_1" title="Permanent link">&para;</a></h3>
+<p>Tính toán một chỉ số thống kê (trung bình hoặc độ lệch chuẩn) trên một cửa sổ thời gian trượt về quá khứ có độ rộng cố định <span class="arithmatex">\(W\)</span>.
+$<span class="arithmatex">\(\text{Rolling Mean}_W(y_t) = \frac{1}{W} \sum_{i=0}^{W-1} y_{t-i}\)</span>$</p>
+<h3 id="vi-du-truc-quan-bang-bang-nho-rolling-mean-voi-cua-so-w3">Ví dụ trực quan bằng Bảng nhỏ (Rolling Mean với cửa sổ <span class="arithmatex">\(W=3\)</span>):<a class="headerlink" href="#vi-du-truc-quan-bang-bang-nho-rolling-mean-voi-cua-so-w3" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Thời gian (<span class="arithmatex">\(t\)</span>)</th>
+<th style="text-align: left;">Appliances thô (<span class="arithmatex">\(y_t\)</span>)</th>
+<th style="text-align: left;">appliances_rolling_mean_3</th>
+<th style="text-align: left;">Phép toán tính trung vị</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">12:00:00</td>
+<td style="text-align: left;"><strong>50 Wh</strong></td>
+<td style="text-align: left;">NaN</td>
+<td style="text-align: left;">Chưa đủ 3 phần tử.</td>
+</tr>
+<tr>
+<td style="text-align: left;">12:10:00</td>
+<td style="text-align: left;"><strong>60 Wh</strong></td>
+<td style="text-align: left;">NaN</td>
+<td style="text-align: left;">Chưa đủ 3 phần tử.</td>
+</tr>
+<tr>
+<td style="text-align: left;">12:20:00</td>
+<td style="text-align: left;"><strong>100 Wh</strong></td>
+<td style="text-align: left;"><strong>70.0 Wh</strong></td>
+<td style="text-align: left;"><span class="arithmatex">\((50 + 60 + 100) / 3 = 70.0\)</span></td>
+</tr>
+<tr>
+<td style="text-align: left;">12:30:00</td>
+<td style="text-align: left;"><strong>90 Wh</strong></td>
+<td style="text-align: left;"><strong>83.3 Wh</strong></td>
+<td style="text-align: left;"><span class="arithmatex">\((60 + 100 + 90) / 3 = 83.3\)</span></td>
+</tr>
+</tbody>
+</table>
+<h3 id="y-nghia-trong-aiot_1">Ý nghĩa trong AIoT<a class="headerlink" href="#y-nghia-trong-aiot_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Rolling Mean</strong>: Lọc bỏ các đỉnh nhọn bất thường mang tính tức thời (nhiễu gai), giúp mô hình nắm bắt xu hướng nền của phụ tải trong 1 tiếng hoặc 4 tiếng gần nhất.</li>
+<li><strong>Rolling Std</strong>: Đo lường sự biến động. STD cao cho thấy các thiết bị công suất lớn đang liên tục được bật/tắt (hệ thống không ổn định).</li>
+</ul>
+<hr />
+<h2 id="4-ac-trung-sai-phan-delta-features">4. Đặc trưng Sai phân (Delta Features)<a class="headerlink" href="#4-ac-trung-sai-phan-delta-features" title="Permanent link">&para;</a></h2>
+<h3 id="inh-nghia-co-che_2">Định nghĩa &amp; Cơ chế<a class="headerlink" href="#inh-nghia-co-che_2" title="Permanent link">&para;</a></h3>
+<p>Đo lường mức độ thay đổi phụ tải điện năng so với thời điểm quá khứ cách đó <span class="arithmatex">\(k\)</span> bước:
+$<span class="arithmatex">\(\Delta_k(y_t) = y_t - y_{t-k}\)</span>$</p>
+<h3 id="vi-du-truc-quan-bang-bang-nho-delta_1-va-delta_2">Ví dụ trực quan bằng Bảng nhỏ (<span class="arithmatex">\(\Delta_1\)</span> và <span class="arithmatex">\(\Delta_2\)</span>):<a class="headerlink" href="#vi-du-truc-quan-bang-bang-nho-delta_1-va-delta_2" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Thời gian (<span class="arithmatex">\(t\)</span>)</th>
+<th style="text-align: left;">Appliances thô (<span class="arithmatex">\(y_t\)</span>)</th>
+<th style="text-align: left;">appliances_delta_1</th>
+<th style="text-align: left;">appliances_delta_2</th>
+<th style="text-align: left;">Phép toán</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">12:00:00</td>
+<td style="text-align: left;"><strong>50 Wh</strong></td>
+<td style="text-align: left;">NaN</td>
+<td style="text-align: left;">NaN</td>
+<td style="text-align: left;">Không có quá khứ đối chiếu.</td>
+</tr>
+<tr>
+<td style="text-align: left;">12:10:00</td>
+<td style="text-align: left;"><strong>60 Wh</strong></td>
+<td style="text-align: left;"><strong>+10 Wh</strong></td>
+<td style="text-align: left;">NaN</td>
+<td style="text-align: left;"><span class="arithmatex">\(60 - 50 = +10\)</span> Wh</td>
+</tr>
+<tr>
+<td style="text-align: left;">12:20:00</td>
+<td style="text-align: left;"><strong>100 Wh</strong></td>
+<td style="text-align: left;"><strong>+40 Wh</strong></td>
+<td style="text-align: left;"><strong>+50 Wh</strong></td>
+<td style="text-align: left;"><span class="arithmatex">\(\Delta_1=100-60\)</span>; <span class="arithmatex">\(\Delta_2=100-50\)</span></td>
+</tr>
+<tr>
+<td style="text-align: left;">12:30:00</td>
+<td style="text-align: left;"><strong>70 Wh</strong></td>
+<td style="text-align: left;"><strong>-30 Wh</strong></td>
+<td style="text-align: left;"><strong>+10 Wh</strong></td>
+<td style="text-align: left;">Phụ tải giảm mạnh <span class="arithmatex">\(70 - 100 = -30\)</span> Wh</td>
+</tr>
+</tbody>
+</table>
+<h3 id="y-nghia-trong-aiot_2">Ý nghĩa trong AIoT<a class="headerlink" href="#y-nghia-trong-aiot_2" title="Permanent link">&para;</a></h3>
+<p>Cung cấp <strong>gia tốc (hướng và cường độ thay đổi)</strong>. Gia trị <span class="arithmatex">\(\Delta_1\)</span> dương rất lớn cho biết một thiết bị công suất cao vừa mới được bật lên, giúp mô hình dự báo xu hướng tiếp tục tăng hoặc bão hòa tiếp theo.</p>
+<hr />
+<h2 id="5-ac-trung-thoi-gian-tuan-hoan-cyclic-time-features">5. Đặc trưng Thời gian Tuần hoàn (Cyclic Time Features)<a class="headerlink" href="#5-ac-trung-thoi-gian-tuan-hoan-cyclic-time-features" title="Permanent link">&para;</a></h2>
+<h3 id="han-che-cua-so-thuong">Hạn chế của số thường<a class="headerlink" href="#han-che-cua-so-thuong" title="Permanent link">&para;</a></h3>
+<p>Nếu biểu diễn giờ từ <span class="arithmatex">\(0\)</span> đến <span class="arithmatex">\(23\)</span>, mốc <strong>23:50</strong> (<span class="arithmatex">\(23.83\)</span>) và <strong>00:10</strong> (<span class="arithmatex">\(0.17\)</span>) về mặt số học cách nhau rất xa (<span class="arithmatex">\(|23.83 - 0.17| = 23.66\)</span>), nhưng thực tế vật lý sinh hoạt chỉ cách nhau đúng <strong>20 phút</strong>.</p>
+<h3 id="giai-phap-luong-giac-sincos-projection">Giải pháp Lượng giác (Sin/Cos Projection)<a class="headerlink" href="#giai-phap-luong-giac-sincos-projection" title="Permanent link">&para;</a></h3>
+<p>Chiếu giờ lên vòng tròn lượng giác có chu kỳ 24 giờ:
+$<span class="arithmatex">\(\theta = \frac{2\pi \cdot \text{Hour}}{24.0}, \quad x = \sin(\theta), \quad y = \cos(\theta)\)</span>$</p>
+<h3 id="vi-du-truc-quan-bang-bang-nho">Ví dụ trực quan bằng Bảng nhỏ:<a class="headerlink" href="#vi-du-truc-quan-bang-bang-nho" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Thời gian thực</th>
+<th style="text-align: left;">Giờ số thực (Hour)</th>
+<th style="text-align: left;">Góc <span class="arithmatex">\(\theta\)</span> (Radian)</th>
+<th style="text-align: left;">hour_sin (<span class="arithmatex">\(x\)</span>)</th>
+<th style="text-align: left;">hour_cos (<span class="arithmatex">\(y\)</span>)</th>
+<th style="text-align: left;">Khoảng cách hình học</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>23:50:00</strong></td>
+<td style="text-align: left;"><span class="arithmatex">\(23.83\)</span></td>
+<td style="text-align: left;"><span class="arithmatex">\(6.24\)</span> Rad</td>
+<td style="text-align: left;"><strong>-0.043</strong></td>
+<td style="text-align: left;"><strong>+0.999</strong></td>
+<td style="text-align: left;"><strong>Cực kỳ gần nhau</strong> trên vòng tròn lượng giác (Cos tiệm cận 1, Sin tiệm cận 0).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>00:00:00</strong></td>
+<td style="text-align: left;"><span class="arithmatex">\(0.00\)</span></td>
+<td style="text-align: left;"><span class="arithmatex">\(0.00\)</span> Rad</td>
+<td style="text-align: left;"><strong>0.000</strong></td>
+<td style="text-align: left;"><strong>+1.000</strong></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>00:10:00</strong></td>
+<td style="text-align: left;"><span class="arithmatex">\(0.17\)</span></td>
+<td style="text-align: left;"><span class="arithmatex">\(0.04\)</span> Rad</td>
+<td style="text-align: left;"><strong>+0.043</strong></td>
+<td style="text-align: left;"><strong>+0.999</strong></td>
+<td style="text-align: left;"></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="6-cach-tao-nhan-target_future-bang-ky-thuat-shifting">6. Cách Tạo nhãn <code>target_future</code> bằng Kỹ thuật Shifting<a class="headerlink" href="#6-cach-tao-nhan-target_future-bang-ky-thuat-shifting" title="Permanent link">&para;</a></h2>
+<p>Để biến bài toán chuỗi thời gian thành bài toán Học có giám sát, ta dịch nhãn ngược lại tương lai <span class="arithmatex">\(h\)</span> bước (Horizon Steps = 1):
+$<span class="arithmatex">\(\text{target\_future}_t = y_{t+h}\)</span>$</p>
+<h3 id="vi-du-truc-quan-bang-bang-nho-h1">Ví dụ trực quan bằng Bảng nhỏ (<span class="arithmatex">\(h=1\)</span>):<a class="headerlink" href="#vi-du-truc-quan-bang-bang-nho-h1" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Thời gian (<span class="arithmatex">\(t\)</span>)</th>
+<th style="text-align: left;">Đặc trưng hiện tại <span class="arithmatex">\(X_t\)</span> (Lag_1)</th>
+<th style="text-align: left;">Appliances thực tế (<span class="arithmatex">\(y_t\)</span>)</th>
+<th style="text-align: left;">target_future (<span class="arithmatex">\(y_{t+1}\)</span>)</th>
+<th style="text-align: left;">Cặp dữ liệu huấn luyện học máy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">12:00:00</td>
+<td style="text-align: left;">NaN</td>
+<td style="text-align: left;"><strong>50 Wh</strong></td>
+<td style="text-align: left;"><strong>60 Wh</strong></td>
+<td style="text-align: left;">(Không dùng vì đặc trưng bị NaN)</td>
+</tr>
+<tr>
+<td style="text-align: left;">12:10:00</td>
+<td style="text-align: left;">50 Wh</td>
+<td style="text-align: left;"><strong>60 Wh</strong></td>
+<td style="text-align: left;"><strong>100 Wh</strong></td>
+<td style="text-align: left;">Đầu vào: <span class="arithmatex">\([60, 50] \rightarrow\)</span> Nhãn: <strong>100</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;">12:20:00</td>
+<td style="text-align: left;">60 Wh</td>
+<td style="text-align: left;"><strong>100 Wh</strong></td>
+<td style="text-align: left;"><strong>90 Wh</strong></td>
+<td style="text-align: left;">Đầu vào: <span class="arithmatex">\([100, 60] \rightarrow\)</span> Nhãn: <strong>90</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;">12:30:00</td>
+<td style="text-align: left;">100 Wh</td>
+<td style="text-align: left;"><strong>90 Wh</strong></td>
+<td style="text-align: left;"><em>NaN</em> (chưa xảy ra)</td>
+<td style="text-align: left;">(Dòng này bị loại bỏ khỏi tập Train)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="7-lam-the-nao-e-tranh-loi-ro-ri-du-lieu-tuong-lai-data-leakage">7. Làm thế nào để Tránh lỗi Rò rỉ Dữ liệu tương lai (Data Leakage)?<a class="headerlink" href="#7-lam-the-nao-e-tranh-loi-ro-ri-du-lieu-tuong-lai-data-leakage" title="Permanent link">&para;</a></h2>
+<p>Rò rỉ dữ liệu tương lai xảy ra khi mô hình vô tình biết trước thông tin của tương lai <span class="arithmatex">\(t+1\)</span> khi đang thực hiện tính toán đặc trưng tại thời điểm <span class="arithmatex">\(t\)</span>.</p>
+<h3 id="3-nguyen-tac-vang-phong-chong-data-leakage-trong-lab-4">3 Nguyên tắc Vàng phòng chống Data Leakage trong Lab 4:<a class="headerlink" href="#3-nguyen-tac-vang-phong-chong-data-leakage-trong-lab-4" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Duy nhất dịch nhãn ngược</strong>: Chỉ duy nhất cột nhãn <code>target_future</code> được phép sử dụng shift âm (<code>.shift(-1)</code>).</li>
+<li><strong>Đặc trưng tuyệt đối không hướng tương lai</strong>: Tất cả các đặc trưng Lag, Rolling, Delta bắt buộc phải dùng shift dương hoặc trượt về quá khứ để bảo đảm mối quan hệ nhân quả vật lý:
+    $<span class="arithmatex">\(\text{Đặc trưng}_t = f(\text{Dữ\_liệu}_{\le t})\)</span>$</li>
+<li><strong>Chia dữ liệu theo mốc thời gian (Time-series Split)</strong>: Cắt bảng dữ liệu theo chiều dọc tuyến tính thời gian. Tuyệt đối không dùng <code>train_test_split(..., shuffle=True)</code> làm trộn lẫn xáo trộn các dòng dữ liệu.</li>
+</ol>
+<hr />
+<h2 id="8-cac-ac-trung-quan-trong-nhat-e-du-bao-ien-nang-tieu-thu">8. Các Đặc trưng Quan trọng nhất để Dự báo Điện năng Tiêu thụ<a class="headerlink" href="#8-cac-ac-trung-quan-trong-nhat-e-du-bao-ien-nang-tieu-thu" title="Permanent link">&para;</a></h2>
+<p>Trong quá trình phân tích huấn luyện offline, các đặc trưng được mô hình đánh giá quan trọng nhất (Feature Importances) đối với bài toán phụ tải điện bao gồm:</p>
+<ol>
+<li><strong><code>appliances_lag_1</code> và <code>appliances_lag_2</code> (Độ trễ gần nhất)</strong>: Chiếm trọng số quan trọng nhất (&gt; 60% mức độ đóng góp). Phản ánh trạng thái liền kề của thiết bị (Đang bật thì khả năng bật tiếp là cực cao).</li>
+<li><strong><code>appliances_rolling_mean_3</code> và <code>rolling_mean_6</code> (Trend ngắn hạn)</strong>: Giúp mô hình nhận biết xu thế nền đang tăng hay giảm của cả ngôi nhà.</li>
+<li><strong><code>hour_sin</code> và <code>hour_cos</code> (Chu kỳ ngày/đêm)</strong>: Xác định rõ ràng các khung giờ sinh hoạt cao điểm (18:00 - 21:00) và thấp điểm (đêm muộn).</li>
+<li><strong><code>T_out</code> và <code>RH_out</code> (Thông số thời tiết ngoài trời)</strong>: Tác động gián tiếp nhưng rất mạnh mẽ đến hoạt động của các thiết bị sưởi ấm hoặc làm mát (HVAC).</li>
+</ol>
+<hr />
+<h2 id="9-phuong-phap-mo-rong-ac-trung-cho-he-thong-aiot-thuc-te-production">9. Phương pháp Mở rộng Đặc trưng cho Hệ thống AIoT Thực tế (Production)<a class="headerlink" href="#9-phuong-phap-mo-rong-ac-trung-cho-he-thong-aiot-thuc-te-production" title="Permanent link">&para;</a></h2>
+<p>Để nâng cấp độ chính xác của mô hình lên cấp độ thương mại, ta cần bổ sung thêm 4 nhóm đặc trưng nâng cao:</p>
+<h3 id="1-ac-trung-tuong-tac-nhiet-interaction-features">1. Đặc trưng Tương tác nhiệt (Interaction Features)<a class="headerlink" href="#1-ac-trung-tuong-tac-nhiet-interaction-features" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>Mô tả</em>: Sự chênh lệch giữa nhiệt độ trong nhà và ngoài trời ảnh hưởng trực tiếp đến công suất làm lạnh của điều hòa.</li>
+<li><em>Đặc trưng mới</em>: <code>temp_diff = T_indoor - T_out</code> hoặc <code>T_out * RH_out</code> (chỉ số cảm giác nhiệt thực tế).</li>
+</ul>
+<h3 id="2-ac-trung-cua-so-truot-cua-thoi-tiet-weather-rolling-features">2. Đặc trưng Cửa sổ trượt của Thời tiết (Weather Rolling Features)<a class="headerlink" href="#2-ac-trung-cua-so-truot-cua-thoi-tiet-weather-rolling-features" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>Mô tả</em>: Ngôi nhà không phản ứng tức thời với thời tiết ngoài trời mà có quán tính hấp thụ nhiệt chậm (khoảng 1 - 2 tiếng).</li>
+<li><em>Đặc trưng mới</em>: <code>T_out_rolling_mean_6</code> (Trung bình nhiệt độ ngoài trời trong 1 tiếng trước).</li>
+</ul>
+<h3 id="3-ac-trung-lich-va-ngay-le-ac-biet-calendar-events-features">3. Đặc trưng Lịch và Ngày lễ đặc biệt (Calendar Events Features)<a class="headerlink" href="#3-ac-trung-lich-va-ngay-le-ac-biet-calendar-events-features" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>Mô tả</em>: Hành vi sử dụng điện ngày Tết, ngày nghỉ lễ quốc khánh, hoặc ngày nắng nóng kỷ lục hoàn toàn khác ngày thường.</li>
+<li><em>Đặc trưng mới</em>: <code>is_holiday</code> (nhị phân), <code>is_summer_peak</code> (khung giờ mùa hè cao điểm).</li>
+</ul>
+<h3 id="4-ac-trung-trang-thai-hoat-ong-thiet-bi-device-actuator-state">4. Đặc trưng Trạng thái hoạt động thiết bị (Device Actuator State)<a class="headerlink" href="#4-ac-trung-trang-thai-hoat-ong-thiet-bi-device-actuator-state" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>Mô tả</em>: Nếu hệ thống có kết nối thông tin phản hồi từ Smart Plug.</li>
+<li><em>Đặc trưng mới</em>: <code>hvac_state_lag_1</code> (<code>0</code> - đang tắt, <code>1</code> - đang bật), phản ánh trực tiếp sự thay đổi tải mà không cần đoán gián tiếp qua dòng điện.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Trở lại mục lục
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u0110\u00e3 sao ch\u00e9p", "clipboard.copy": "Sao ch\u00e9p v\u00e0o b\u1ed9 nh\u1edb t\u1ea1m", "search.result.more.one": "1 t\u1eeb kh\u00e1c trong trang", "search.result.more.other": "# t\u1eeb kh\u00e1c trong trang", "search.result.none": "Kh\u00f4ng t\u00ecm th\u1ea5y t\u00e0i li\u1ec7u li\u00ean quan", "search.result.one": "1 t\u00e0i li\u1ec7u li\u00ean quan", "search.result.other": "# t\u00e0i li\u1ec7u li\u00ean quan", "search.result.placeholder": "Nh\u1eadp \u0111\u1ec3 b\u1eaft \u0111\u1ea7u t\u00ecm ki\u1ebfm", "search.result.term.missing": "Kh\u00f4ng", "select.version": "Ch\u1ecdn phi\u00ean b\u1ea3n"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="../javascripts/mathjax.js"></script>
+      
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>

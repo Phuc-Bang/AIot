@@ -1,0 +1,2 @@
+dataset,model,split,mae,rmse,mape,r2,bias_pred_minus_actual,epochs_ran,hidden_size,sequence_length
+appliances,LSTM_optional,test,32.55687478383382,47.13301652538611,36.43376001117379,0.2063554332342863,-5.924076938629151,12,32,24

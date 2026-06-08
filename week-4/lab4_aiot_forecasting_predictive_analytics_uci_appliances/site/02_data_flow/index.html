@@ -1,0 +1,2138 @@
+
+<!doctype html>
+<html lang="vi" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Tài liệu kỹ thuật chuyên sâu về dự báo phụ tải điện năng và phân tích dự đoán trong hệ thống AIoT">
+      
+      
+        <meta name="author" content="DeepMind team & Antigravity AI">
+      
+      
+      
+        <link rel="prev" href="../01_architecture/">
+      
+      
+        <link rel="next" href="../03_runtime_and_dependencies/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>02. Luồng dữ liệu tuần tự - Lab 4: AIoT Energy Forecasting & Predictive Analytics</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#phan-tich-chuyen-sau-luong-luan-chuyen-va-bien-oi-du-lieu" class="md-skip">
+          Bỏ qua
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Đầu trang">
+    <a href=".." title="Lab 4: AIoT Energy Forecasting &amp; Predictive Analytics" class="md-header__button md-logo" aria-label="Lab 4: AIoT Energy Forecasting & Predictive Analytics" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Lab 4: AIoT Energy Forecasting & Predictive Analytics
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              02. Luồng dữ liệu tuần tự
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Chuyển sang chế độ Dark Mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Chuyển sang chế độ Dark Mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Chuyển sang chế độ Light Mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Chuyển sang chế độ Light Mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Tìm kiếm" placeholder="Tìm kiếm" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Tìm kiếm">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Xoá" aria-label="Xoá" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Trang chủ
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../00_project_overview/" class="md-tabs__link">
+          
+  
+  
+  Học phần I: Tổng quan & Kiến trúc
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../04_dataset_and_schema/" class="md-tabs__link">
+          
+  
+  
+  Học phần II: Dữ liệu & Đặc trưng
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../06_model_training_and_metrics/" class="md-tabs__link">
+          
+  
+  
+  Học phần III: Mô hình & API Serving
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../09_code_review/" class="md-tabs__link">
+          
+  
+  
+  Học phần IV: Chất lượng mã & An toàn
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../11_development_roadmap/" class="md-tabs__link">
+          
+  
+  
+  Học phần V: Lộ trình & Handbook
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../README_HTML_EXPORT/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Hướng dẫn xuất bản HTML
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../README_MKDOCS/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Hướng dẫn cấu hình MkDocs
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Thanh điều hướng" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Lab 4: AIoT Energy Forecasting &amp; Predictive Analytics" class="md-nav__button md-logo" aria-label="Lab 4: AIoT Energy Forecasting & Predictive Analytics" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Lab 4: AIoT Energy Forecasting & Predictive Analytics
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Trang chủ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Học phần I: Tổng quan & Kiến trúc
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Học phần I: Tổng quan & Kiến trúc
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../00_project_overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    00. Tổng quan bài toán
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../01_architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    01. Kiến trúc hệ thống
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    02. Luồng dữ liệu tuần tự
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    02. Luồng dữ liệu tuần tự
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Mục lục">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Mục lục
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-so-o-luong-bien-oi-tuan-tu-sequential-data-flow-chart" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Sơ đồ Luồng Biến đổi Tuần tự (Sequential Data Flow Chart)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-bang-theo-doi-san-pham-trung-gian-table-of-intermediate-artifacts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Bảng Theo dõi Sản phẩm Trung gian (Table of Intermediate Artifacts)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-mo-ta-chi-tiet-tung-buoc-bien-oi-inputs-outputs-explanation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Mô tả Chi tiết Từng Bước Biến đổi (Inputs &amp; Outputs Explanation)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Mô tả Chi tiết Từng Bước Biến đổi (Inputs &amp; Outputs Explanation)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#buoc-1-raw-csv-on-disk-du-lieu-tho-luu-tren-ia" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bước 1: Raw CSV on Disk (Dữ liệu thô lưu trên đĩa)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#buoc-2-load_dataset-nap-va-chuan-hoa-co-ban" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bước 2: load_dataset (Nạp và chuẩn hóa cơ bản)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#buoc-3-clean_supervised_frame-loc-sach-dataframe-tho" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bước 3: clean_supervised_frame (Lọc sạch DataFrame thô)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#buoc-4-create-time-features-ky-nghe-ac-trung-thoi-gian-tuan-hoan" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bước 4: create time features (Kỹ nghệ đặc trưng thời gian tuần hoàn)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#buoc-5-create-lag-features-tao-ac-trung-tre-lich-su" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bước 5: create lag features (Tạo đặc trưng trễ lịch sử)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#buoc-6-create-rolling-features-tao-ac-trung-cua-so-truot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bước 6: create rolling features (Tạo đặc trưng cửa sổ trượt)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#buoc-7-create-delta-features-tao-ac-trung-sai-phan-gia-toc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bước 7: create delta features (Tạo đặc trưng sai phân gia tốc)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#buoc-8-create-target_future-thiet-lap-nhan-hoc-co-giam-sat" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bước 8: create target_future (Thiết lập nhãn học có giám sát)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#buoc-9-drop-invalid-rows-loai-bo-cac-dong-khuyet-thieu-bien" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bước 9: drop invalid rows (Loại bỏ các dòng khuyết thiếu biên)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#buoc-10-traintest-split-by-time-phan-tach-du-lieu-khong-ro-ri" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bước 10: train/test split by time (Phân tách dữ liệu không rò rỉ)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#buoc-11-train-models-offline-huan-luyen-va-ong-goi-mo-hinh" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bước 11: train models offline (Huấn luyện và đóng gói mô hình)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#buoc-12-generate-predictions-suy-dien-tren-tap-kiem-thu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bước 12: generate predictions (Suy diễn trên tập kiểm thử)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#buoc-13-calculate-forecast_error-anh-gia-sai-so-thuc-te" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bước 13: calculate forecast_error (Đánh giá sai số thực tế)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#buoc-14-create-forecast_logcsv-ghi-nhat-ky-he-thong" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bước 14: create forecast_log.csv (Ghi nhật ký hệ thống)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#buoc-15-serve-prediction-through-forecast-api-quy-trinh-api-thoi-gian-thuc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bước 15: serve prediction through /forecast API (Quy trình API thời gian thực)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-cac-loi-pho-bien-cam-nang-go-loi-common-mistakes-debugging" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Các lỗi Phổ biến &amp; Cẩm nang Gỡ lỗi (Common Mistakes &amp; Debugging)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Các lỗi Phổ biến &amp; Cẩm nang Gỡ lỗi (Common Mistakes &amp; Debugging)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#loi-1-keyerror-khi-goi-api-forecast-do-thieu-cot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lỗi 1: KeyError khi gọi API /forecast do thiếu cột
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#loi-2-gia-tri-du-bao-tra-ve-nan-hoac-null-o-thoi-gian-thuc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lỗi 2: Giá trị Dự báo trả về NaN hoặc Null ở thời gian thực
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#loi-3-sai-so-maermse-cuc-thap-khi-huan-luyen-nhung-cuc-cao-khi-chay-api-thuc-te" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lỗi 3: Sai số MAE/RMSE cực thấp khi huấn luyện nhưng cực cao khi chạy API thực tế
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#loi-4-loi-inh-dang-moc-thoi-gian-date-khi-tao-dataframe" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lỗi 4: Lỗi định dạng mốc thời gian date khi tạo DataFrame
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03_runtime_and_dependencies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    03. Luồng thực thi & Phụ thuộc
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Học phần II: Dữ liệu & Đặc trưng
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Học phần II: Dữ liệu & Đặc trưng
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04_dataset_and_schema/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    04. Tập dữ liệu & Điền khuyết
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../05_feature_engineering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    05. Kỹ nghệ đặc trưng chuỗi thời gian
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Học phần III: Mô hình & API Serving
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Học phần III: Mô hình & API Serving
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../06_model_training_and_metrics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    06. Mô hình hóa & Đo lường sai số
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../07_decision_layer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    07. Tầng ra quyết định & Cảnh báo
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../08_api_forecast_workflow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    08. Triển khai FastAPI Serving
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Học phần IV: Chất lượng mã & An toàn
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Học phần IV: Chất lượng mã & An toàn
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../09_code_review/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    09. Đánh giá chất lượng mã nguồn
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../10_safety_fail_safe/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    10. An toàn & Cơ chế Fail-safe
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Học phần V: Lộ trình & Handbook
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Học phần V: Lộ trình & Handbook
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../11_development_roadmap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    11. Lộ trình phát triển
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../HANDBOOK/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📖 Sách hướng dẫn kỹ thuật (Handbook)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../README_HTML_EXPORT/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hướng dẫn xuất bản HTML
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../README_MKDOCS/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hướng dẫn cấu hình MkDocs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Mục lục">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Mục lục
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-so-o-luong-bien-oi-tuan-tu-sequential-data-flow-chart" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Sơ đồ Luồng Biến đổi Tuần tự (Sequential Data Flow Chart)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-bang-theo-doi-san-pham-trung-gian-table-of-intermediate-artifacts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Bảng Theo dõi Sản phẩm Trung gian (Table of Intermediate Artifacts)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-mo-ta-chi-tiet-tung-buoc-bien-oi-inputs-outputs-explanation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Mô tả Chi tiết Từng Bước Biến đổi (Inputs &amp; Outputs Explanation)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Mô tả Chi tiết Từng Bước Biến đổi (Inputs &amp; Outputs Explanation)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#buoc-1-raw-csv-on-disk-du-lieu-tho-luu-tren-ia" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bước 1: Raw CSV on Disk (Dữ liệu thô lưu trên đĩa)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#buoc-2-load_dataset-nap-va-chuan-hoa-co-ban" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bước 2: load_dataset (Nạp và chuẩn hóa cơ bản)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#buoc-3-clean_supervised_frame-loc-sach-dataframe-tho" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bước 3: clean_supervised_frame (Lọc sạch DataFrame thô)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#buoc-4-create-time-features-ky-nghe-ac-trung-thoi-gian-tuan-hoan" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bước 4: create time features (Kỹ nghệ đặc trưng thời gian tuần hoàn)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#buoc-5-create-lag-features-tao-ac-trung-tre-lich-su" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bước 5: create lag features (Tạo đặc trưng trễ lịch sử)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#buoc-6-create-rolling-features-tao-ac-trung-cua-so-truot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bước 6: create rolling features (Tạo đặc trưng cửa sổ trượt)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#buoc-7-create-delta-features-tao-ac-trung-sai-phan-gia-toc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bước 7: create delta features (Tạo đặc trưng sai phân gia tốc)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#buoc-8-create-target_future-thiet-lap-nhan-hoc-co-giam-sat" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bước 8: create target_future (Thiết lập nhãn học có giám sát)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#buoc-9-drop-invalid-rows-loai-bo-cac-dong-khuyet-thieu-bien" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bước 9: drop invalid rows (Loại bỏ các dòng khuyết thiếu biên)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#buoc-10-traintest-split-by-time-phan-tach-du-lieu-khong-ro-ri" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bước 10: train/test split by time (Phân tách dữ liệu không rò rỉ)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#buoc-11-train-models-offline-huan-luyen-va-ong-goi-mo-hinh" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bước 11: train models offline (Huấn luyện và đóng gói mô hình)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#buoc-12-generate-predictions-suy-dien-tren-tap-kiem-thu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bước 12: generate predictions (Suy diễn trên tập kiểm thử)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#buoc-13-calculate-forecast_error-anh-gia-sai-so-thuc-te" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bước 13: calculate forecast_error (Đánh giá sai số thực tế)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#buoc-14-create-forecast_logcsv-ghi-nhat-ky-he-thong" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bước 14: create forecast_log.csv (Ghi nhật ký hệ thống)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#buoc-15-serve-prediction-through-forecast-api-quy-trinh-api-thoi-gian-thuc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bước 15: serve prediction through /forecast API (Quy trình API thời gian thực)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-cac-loi-pho-bien-cam-nang-go-loi-common-mistakes-debugging" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Các lỗi Phổ biến &amp; Cẩm nang Gỡ lỗi (Common Mistakes &amp; Debugging)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Các lỗi Phổ biến &amp; Cẩm nang Gỡ lỗi (Common Mistakes &amp; Debugging)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#loi-1-keyerror-khi-goi-api-forecast-do-thieu-cot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lỗi 1: KeyError khi gọi API /forecast do thiếu cột
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#loi-2-gia-tri-du-bao-tra-ve-nan-hoac-null-o-thoi-gian-thuc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lỗi 2: Giá trị Dự báo trả về NaN hoặc Null ở thời gian thực
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#loi-3-sai-so-maermse-cuc-thap-khi-huan-luyen-nhung-cuc-cao-khi-chay-api-thuc-te" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lỗi 3: Sai số MAE/RMSE cực thấp khi huấn luyện nhưng cực cao khi chạy API thực tế
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#loi-4-loi-inh-dang-moc-thoi-gian-date-khi-tao-dataframe" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lỗi 4: Lỗi định dạng mốc thời gian date khi tạo DataFrame
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="phan-tich-chuyen-sau-luong-luan-chuyen-va-bien-oi-du-lieu">PHÂN TÍCH CHUYÊN SÂU LUỒNG LUÂN CHUYỂN VÀ BIẾN ĐỔI DỮ LIỆU<a class="headerlink" href="#phan-tich-chuyen-sau-luong-luan-chuyen-va-bien-oi-du-lieu" title="Permanent link">&para;</a></h1>
+<p>Trong một hệ thống AIoT Dự báo chuỗi thời gian, dữ liệu không ở trạng thái tĩnh. Nó là một dòng chảy liên tục, trải qua hàng loạt các bước lọc, làm sạch, tính toán đặc trưng động, phân tách thời gian và suy diễn mô hình để cuối cùng trở thành các quyết định vận hành thời gian thực.</p>
+<p>Tài liệu này phân tích chi tiết quy trình <strong>15 bước biến đổi tuần tự của dòng dữ liệu</strong> trong dự án <strong>Lab 4</strong>, cung cấp sơ đồ luồng dữ liệu chuẩn tắc, bảng theo dõi các sản phẩm trung gian, giải thích chi tiết đầu vào/đầu ra và cẩm nang xử lý lỗi thực tế.</p>
+<hr />
+<h2 id="1-so-o-luong-bien-oi-tuan-tu-sequential-data-flow-chart">1. Sơ đồ Luồng Biến đổi Tuần tự (Sequential Data Flow Chart)<a class="headerlink" href="#1-so-o-luong-bien-oi-tuan-tu-sequential-data-flow-chart" title="Permanent link">&para;</a></h2>
+<p>Dưới đây là sơ đồ chi tiết biểu diễn hành trình 15 bước của dòng dữ liệu trong hệ thống Lab 4:</p>
+<pre class="mermaid"><code>flowchart TD
+    A[1. Raw CSV on Disk] --&gt; B[2. load_dataset]
+    B --&gt; C[3. clean_supervised_frame]
+    C --&gt; D[4. create time features]
+    D --&gt; E[5. create lag features]
+    E --&gt; F[6. create rolling features]
+    F --&gt; G[7. create delta features]
+    G --&gt; H[8. create target_future]
+    H --&gt; I[9. drop invalid rows]
+    I --&gt; J[10. train/test split by time]
+    J --&gt;|75% Train Data| K[11. train models offline]
+    J --&gt;|25% Test Data| L[12. generate predictions]
+    L --&gt; M[13. calculate forecast_error]
+    M --&gt; N[14. create forecast_log.csv]
+    K --&gt;|Export joblib bundle| O[15. serve through FastAPI /forecast API]
+    N --&gt;|Auditing/Historical Logs| O</code></pre>
+<hr />
+<h2 id="2-bang-theo-doi-san-pham-trung-gian-table-of-intermediate-artifacts">2. Bảng Theo dõi Sản phẩm Trung gian (Table of Intermediate Artifacts)<a class="headerlink" href="#2-bang-theo-doi-san-pham-trung-gian-table-of-intermediate-artifacts" title="Permanent link">&para;</a></h2>
+<p>Mỗi bước biến đổi trong pipeline tạo ra các cấu trúc dữ liệu trung gian với số lượng cột và dòng thay đổi rõ rệt. Dưới đây là bảng thống kê chi tiết giúp kỹ sư dễ dàng kiểm soát dòng chảy:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Bước</th>
+<th style="text-align: left;">Cấu phần / Hàm</th>
+<th style="text-align: left;">Loại dữ liệu / Sản phẩm</th>
+<th style="text-align: left;">Định dạng vật lý</th>
+<th style="text-align: left;">Số cột chính</th>
+<th style="text-align: left;">Ghi chú &amp; Trạng thái thay đổi dữ liệu</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>1</strong></td>
+<td style="text-align: left;">Thư mục <code>data/</code></td>
+<td style="text-align: left;">Dữ liệu thô ban đầu</td>
+<td style="text-align: left;">File <code>.csv</code></td>
+<td style="text-align: left;">29 cột</td>
+<td style="text-align: left;">Chứa dữ liệu gốc UCI hoặc fallback sample.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>2</strong></td>
+<td style="text-align: left;"><code>load_dataset()</code></td>
+<td style="text-align: left;">DataFrame gốc chuẩn hóa</td>
+<td style="text-align: left;">Pandas DataFrame</td>
+<td style="text-align: left;">29 cột</td>
+<td style="text-align: left;">Cột <code>date</code> chuyển sang datetime64, sắp xếp, xóa trùng.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>3</strong></td>
+<td style="text-align: left;"><code>clean_supervised_frame</code></td>
+<td style="text-align: left;">DataFrame cơ sở sạch</td>
+<td style="text-align: left;">Pandas DataFrame</td>
+<td style="text-align: left;">29 cột</td>
+<td style="text-align: left;">Đảm bảo đủ cột, điền NaN nếu thiếu, ép kiểu numeric.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>4</strong></td>
+<td style="text-align: left;"><code>add_time_features()</code></td>
+<td style="text-align: left;">DataFrame bổ sung mốc giờ</td>
+<td style="text-align: left;">Pandas DataFrame</td>
+<td style="text-align: left;">37 cột</td>
+<td style="text-align: left;">Thêm 8 cột: <code>hour</code>, <code>dayofweek</code>, <code>month</code>, <code>is_weekend</code>, và 4 cột sin/cos.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>5</strong></td>
+<td style="text-align: left;"><code>add_lag_rolling_features</code></td>
+<td style="text-align: left;">DataFrame đặc trưng trễ</td>
+<td style="text-align: left;">Pandas DataFrame</td>
+<td style="text-align: left;">43 cột</td>
+<td style="text-align: left;">Thêm 6 cột đặc trưng trễ <code>appliances_lag_1</code> đến <code>lag_24</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>6</strong></td>
+<td style="text-align: left;"><code>add_lag_rolling_features</code></td>
+<td style="text-align: left;">DataFrame đặc trưng trượt</td>
+<td style="text-align: left;">Pandas DataFrame</td>
+<td style="text-align: left;">49 cột</td>
+<td style="text-align: left;">Thêm 6 cột đặc trưng cửa sổ trượt (Rolling Mean &amp; Rolling Std).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>7</strong></td>
+<td style="text-align: left;"><code>add_lag_rolling_features</code></td>
+<td style="text-align: left;">DataFrame đặc trưng sai phân</td>
+<td style="text-align: left;">Pandas DataFrame</td>
+<td style="text-align: left;">52 cột</td>
+<td style="text-align: left;">Thêm 3 cột sai phân vi phân <code>appliances_delta_1</code> đến <code>delta_6</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>8</strong></td>
+<td style="text-align: left;"><code>make_supervised_frame</code></td>
+<td style="text-align: left;">DataFrame học có giám sát</td>
+<td style="text-align: left;">Pandas DataFrame</td>
+<td style="text-align: left;">53 cột</td>
+<td style="text-align: left;">Thêm cột nhãn dịch chuyển tương lai <code>target_future</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>9</strong></td>
+<td style="text-align: left;"><code>clean_supervised_frame</code></td>
+<td style="text-align: left;">Ma trận đặc trưng không trống</td>
+<td style="text-align: left;">Pandas DataFrame</td>
+<td style="text-align: left;">53 cột</td>
+<td style="text-align: left;"><strong>[QUAN TRỌNG]</strong> Xóa bỏ các dòng NaN ở đầu chuỗi (thiếu Lag) và cuối chuỗi (thiếu nhãn).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>10</strong></td>
+<td style="text-align: left;"><code>time_split()</code></td>
+<td style="text-align: left;">Tập Train &amp; Test</td>
+<td style="text-align: left;">2x DataFrame</td>
+<td style="text-align: left;">53 cột</td>
+<td style="text-align: left;">Phân cắt theo tỷ lệ tuyến tính 75% quá khứ, 25% tương lai.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>11</strong></td>
+<td style="text-align: left;"><code>train_forecasting_models</code></td>
+<td style="text-align: left;">Trọng số / Cây quyết định học</td>
+<td style="text-align: left;">File <code>.joblib</code></td>
+<td style="text-align: left;">N/A</td>
+<td style="text-align: left;">Đóng gói mô hình tối ưu nhất kèm bộ Medians.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>12</strong></td>
+<td style="text-align: left;"><code>model.predict()</code></td>
+<td style="text-align: left;">Mảng giá trị dự báo</td>
+<td style="text-align: left;">NumPy Array</td>
+<td style="text-align: left;">1 cột</td>
+<td style="text-align: left;">Dự đoán lượng điện tiêu thụ Wh của tập kiểm thử.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>13</strong></td>
+<td style="text-align: left;"><code>regression_metrics()</code></td>
+<td style="text-align: left;">Mảng sai số tuyệt đối</td>
+<td style="text-align: left;">NumPy Array</td>
+<td style="text-align: left;">1 cột</td>
+<td style="text-align: left;">Độ lệch <code>predicted_value - actual_value</code> phục vụ đánh giá.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>14</strong></td>
+<td style="text-align: left;"><code>build_forecast_log()</code></td>
+<td style="text-align: left;">Bảng nhật ký vận hành</td>
+<td style="text-align: left;">File <code>.csv</code></td>
+<td style="text-align: left;">9 cột</td>
+<td style="text-align: left;">Lưu tại <code>outputs/forecast_log.csv</code> gồm timestamp, dự báo, rủi ro, khuyến nghị.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>15</strong></td>
+<td style="text-align: left;"><code>app.py</code></td>
+<td style="text-align: left;">Gói tin phản hồi JSON</td>
+<td style="text-align: left;">JSON Payload</td>
+<td style="text-align: left;">N/A</td>
+<td style="text-align: left;">Trả kết quả dự báo, rủi ro, khuyến nghị và safety note về Client.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="3-mo-ta-chi-tiet-tung-buoc-bien-oi-inputs-outputs-explanation">3. Mô tả Chi tiết Từng Bước Biến đổi (Inputs &amp; Outputs Explanation)<a class="headerlink" href="#3-mo-ta-chi-tiet-tung-buoc-bien-oi-inputs-outputs-explanation" title="Permanent link">&para;</a></h2>
+<h3 id="buoc-1-raw-csv-on-disk-du-lieu-tho-luu-tren-ia">Bước 1: Raw CSV on Disk (Dữ liệu thô lưu trên đĩa)<a class="headerlink" href="#buoc-1-raw-csv-on-disk-du-lieu-tho-luu-tren-ia" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Đầu vào</strong>: Tệp CSV thô chứa các hàng telemetry thu thập từ cảm biến vật lý.</li>
+<li><strong>Đầu ra</strong>: File lưu trữ vật lý tại <code>data/energydata_complete.csv</code>.</li>
+<li><strong>Mô tả</strong>: Dữ liệu có thể bị thiếu dòng, sai định dạng cột, hoặc các mốc thời gian bị xáo trộn do lỗi mạng khi lưu file.</li>
+</ul>
+<h3 id="buoc-2-load_dataset-nap-va-chuan-hoa-co-ban">Bước 2: load_dataset (Nạp và chuẩn hóa cơ bản)<a class="headerlink" href="#buoc-2-load_dataset-nap-va-chuan-hoa-co-ban" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Đầu vào</strong>: Đường dẫn file CSV thô.</li>
+<li><strong>Đầu ra</strong>: Pandas DataFrame đã được định dạng và sắp xếp tuần tự theo thời gian.</li>
+<li><strong>Mô tả</strong>: Ép kiểu cột thời gian, thực hiện sắp xếp <code>sort_values("date")</code> và xóa bản ghi trùng lặp mốc giờ để chuẩn bị trục thời gian sạch.</li>
+</ul>
+<h3 id="buoc-3-clean_supervised_frame-loc-sach-dataframe-tho">Bước 3: clean_supervised_frame (Lọc sạch DataFrame thô)<a class="headerlink" href="#buoc-3-clean_supervised_frame-loc-sach-dataframe-tho" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Đầu vào</strong>: DataFrame đã sắp xếp.</li>
+<li><strong>Đầu ra</strong>: DataFrame sạch, bảo đảm đầy đủ cấu trúc cột.</li>
+<li><strong>Mô tả</strong>: Nếu có bất kỳ cột cảm biến tùy chọn nào bị thiếu, hàm tự động tạo cột đó và điền giá trị <code>NaN</code> (tránh lỗi KeyError trong các bước sau).</li>
+</ul>
+<h3 id="buoc-4-create-time-features-ky-nghe-ac-trung-thoi-gian-tuan-hoan">Bước 4: create time features (Kỹ nghệ đặc trưng thời gian tuần hoàn)<a class="headerlink" href="#buoc-4-create-time-features-ky-nghe-ac-trung-thoi-gian-tuan-hoan" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Đầu vào</strong>: DataFrame thô sạch.</li>
+<li><strong>Đầu ra</strong>: DataFrame bổ sung thêm 8 đặc trưng thời gian lượng giác.</li>
+<li><strong>Mô tả</strong>: Tính toán giờ trong ngày, ngày trong tuần, tháng trong năm và chuyển đổi giờ/ngày sang tọa độ lượng giác sin/cos để bảo toàn khoảng cách thời gian vật lý.</li>
+</ul>
+<h3 id="buoc-5-create-lag-features-tao-ac-trung-tre-lich-su">Bước 5: create lag features (Tạo đặc trưng trễ lịch sử)<a class="headerlink" href="#buoc-5-create-lag-features-tao-ac-trung-tre-lich-su" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Đầu vào</strong>: DataFrame mốc giờ.</li>
+<li><strong>Đầu ra</strong>: DataFrame thêm 6 cột đặc trưng trễ <code>appliances_lag_k</code> (<span class="arithmatex">\(k \in [1, 2, 3, 6, 12, 24]\)</span>).</li>
+<li><strong>Mô tả</strong>: Sử dụng hàm dịch chuyển xuôi <code>.shift(k)</code> của Pandas để lấy giá trị phụ tải điện của quá khứ làm đặc trưng đầu vào cho thời điểm hiện tại.</li>
+</ul>
+<h3 id="buoc-6-create-rolling-features-tao-ac-trung-cua-so-truot">Bước 6: create rolling features (Tạo đặc trưng cửa sổ trượt)<a class="headerlink" href="#buoc-6-create-rolling-features-tao-ac-trung-cua-so-truot" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Đầu vào</strong>: DataFrame đặc trưng trễ.</li>
+<li><strong>Đầu ra</strong>: DataFrame thêm 6 cột trung bình trượt và độ lệch chuẩn trượt.</li>
+<li><strong>Mô tả</strong>: Tính toán thống kê trên cửa sổ thời gian trượt về quá khứ qua hàm <code>.rolling(window=W).mean()</code> và <code>.std()</code>.</li>
+</ul>
+<h3 id="buoc-7-create-delta-features-tao-ac-trung-sai-phan-gia-toc">Bước 7: create delta features (Tạo đặc trưng sai phân gia tốc)<a class="headerlink" href="#buoc-7-create-delta-features-tao-ac-trung-sai-phan-gia-toc" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Đầu vào</strong>: DataFrame đặc trưng trượt.</li>
+<li><strong>Đầu ra</strong>: DataFrame thêm 3 cột delta thay đổi.</li>
+<li><strong>Mô tả</strong>: Tính toán mức độ chênh lệch phụ tải so với các mốc trước đó qua hàm <code>.diff(lag)</code>.</li>
+</ul>
+<h3 id="buoc-8-create-target_future-thiet-lap-nhan-hoc-co-giam-sat">Bước 8: create target_future (Thiết lập nhãn học có giám sát)<a class="headerlink" href="#buoc-8-create-target_future-thiet-lap-nhan-hoc-co-giam-sat" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Đầu vào</strong>: DataFrame đầy đủ đặc trưng đầu vào.</li>
+<li><strong>Đầu ra</strong>: DataFrame thêm cột nhãn mục tiêu tương lai <code>target_future</code>.</li>
+<li><strong>Mô tả</strong>: Dịch ngược âm cột phụ tải: <code>target_future = Appliances.shift(-horizon_steps)</code> (đặt <span class="arithmatex">\(h=1\)</span>, đoán trước 10 phút).</li>
+</ul>
+<h3 id="buoc-9-drop-invalid-rows-loai-bo-cac-dong-khuyet-thieu-bien">Bước 9: drop invalid rows (Loại bỏ các dòng khuyết thiếu biên)<a class="headerlink" href="#buoc-9-drop-invalid-rows-loai-bo-cac-dong-khuyet-thieu-bien" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Đầu vào</strong>: DataFrame giám sát thô.</li>
+<li><strong>Đầu ra</strong>: DataFrame sạch hoàn toàn không chứa bất kỳ giá trị <code>NaN</code> nào.</li>
+<li><strong>Mô tả</strong>: <ul>
+<li>24 dòng đầu chuỗi thời gian sẽ bị rỗng (<code>NaN</code>) ở các cột Lag/Rolling lớn do chưa đủ lịch sử quá khứ.</li>
+<li>1 dòng cuối chuỗi sẽ bị rỗng ở cột <code>target_future</code> do chưa có thực tế tương lai của mốc tiếp theo.</li>
+<li>Hàm <code>clean_supervised_frame</code> thực hiện loại bỏ triệt để các dòng khuyết này để chuẩn bị ma trận toán học sạch huấn luyện mô hình.</li>
+</ul>
+</li>
+</ul>
+<h3 id="buoc-10-traintest-split-by-time-phan-tach-du-lieu-khong-ro-ri">Bước 10: train/test split by time (Phân tách dữ liệu không rò rỉ)<a class="headerlink" href="#buoc-10-traintest-split-by-time-phan-tach-du-lieu-khong-ro-ri" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Đầu vào</strong>: DataFrame sạch hoàn toàn.</li>
+<li><strong>Đầu ra</strong>: Hai DataFrame độc lập: <code>train_df</code> (<span class="arithmatex">\(75\%\)</span> dòng quá khứ) và <code>test_df</code> (<span class="arithmatex">\(25\%\)</span> dòng tương lai).</li>
+<li><strong>Mô tả</strong>: Phân chia theo dòng thời gian tuyến tính để ngăn ngừa triệt để hiện tượng rò rỉ thông tin tương lai về quá khứ.</li>
+</ul>
+<h3 id="buoc-11-train-models-offline-huan-luyen-va-ong-goi-mo-hinh">Bước 11: train models offline (Huấn luyện và đóng gói mô hình)<a class="headerlink" href="#buoc-11-train-models-offline-huan-luyen-va-ong-goi-mo-hinh" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Đầu vào</strong>: Ma trận đặc trưng <code>X_train</code> và nhãn <code>y_train</code>.</li>
+<li><strong>Đầu ra</strong>: Tệp bundle nén <code>forecast_model_bundle_v1.joblib</code> lưu trữ mô hình tốt nhất cùng bộ Medians hỗ trợ điền khuyết thiếu trực tuyến.</li>
+<li><strong>Mô tả</strong>: Huấn luyện đồng thời các mô hình, so sánh tìm ra mô hình có MAE nhỏ nhất trên tập kiểm thử để đóng gói phục vụ sản xuất.</li>
+</ul>
+<h3 id="buoc-12-generate-predictions-suy-dien-tren-tap-kiem-thu">Bước 12: generate predictions (Suy diễn trên tập kiểm thử)<a class="headerlink" href="#buoc-12-generate-predictions-suy-dien-tren-tap-kiem-thu" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Đầu vào</strong>: Ma trận kiểm thử <code>X_test</code> và mô hình đã huấn luyện.</li>
+<li><strong>Đầu ra</strong>: Mảng NumPy chứa giá trị công suất dự báo <code>predicted_value</code> cho toàn bộ tập kiểm thử.</li>
+<li><strong>Mô tả</strong>: Chạy phương thức <code>model.predict(X_test)</code> để giả lập hoạt động suy diễn thực tế ngoại tuyến.</li>
+</ul>
+<h3 id="buoc-13-calculate-forecast_error-anh-gia-sai-so-thuc-te">Bước 13: calculate forecast_error (Đánh giá sai số thực tế)<a class="headerlink" href="#buoc-13-calculate-forecast_error-anh-gia-sai-so-thuc-te" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Đầu vào</strong>: Mảng dự báo <code>predicted_value</code> và mảng nhãn thực tế <code>target_future</code> của tập kiểm thử.</li>
+<li><strong>Đầu ra</strong>: Mảng sai số tức thời <code>forecast_error</code> và giá trị tuyệt đối sai số <code>abs_error</code>.</li>
+<li><strong>Mô tả</strong>: Phép tính trừ: <span class="arithmatex">\(\text{Error} = \text{Predicted} - \text{Actual}\)</span>.</li>
+</ul>
+<h3 id="buoc-14-create-forecast_logcsv-ghi-nhat-ky-he-thong">Bước 14: create forecast_log.csv (Ghi nhật ký hệ thống)<a class="headerlink" href="#buoc-14-create-forecast_logcsv-ghi-nhat-ky-he-thong" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Đầu vào</strong>: DataFrame kiểm thử và mảng giá trị dự báo kèm rủi ro/khuyến nghị đã ánh xạ.</li>
+<li><strong>Đầu ra</strong>: Tệp nhật ký lưu trữ tại <code>outputs/forecast_log.csv</code>.</li>
+<li><strong>Mô tả</strong>: Lưu trữ vĩnh viễn mốc thời gian, giá trị thực tế, giá trị dự báo, sai số, cấp rủi ro, khuyến nghị và phiên bản mô hình để phục vụ giám sát và hậu kiểm.</li>
+</ul>
+<h3 id="buoc-15-serve-prediction-through-forecast-api-quy-trinh-api-thoi-gian-thuc">Bước 15: serve prediction through /forecast API (Quy trình API thời gian thực)<a class="headerlink" href="#buoc-15-serve-prediction-through-forecast-api-quy-trinh-api-thoi-gian-thuc" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Đầu vào</strong>: Client gửi gói tin HTTP POST chứa mảng JSON gồm 24 điểm telemetry gần nhất.</li>
+<li><strong>Đầu ra</strong>: Gói tin JSON trả về chứa kết quả suy diễn của mô hình tốt nhất, phân cấp rủi ro, khuyến nghị vận hành và safety note.</li>
+<li><strong>Mô tả</strong>: FastAPI Server nạp file <code>.joblib</code> vào RAM, tiếp nhận payload từ Client, thực thi tuần tự các bước điền khuyết dữ liệu thô, tính đặc trưng động thời gian thực tại mốc hiện tại <span class="arithmatex">\(t\)</span>, chuyển ma trận qua mô hình suy diễn và trả kết quả phản hồi an toàn trong &lt; 50ms.</li>
+</ul>
+<hr />
+<h2 id="4-cac-loi-pho-bien-cam-nang-go-loi-common-mistakes-debugging">4. Các lỗi Phổ biến &amp; Cẩm nang Gỡ lỗi (Common Mistakes &amp; Debugging)<a class="headerlink" href="#4-cac-loi-pho-bien-cam-nang-go-loi-common-mistakes-debugging" title="Permanent link">&para;</a></h2>
+<p>Khi vận hành hoặc phát triển thêm hệ thống, kỹ sư thường gặp phải một số lỗi hệ thống kinh điển dưới đây:</p>
+<h3 id="loi-1-keyerror-khi-goi-api-forecast-do-thieu-cot">Lỗi 1: KeyError khi gọi API <code>/forecast</code> do thiếu cột<a class="headerlink" href="#loi-1-keyerror-khi-goi-api-forecast-do-thieu-cot" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Hiện tượng</strong>: Khi gọi API dự báo thời gian thực, Server trả về lỗi <code>500 Internal Server Error</code> và terminal log báo lỗi <code>KeyError: 'lights'</code> hoặc <code>KeyError: 'T_out'</code>.</li>
+<li><strong>Nguyên nhân</strong>: Client (Gateway) gửi payload JSON bị thiếu một hoặc nhiều trường dữ liệu tùy chọn (ví dụ: cảm biến đo đèn bị hỏng nên Gateway không gửi trường <code>lights</code> lên API).</li>
+<li><strong>Cách Debug &amp; Khắc phục</strong>:<ol>
+<li><em>Kiểm tra</em>: Xem cấu trúc JSON gửi lên từ Client có khớp với Schema <code>TelemetryPoint</code> định nghĩa trong <code>app.py</code> hay không.</li>
+<li><em>Khắc phục</em>: Bảo đảm đã gọi hàm <code>fill_missing_for_api(df, model_bundle["raw_medians"])</code> ngay khi tiếp nhận DataFrame đầu vào trong <code>app.py</code> (Hàm này tự động tạo cột thiếu và điền trung vị thô lịch sử, ngăn chặn triệt để lỗi KeyError).</li>
+</ol>
+</li>
+</ul>
+<h3 id="loi-2-gia-tri-du-bao-tra-ve-nan-hoac-null-o-thoi-gian-thuc">Lỗi 2: Giá trị Dự báo trả về <code>NaN</code> hoặc <code>Null</code> ở thời gian thực<a class="headerlink" href="#loi-2-gia-tri-du-bao-tra-ve-nan-hoac-null-o-thoi-gian-thuc" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Hiện tượng</strong>: API trả phản hồi JSON thành công nhưng trường <code>predicted_value</code> lại là <code>NaN</code> hoặc <code>Null</code>.</li>
+<li><strong>Nguyên nhân</strong>: Client gửi chuỗi lịch sử quá ngắn (ví dụ chỉ gửi 10 điểm thay vì 24 điểm). Phép toán <code>.rolling(window=24).mean()</code> bị thiếu dữ liệu quá khứ nên trả về <code>NaN</code> cho đặc trưng cửa sổ trượt lớn nhất, dẫn đến mô hình hồi quy suy luận ra giá trị <code>NaN</code>.</li>
+<li><strong>Cách Debug &amp; Khắc phục</strong>:<ol>
+<li><em>Kiểm tra</em>: In ra số lượng bản ghi nhận được trong log FastAPI: <code>print(len(payload.history))</code>.</li>
+<li><em>Khắc phục</em>: Tích hợp lớp phòng vệ thứ hai điền khuyết đặc trưng bằng <code>feature_medians</code> lưu trong file <code>.joblib</code> trước khi đưa ma trận qua phương thức <code>.predict()</code>:
+    <div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">X</span> <span class="o">=</span> <span class="n">latest</span><span class="p">[</span><span class="n">feature_columns</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="n">model_bundle</span><span class="p">[</span><span class="s2">&quot;feature_medians&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
+</span></code></pre></div></li>
+</ol>
+</li>
+</ul>
+<h3 id="loi-3-sai-so-maermse-cuc-thap-khi-huan-luyen-nhung-cuc-cao-khi-chay-api-thuc-te">Lỗi 3: Sai số MAE/RMSE cực thấp khi huấn luyện nhưng cực cao khi chạy API thực tế<a class="headerlink" href="#loi-3-sai-so-maermse-cuc-thap-khi-huan-luyen-nhung-cuc-cao-khi-chay-api-thuc-te" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Hiện tượng</strong>: Lúc huấn luyện offline đạt độ chính xác gần như hoàn hảo (<span class="arithmatex">\(\text{MAE} \approx 2\)</span> Wh), nhưng khi chạy API dự báo thực tế sai số nhảy vọt lên <span class="arithmatex">\(\text{MAE} \gt 80\)</span> Wh.</li>
+<li><strong>Nguyên nhân</strong>: Bị rò rỉ dữ liệu tương lai (Data Leakage) do phân chia dữ liệu ngẫu nhiên (Random Split) ở pha huấn luyện offline hoặc tính đặc trưng trễ bị dịch chuyển ngược hướng.</li>
+<li><strong>Cách Debug &amp; Khắc phục</strong>:<ol>
+<li><em>Kiểm tra</em>: Xem lại file <code>train_forecast.py</code> xem có vô tình sử dụng <code>train_test_split(..., shuffle=True)</code> hoặc dùng shift âm cho các đặc trưng đầu vào hay không.</li>
+<li><em>Khắc phục</em>: Bắt buộc sử dụng hàm phân tách tuyến tính thời gian <code>time_split()</code> và đảm bảo tất cả các đặc trưng Lag/Rolling đều dùng shift dương hướng về quá khứ.</li>
+</ol>
+</li>
+</ul>
+<h3 id="loi-4-loi-inh-dang-moc-thoi-gian-date-khi-tao-dataframe">Lỗi 4: Lỗi định dạng mốc thời gian <code>date</code> khi tạo DataFrame<a class="headerlink" href="#loi-4-loi-inh-dang-moc-thoi-gian-date-khi-tao-dataframe" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Hiện tượng</strong>: Hàm <code>make_supervised_frame</code> báo lỗi không thể tính toán đặc trưng tuần hoàn <code>hour</code> hoặc <code>dayofweek</code>.</li>
+<li><strong>Nguyên nhân</strong>: Cột <code>date</code> trong JSON gửi lên ở dạng chuỗi string chưa được định dạng thời gian.</li>
+<li><strong>Cách Debug &amp; Khắc phục</strong>:<ol>
+<li><em>Kiểm tra</em>: In ra kiểu dữ liệu của cột: <code>print(df["date"].dtype)</code>. Nếu ra kiểu <code>object</code> hoặc <code>string</code> là chưa chuyển đổi.</li>
+<li><em>Khắc phục</em>: Ép kiểu rõ ràng trước khi tính đặc trưng:
+    <div class="highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">df</span><span class="p">[</span><span class="s2">&quot;date&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;date&quot;</span><span class="p">])</span>
+</span></code></pre></div></li>
+</ol>
+</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Trở lại mục lục
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u0110\u00e3 sao ch\u00e9p", "clipboard.copy": "Sao ch\u00e9p v\u00e0o b\u1ed9 nh\u1edb t\u1ea1m", "search.result.more.one": "1 t\u1eeb kh\u00e1c trong trang", "search.result.more.other": "# t\u1eeb kh\u00e1c trong trang", "search.result.none": "Kh\u00f4ng t\u00ecm th\u1ea5y t\u00e0i li\u1ec7u li\u00ean quan", "search.result.one": "1 t\u00e0i li\u1ec7u li\u00ean quan", "search.result.other": "# t\u00e0i li\u1ec7u li\u00ean quan", "search.result.placeholder": "Nh\u1eadp \u0111\u1ec3 b\u1eaft \u0111\u1ea7u t\u00ecm ki\u1ebfm", "search.result.term.missing": "Kh\u00f4ng", "select.version": "Ch\u1ecdn phi\u00ean b\u1ea3n"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="../javascripts/mathjax.js"></script>
+      
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>

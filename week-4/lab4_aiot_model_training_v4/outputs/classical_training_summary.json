@@ -1,0 +1,22 @@
+[
+  {
+    "dataset": "appliances",
+    "best_model_by_val_mae": "GradientBoosting_advanced",
+    "best_model_test_mae": 23.46637319246207,
+    "last_value_test_mae": 27.434782608695652,
+    "mae_improvement_vs_last_value_percent": 14.464883767570907,
+    "best_model_test_rmse": 37.71906739037009,
+    "best_model_test_mape": 26.284303375508856,
+    "best_model_test_r2": 0.3519341281683499
+  },
+  {
+    "dataset": "co2",
+    "best_model_by_val_mae": "Ridge_alpha_1",
+    "best_model_test_mae": 35.07594063496176,
+    "last_value_test_mae": 36.12990802348337,
+    "mae_improvement_vs_last_value_percent": 2.9171604528762116,
+    "best_model_test_rmse": 45.5183269022176,
+    "best_model_test_mape": 5.466503195052838,
+    "best_model_test_r2": 0.9006178722639886
+  }
+]

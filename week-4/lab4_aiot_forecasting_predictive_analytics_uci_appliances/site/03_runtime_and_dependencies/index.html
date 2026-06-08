@@ -1,0 +1,1973 @@
+
+<!doctype html>
+<html lang="vi" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Tài liệu kỹ thuật chuyên sâu về dự báo phụ tải điện năng và phân tích dự đoán trong hệ thống AIoT">
+      
+      
+        <meta name="author" content="DeepMind team & Antigravity AI">
+      
+      
+      
+        <link rel="prev" href="../02_data_flow/">
+      
+      
+        <link rel="next" href="../04_dataset_and_schema/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>03. Luồng thực thi & Phụ thuộc - Lab 4: AIoT Energy Forecasting & Predictive Analytics</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#phan-tich-luong-thuc-thi-runtime-va-phu-thuoc-file" class="md-skip">
+          Bỏ qua
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Đầu trang">
+    <a href=".." title="Lab 4: AIoT Energy Forecasting &amp; Predictive Analytics" class="md-header__button md-logo" aria-label="Lab 4: AIoT Energy Forecasting & Predictive Analytics" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Lab 4: AIoT Energy Forecasting & Predictive Analytics
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              03. Luồng thực thi & Phụ thuộc
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Chuyển sang chế độ Dark Mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Chuyển sang chế độ Dark Mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Chuyển sang chế độ Light Mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Chuyển sang chế độ Light Mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Tìm kiếm" placeholder="Tìm kiếm" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Tìm kiếm">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Xoá" aria-label="Xoá" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Trang chủ
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../00_project_overview/" class="md-tabs__link">
+          
+  
+  
+  Học phần I: Tổng quan & Kiến trúc
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../04_dataset_and_schema/" class="md-tabs__link">
+          
+  
+  
+  Học phần II: Dữ liệu & Đặc trưng
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../06_model_training_and_metrics/" class="md-tabs__link">
+          
+  
+  
+  Học phần III: Mô hình & API Serving
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../09_code_review/" class="md-tabs__link">
+          
+  
+  
+  Học phần IV: Chất lượng mã & An toàn
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../11_development_roadmap/" class="md-tabs__link">
+          
+  
+  
+  Học phần V: Lộ trình & Handbook
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../README_HTML_EXPORT/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Hướng dẫn xuất bản HTML
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../README_MKDOCS/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Hướng dẫn cấu hình MkDocs
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Thanh điều hướng" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Lab 4: AIoT Energy Forecasting &amp; Predictive Analytics" class="md-nav__button md-logo" aria-label="Lab 4: AIoT Energy Forecasting & Predictive Analytics" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Lab 4: AIoT Energy Forecasting & Predictive Analytics
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Trang chủ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Học phần I: Tổng quan & Kiến trúc
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Học phần I: Tổng quan & Kiến trúc
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../00_project_overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    00. Tổng quan bài toán
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../01_architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    01. Kiến trúc hệ thống
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02_data_flow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    02. Luồng dữ liệu tuần tự
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    03. Luồng thực thi & Phụ thuộc
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    03. Luồng thực thi & Phụ thuộc
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Mục lục">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Mục lục
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-o-thi-phu-thuoc-giua-cac-file-dependency-graph" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Đồ thị Phụ thuộc giữa các File (Dependency Graph)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-chi-tiet-phu-thuoc-au-vao-au-ra-cua-tung-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Chi tiết Phụ thuộc, Đầu vào &amp; Đầu ra của Từng File
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Chi tiết Phụ thuộc, Đầu vào &amp; Đầu ra của Từng File">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-utilspy-loi-tinh-toan-tien-ich-dung-chung" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. utils.py (Lõi tính toán &amp; Tiện ích dùng chung)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-train_forecastpy-chay-huan-luyen-ngoai-tuyen" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. train_forecast.py (Chạy huấn luyện ngoại tuyến)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-apppy-fastapi-server-endpoint-phuc-vu-online" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. app.py (FastAPI Server Endpoint Phục vụ Online)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-plot_resultspy-ve-bieu-o-ket-qua" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. plot_results.py (Vẽ biểu đồ kết quả)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-download_datapy-tai-du-lieu-tu-ong" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. download_data.py (Tải dữ liệu tự động)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-test_api_localpy-kiem-thu-api-cuc-bo-khong-mo-port" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. test_api_local.py (Kiểm thử API cục bộ không mở port)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-luong-thuc-thi-runtime-chi-tiet-execution-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Luồng Thực thi Runtime chi tiết (Execution Flow)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Luồng Thực thi Runtime chi tiết (Execution Flow)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#luong-a-huan-luyen-ngoai-tuyen-offline-training-pipeline-execution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Luồng A: Huấn luyện Ngoại tuyến (Offline Training Pipeline Execution)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#luong-b-phuc-vu-du-bao-truc-tuyen-online-serving-inference-execution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Luồng B: Phục vụ Dự báo Trực tuyến (Online Serving Inference Execution)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-cac-iem-at-debug-quan-trong-khi-gap-su-co-debugging-checkpoints" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Các điểm đặt Debug quan trọng khi gặp Sự cố (Debugging Checkpoints)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Các điểm đặt Debug quan trọng khi gặp Sự cố (Debugging Checkpoints)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#chot-chan-1-kiem-tra-du-lieu-tho-sau-lam-sach" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chốt chặn 1: Kiểm tra Dữ liệu thô sau làm sạch
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#chot-chan-2-kiem-tra-ac-trung-ong-tai-thoi-iem-hien-tai-t" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chốt chặn 2: Kiểm tra Đặc trưng động tại thời điểm hiện tại \(t\)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#chot-chan-3-kiem-tra-ma-tran-au-vao-truoc-khi-goi-predict" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chốt chặn 3: Kiểm tra Ma trận đầu vào trước khi gọi predict
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#chot-chan-4-kiem-tra-logic-phan-cap-rui-ro" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chốt chặn 4: Kiểm tra Logic phân cấp rủi ro
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-ban-o-phan-loai-an-toan-chinh-sua-file-file-modifiability-guide" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Bản đồ Phân loại An toàn Chỉnh sửa File (File Modifiability Guide)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Bản đồ Phân loại An toàn Chỉnh sửa File (File Modifiability Guide)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cap-o-1-cuc-ky-nguy-hiem-core-pipeline-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🔴 CẬP ĐỘ 1: CỰC KỲ NGUY HIỂM (Core Pipeline Files)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cap-o-2-can-than-trong-deployment-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🟡 CẤP ĐỘ 2: CẦN THẬN TRỌNG (Deployment Files)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cap-o-3-an-toan-tuyet-oi-scripts-visuals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🟢 CẤP ĐỘ 3: AN TOÀN TUYỆT ĐỐI (Scripts &amp; Visuals)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Học phần II: Dữ liệu & Đặc trưng
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Học phần II: Dữ liệu & Đặc trưng
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04_dataset_and_schema/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    04. Tập dữ liệu & Điền khuyết
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../05_feature_engineering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    05. Kỹ nghệ đặc trưng chuỗi thời gian
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Học phần III: Mô hình & API Serving
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Học phần III: Mô hình & API Serving
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../06_model_training_and_metrics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    06. Mô hình hóa & Đo lường sai số
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../07_decision_layer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    07. Tầng ra quyết định & Cảnh báo
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../08_api_forecast_workflow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    08. Triển khai FastAPI Serving
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Học phần IV: Chất lượng mã & An toàn
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Học phần IV: Chất lượng mã & An toàn
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../09_code_review/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    09. Đánh giá chất lượng mã nguồn
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../10_safety_fail_safe/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    10. An toàn & Cơ chế Fail-safe
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Học phần V: Lộ trình & Handbook
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Học phần V: Lộ trình & Handbook
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../11_development_roadmap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    11. Lộ trình phát triển
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../HANDBOOK/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📖 Sách hướng dẫn kỹ thuật (Handbook)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../README_HTML_EXPORT/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hướng dẫn xuất bản HTML
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../README_MKDOCS/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hướng dẫn cấu hình MkDocs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Mục lục">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Mục lục
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-o-thi-phu-thuoc-giua-cac-file-dependency-graph" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Đồ thị Phụ thuộc giữa các File (Dependency Graph)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-chi-tiet-phu-thuoc-au-vao-au-ra-cua-tung-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Chi tiết Phụ thuộc, Đầu vào &amp; Đầu ra của Từng File
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Chi tiết Phụ thuộc, Đầu vào &amp; Đầu ra của Từng File">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-utilspy-loi-tinh-toan-tien-ich-dung-chung" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. utils.py (Lõi tính toán &amp; Tiện ích dùng chung)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-train_forecastpy-chay-huan-luyen-ngoai-tuyen" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. train_forecast.py (Chạy huấn luyện ngoại tuyến)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-apppy-fastapi-server-endpoint-phuc-vu-online" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. app.py (FastAPI Server Endpoint Phục vụ Online)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-plot_resultspy-ve-bieu-o-ket-qua" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. plot_results.py (Vẽ biểu đồ kết quả)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-download_datapy-tai-du-lieu-tu-ong" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. download_data.py (Tải dữ liệu tự động)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-test_api_localpy-kiem-thu-api-cuc-bo-khong-mo-port" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. test_api_local.py (Kiểm thử API cục bộ không mở port)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-luong-thuc-thi-runtime-chi-tiet-execution-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Luồng Thực thi Runtime chi tiết (Execution Flow)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Luồng Thực thi Runtime chi tiết (Execution Flow)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#luong-a-huan-luyen-ngoai-tuyen-offline-training-pipeline-execution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Luồng A: Huấn luyện Ngoại tuyến (Offline Training Pipeline Execution)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#luong-b-phuc-vu-du-bao-truc-tuyen-online-serving-inference-execution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Luồng B: Phục vụ Dự báo Trực tuyến (Online Serving Inference Execution)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-cac-iem-at-debug-quan-trong-khi-gap-su-co-debugging-checkpoints" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Các điểm đặt Debug quan trọng khi gặp Sự cố (Debugging Checkpoints)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Các điểm đặt Debug quan trọng khi gặp Sự cố (Debugging Checkpoints)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#chot-chan-1-kiem-tra-du-lieu-tho-sau-lam-sach" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chốt chặn 1: Kiểm tra Dữ liệu thô sau làm sạch
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#chot-chan-2-kiem-tra-ac-trung-ong-tai-thoi-iem-hien-tai-t" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chốt chặn 2: Kiểm tra Đặc trưng động tại thời điểm hiện tại \(t\)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#chot-chan-3-kiem-tra-ma-tran-au-vao-truoc-khi-goi-predict" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chốt chặn 3: Kiểm tra Ma trận đầu vào trước khi gọi predict
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#chot-chan-4-kiem-tra-logic-phan-cap-rui-ro" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chốt chặn 4: Kiểm tra Logic phân cấp rủi ro
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-ban-o-phan-loai-an-toan-chinh-sua-file-file-modifiability-guide" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Bản đồ Phân loại An toàn Chỉnh sửa File (File Modifiability Guide)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Bản đồ Phân loại An toàn Chỉnh sửa File (File Modifiability Guide)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cap-o-1-cuc-ky-nguy-hiem-core-pipeline-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🔴 CẬP ĐỘ 1: CỰC KỲ NGUY HIỂM (Core Pipeline Files)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cap-o-2-can-than-trong-deployment-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🟡 CẤP ĐỘ 2: CẦN THẬN TRỌNG (Deployment Files)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cap-o-3-an-toan-tuyet-oi-scripts-visuals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🟢 CẤP ĐỘ 3: AN TOÀN TUYỆT ĐỐI (Scripts &amp; Visuals)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="phan-tich-luong-thuc-thi-runtime-va-phu-thuoc-file">PHÂN TÍCH LUỒNG THỰC THI RUNTIME VÀ PHỤ THUỘC FILE<a class="headerlink" href="#phan-tich-luong-thuc-thi-runtime-va-phu-thuoc-file" title="Permanent link">&para;</a></h1>
+<p>Để làm chủ hệ thống mã nguồn <strong>Lab 4</strong>, một kỹ sư hoặc nhà phát triển cần hiểu rõ cách thức hoạt động của chương trình ở thời điểm chạy (Runtime): file nào gọi file nào, luồng dữ liệu biến đổi ra sao trên bộ nhớ RAM, cấu trúc phụ thuộc giữa các module, và các vị trí chốt chặn quan trọng để đặt điểm debug khi gặp sự cố.</p>
+<p>Tài liệu này phân tích chi tiết luồng thực thi runtime, đồ thị phụ thuộc của hệ thống, phân loại mức độ an toàn chỉnh sửa của từng file và cẩm nang debug thực tế trong <strong>Lab 4</strong>.</p>
+<hr />
+<h2 id="1-o-thi-phu-thuoc-giua-cac-file-dependency-graph">1. Đồ thị Phụ thuộc giữa các File (Dependency Graph)<a class="headerlink" href="#1-o-thi-phu-thuoc-giua-cac-file-dependency-graph" title="Permanent link">&para;</a></h2>
+<p>Mã nguồn được thiết kế theo nguyên lý mô-đun hóa, trong đó tệp <code>utils.py</code> đóng vai trò là thư viện tiện ích dùng chung (Core Utility Library) cấp thấp nhất, cung cấp logic cho tất cả các kịch bản chạy cấp cao hơn.</p>
+<p>Dưới đây là đồ thị phụ thuộc giữa các file trong hệ thống:</p>
+<pre class="mermaid"><code>graph TD
+    %% Base Utility
+    classDef core fill:#f9f,stroke:#333,stroke-width:2px;
+    classDef script fill:#bbf,stroke:#333,stroke-width:1px;
+    classDef data fill:#fbb,stroke:#333,stroke-width:1px;
+
+    utils[utils.py]:::core
+
+    %% Main Scripts
+    train[train_forecast.py]:::core
+    app[app.py]:::core
+    plot[plot_results.py]:::script
+    dl[download_data.py]:::script
+    test_local[test_api_local.py]:::script
+    test_remote[test_api.py]:::script
+
+    %% Models and Output Artifacts
+    bundle[forecast_model_bundle_v1.joblib]:::data
+    metrics[forecast_metrics.json]:::data
+    log[forecast_log.csv]:::data
+    pred_csv[forecast_test_predictions.csv]:::data
+
+    %% Dependencies mapping
+    dl --&gt;|1. Tải dữ liệu thô| utils
+    train --&gt;|2. Gọi hàm tính đặc trưng| utils
+    train --&gt;|3. Xuất bản model| bundle
+    train --&gt;|4. Lưu sai số| metrics
+    train --&gt;|5. Tạo dự báo thử| pred_csv
+    train --&gt;|6. Ghi log thử nghiệm| log
+
+    plot --&gt;|7. Vẽ biểu đồ| metrics &amp; pred_csv &amp; log
+
+    app --&gt;|8. Gọi hàm điền khuyết &amp; đặc trưng| utils
+    app --&gt;|9. Nạp mô hình vào RAM| bundle
+
+    test_local --&gt;|10. Gọi trực tiếp hàm endpoint| app
+    test_local --&gt;|11. Đọc dữ liệu test| utils
+
+    test_remote --&gt;|12. Gửi HTTP POST request| app</code></pre>
+<hr />
+<h2 id="2-chi-tiet-phu-thuoc-au-vao-au-ra-cua-tung-file">2. Chi tiết Phụ thuộc, Đầu vào &amp; Đầu ra của Từng File<a class="headerlink" href="#2-chi-tiet-phu-thuoc-au-vao-au-ra-cua-tung-file" title="Permanent link">&para;</a></h2>
+<p>Dưới đây là phân tích chi tiết vai trò, các file gọi và dữ liệu đầu vào/đầu ra của tất cả các file mã nguồn chính trong thư mục <code>src/</code>:</p>
+<h3 id="1-utilspy-loi-tinh-toan-tien-ich-dung-chung">1. <code>utils.py</code> (Lõi tính toán &amp; Tiện ích dùng chung)<a class="headerlink" href="#1-utilspy-loi-tinh-toan-tien-ich-dung-chung" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Các phụ thuộc (Imports)</strong>: <code>pandas</code>, <code>numpy</code>, <code>pathlib</code>, <code>json</code>.</li>
+<li><strong>Được gọi bởi</strong>: <code>train_forecast.py</code>, <code>app.py</code>, <code>plot_results.py</code>, <code>test_api_local.py</code>, <code>download_data.py</code>.</li>
+<li><strong>Dữ liệu đầu vào (Input)</strong>: DataFrame thô hoặc mảng dữ liệu chuỗi thời gian.</li>
+<li><strong>Dữ liệu đầu ra (Output)</strong>: DataFrame đã được làm sạch, bổ sung đầy đủ các đặc trưng trễ (Lag), trượt (Rolling), sai phân (Delta), lượng giác tuần hoàn (Cyclic Time), và dịch chuyển nhãn tương lai (<code>target_future</code>).</li>
+<li><strong>Ý nghĩa</strong>: Đây là "lõi toán học" duy nhất của toàn hệ thống. Mọi thay đổi về đặc trưng tại đây sẽ lập tức ảnh hưởng đến cả pha huấn luyện offline và pha chạy online.</li>
+</ul>
+<h3 id="2-train_forecastpy-chay-huan-luyen-ngoai-tuyen">2. <code>train_forecast.py</code> (Chạy huấn luyện ngoại tuyến)<a class="headerlink" href="#2-train_forecastpy-chay-huan-luyen-ngoai-tuyen" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Các phụ thuộc (Imports)</strong>: <code>scikit-learn</code> (StandardScaler, LinearRegression, RandomForestRegressor, GradientBoostingRegressor), <code>joblib</code>, <code>utils.py</code>.</li>
+<li><strong>Được gọi bởi</strong>: Kỹ sư chạy thủ công bằng lệnh terminal: <code>python src/train_forecast.py</code>.</li>
+<li><strong>Dữ liệu đầu vào (Input)</strong>: Đọc file dữ liệu thô <code>data/energydata_complete.csv</code> từ đĩa cứng qua hàm <code>load_dataset()</code>.</li>
+<li><strong>Dữ liệu đầu ra (Output)</strong>:<ol>
+<li>Tệp nén mô hình: <code>models/forecast_model_bundle_v1.joblib</code></li>
+<li>Tệp chỉ số sai số: <code>outputs/forecast_metrics.json</code></li>
+<li>Bảng dự báo kiểm thử: <code>outputs/forecast_test_predictions.csv</code></li>
+<li>Nhật ký giả lập: <code>outputs/forecast_log.csv</code></li>
+</ol>
+</li>
+</ul>
+<h3 id="3-apppy-fastapi-server-endpoint-phuc-vu-online">3. <code>app.py</code> (FastAPI Server Endpoint Phục vụ Online)<a class="headerlink" href="#3-apppy-fastapi-server-endpoint-phuc-vu-online" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Các phụ thuộc (Imports)</strong>: <code>fastapi</code>, <code>pydantic</code>, <code>joblib</code>, <code>utils.py</code>.</li>
+<li><strong>Được gọi bởi</strong>: Trình chạy ASGI Uvicorn: <code>uvicorn src.app:app --reload</code>.</li>
+<li><strong>Dữ liệu đầu vào (Input)</strong>: Gói tin HTTP POST gửi lên JSON Payload chứa mảng lịch sử telemetry (<code>history</code>).</li>
+<li><strong>Dữ liệu đầu ra (Output)</strong>: Gói tin HTTP response JSON chứa giá trị dự báo Wh, cấp độ rủi ro, khuyến nghị và safety note. Đồng thời ghi thêm 1 dòng nhật ký vào <code>outputs/forecast_log.csv</code>.</li>
+</ul>
+<h3 id="4-plot_resultspy-ve-bieu-o-ket-qua">4. <code>plot_results.py</code> (Vẽ biểu đồ kết quả)<a class="headerlink" href="#4-plot_resultspy-ve-bieu-o-ket-qua" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Các phụ thuộc (Imports)</strong>: <code>matplotlib</code>, <code>pandas</code>, <code>json</code>, <code>utils.py</code>.</li>
+<li><strong>Được gọi bởi</strong>: Kỹ sư chạy lệnh terminal: <code>python src/plot_results.py</code>.</li>
+<li><strong>Dữ liệu đầu vào (Input)</strong>: Đọc các file kết quả trung gian: <code>outputs/forecast_test_predictions.csv</code>, <code>outputs/forecast_log.csv</code>, và <code>outputs/forecast_metrics.json</code>.</li>
+<li><strong>Dữ liệu đầu ra (Output)</strong>: Xuất ra 3 file ảnh đồ thị lưu tại thư mục <code>figures/</code>:<ul>
+<li><code>forecast_vs_actual.png</code></li>
+<li><code>forecast_error_over_time.png</code></li>
+<li><code>model_comparison_mae.png</code></li>
+</ul>
+</li>
+</ul>
+<h3 id="5-download_datapy-tai-du-lieu-tu-ong">5. <code>download_data.py</code> (Tải dữ liệu tự động)<a class="headerlink" href="#5-download_datapy-tai-du-lieu-tu-ong" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Các phụ thuộc (Imports)</strong>: <code>urllib.request</code>, <code>zipfile</code>, <code>tempfile</code>, <code>shutil</code>, <code>utils.py</code>.</li>
+<li><strong>Được gọi bởi</strong>: Kỹ sư chạy lệnh terminal: <code>python src/download_data.py</code>.</li>
+<li><strong>Dữ liệu đầu vào (Input)</strong>: Tải tệp zip công khai từ kho lưu trữ của UCI qua giao thức HTTP.</li>
+<li><strong>Dữ liệu đầu ra (Output)</strong>: Giải nén và lưu file <code>data/energydata_complete.csv</code>. Nếu không có internet, tự động kích hoạt fallback sử dụng dữ liệu mẫu lớp học.</li>
+</ul>
+<h3 id="6-test_api_localpy-kiem-thu-api-cuc-bo-khong-mo-port">6. <code>test_api_local.py</code> (Kiểm thử API cục bộ không mở port)<a class="headerlink" href="#6-test_api_localpy-kiem-thu-api-cuc-bo-khong-mo-port" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Các phụ thuộc (Imports)</strong>: <code>utils.py</code>, <code>app.py</code> (gọi trực tiếp hàm Python <code>forecast()</code>, <code>health()</code>, <code>model_info()</code>).</li>
+<li><strong>Được gọi bởi</strong>: Kỹ sư chạy lệnh: <code>python src/test_api_local.py</code>.</li>
+<li><strong>Dữ liệu đầu vào (Input)</strong>: Rút trích 36 dòng cuối cùng của DataFrame thô làm lịch sử giả lập.</li>
+<li><strong>Dữ liệu đầu ra (Output)</strong>: Xác thực Schema trả về của API và ghi kết quả test vào <code>outputs/api_test_result.json</code>.</li>
+</ul>
+<hr />
+<h2 id="3-luong-thuc-thi-runtime-chi-tiet-execution-flow">3. Luồng Thực thi Runtime chi tiết (Execution Flow)<a class="headerlink" href="#3-luong-thuc-thi-runtime-chi-tiet-execution-flow" title="Permanent link">&para;</a></h2>
+<p>Hệ thống có hai luồng chạy runtime độc lập hoàn toàn, phân tách rõ ràng nhiệm vụ của kỹ sư dữ liệu (Offline) và dịch vụ web tự động (Online):</p>
+<h3 id="luong-a-huan-luyen-ngoai-tuyen-offline-training-pipeline-execution">Luồng A: Huấn luyện Ngoại tuyến (Offline Training Pipeline Execution)<a class="headerlink" href="#luong-a-huan-luyen-ngoai-tuyen-offline-training-pipeline-execution" title="Permanent link">&para;</a></h3>
+<p>Chạy tuần tự từ trên xuống dưới khi gọi <code>train_forecast.py</code>:
+1.  <strong>Nạp</strong>: Đọc file dữ liệu từ đĩa <span class="arithmatex">\(\rightarrow\)</span> tạo Pandas DataFrame.
+2.  <strong>Tính</strong>: Gọi <code>make_supervised_frame</code> thực hiện dịch chuyển mốc giờ tuần hoàn và tính Lag/Rolling/Delta cho toàn bộ hàng vạn dòng.
+3.  <strong>Lọc</strong>: Xóa bỏ các dòng khuyết biên (<code>clean_supervised_frame</code>).
+4.  <strong>Chia</strong>: Chia DataFrame thành 2 phần Train (75% đầu) và Test (25% cuối) theo mốc cắt dòng thời gian tuyến tính.
+5.  <strong>Học</strong>: Khởi tạo 3 mô hình học máy. Gọi phương thức <code>.fit(X_train, y_train)</code> để học trọng số.
+6.  <strong>Đo</strong>: Gọi <code>.predict(X_test)</code> trên tập Test để tính toán MAE/RMSE/MAPE và chọn ra mô hình tối ưu nhất.
+7.  <strong>Lưu</strong>: Đóng gói mô hình tốt nhất cùng với các giá trị trung vị (<code>raw_medians</code>, <code>feature_medians</code>) vào bộ nhớ đĩa thành file <code>.joblib</code>.</p>
+<h3 id="luong-b-phuc-vu-du-bao-truc-tuyen-online-serving-inference-execution">Luồng B: Phục vụ Dự báo Trực tuyến (Online Serving Inference Execution)<a class="headerlink" href="#luong-b-phuc-vu-du-bao-truc-tuyen-online-serving-inference-execution" title="Permanent link">&para;</a></h3>
+<p>Chạy tức thời khi có Client gọi HTTP POST lên FastAPI Server <code>/forecast</code>:
+1.  <strong>Tiếp nhận</strong>: FastAPI validate định dạng payload JSON đầu vào qua Pydantic schema <code>ForecastRequest</code>.
+2.  <strong>Chuyển đổi</strong>: Chuyển mảng JSON gồm 24 điểm thô thành Pandas DataFrame gồm 24 dòng.
+3.  <strong>Làm sạch</strong>: Gọi <code>fill_missing_for_api</code> để lấp đầy các cột cảm biến bị thiếu bằng <code>raw_medians</code> đã được nạp sẵn trên RAM từ file <code>.joblib</code>.
+4.  <strong>Kỹ nghệ</strong>: Gọi <code>make_supervised_frame(include_target=False)</code> tính toán Lag, Rolling, Delta thời gian thực.
+5.  <strong>Trích xuất</strong>: Lấy duy nhất hàng cuối cùng của DataFrame (<code>latest_row</code>), đại diện cho thời điểm hiện tại <span class="arithmatex">\(t\)</span>.
+6.  <strong>Điền khuyết đặc trưng</strong>: Điền các giá trị đặc trưng bị rỗng (do chuỗi lịch sử quá ngắn) bằng <code>feature_medians</code> từ RAM.
+7.  <strong>Suy diễn</strong>: Chuyển ma trận đặc trưng qua mô hình tốt nhất: <code>model.predict(X)</code> <span class="arithmatex">\(\rightarrow\)</span> trả về <code>predicted_value</code> Wh.
+8.  <strong>Ánh xạ quyết định</strong>: Đưa <code>predicted_value</code> qua bộ phân tích ngưỡng để gán nhãn <code>risk_level</code> và khuyến nghị <code>recommendation</code>.
+9.  <strong>Ghi log</strong>: Ghi thêm 1 dòng nhật ký vào <code>outputs/forecast_log.csv</code>.
+10. <strong>Phản hồi</strong>: Trả về gói tin JSON cấu trúc cho Client.</p>
+<hr />
+<h2 id="4-cac-iem-at-debug-quan-trong-khi-gap-su-co-debugging-checkpoints">4. Các điểm đặt Debug quan trọng khi gặp Sự cố (Debugging Checkpoints)<a class="headerlink" href="#4-cac-iem-at-debug-quan-trong-khi-gap-su-co-debugging-checkpoints" title="Permanent link">&para;</a></h2>
+<p>Khi hệ thống gặp lỗi hoặc kết quả dự báo sai lệch bất thường, kỹ sư nên đặt điểm dừng (breakpoint) hoặc chèn lệnh in dữ liệu (<code>print()</code>) tại 4 chốt chặn runtime dưới đây:</p>
+<pre class="mermaid"><code>graph TD
+    A[Telemetry thô từ Client] --&gt;|Chốt chặn 1: Điền khuyết thô| B(utils.py - fill_missing_for_api)
+    B --&gt;|Chốt chặn 2: Trích xuất đặc trưng| C(app.py - latest_row)
+    C --&gt;|Chốt chặn 3: Kiểm tra ma trận suy diễn| D(app.py - model.predict)
+    D --&gt;|Chốt chặn 4: Ánh xạ rủi ro| E(utils.py - risk_from_prediction)</code></pre>
+<h3 id="chot-chan-1-kiem-tra-du-lieu-tho-sau-lam-sach">Chốt chặn 1: Kiểm tra Dữ liệu thô sau làm sạch<a class="headerlink" href="#chot-chan-1-kiem-tra-du-lieu-tho-sau-lam-sach" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>Vị trí</em>: Cuối hàm <code>fill_missing_for_api</code> trong <code>utils.py</code>.</li>
+<li><em>Mục đích debug</em>: Kiểm tra xem dữ liệu thô gửi lên có bị khuyết thiếu quá nhiều hay không, và bộ trung vị <code>raw_medians</code> có điền chính xác giá trị hợp lý vật lý hay không.</li>
+<li><em>Lệnh debug</em>: <code>print(out.isnull().sum())</code> (Đảm bảo kết quả in ra toàn bộ là <code>0</code> - không còn giá trị rỗng).</li>
+</ul>
+<h3 id="chot-chan-2-kiem-tra-ac-trung-ong-tai-thoi-iem-hien-tai-t">Chốt chặn 2: Kiểm tra Đặc trưng động tại thời điểm hiện tại <span class="arithmatex">\(t\)</span><a class="headerlink" href="#chot-chan-2-kiem-tra-ac-trung-ong-tai-thoi-iem-hien-tai-t" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>Vị trí</em>: Ngay sau dòng <code>latest = features_df.iloc[[-1]].copy()</code> trong file <code>app.py</code>.</li>
+<li><em>Mục đích debug</em>: Xác thực xem các đặc trưng trễ lớn (như <code>appliances_rolling_mean_24</code>) có bị rỗng <code>NaN</code> hay không (nếu rỗng nghĩa là client gửi chuỗi lịch sử ngắn hơn 24 điểm).</li>
+<li><em>Lệnh debug</em>: <code>print(latest[FEATURE_COLUMNS].to_dict(orient='records')[0])</code>.</li>
+</ul>
+<h3 id="chot-chan-3-kiem-tra-ma-tran-au-vao-truoc-khi-goi-predict">Chốt chặn 3: Kiểm tra Ma trận đầu vào trước khi gọi predict<a class="headerlink" href="#chot-chan-3-kiem-tra-ma-tran-au-vao-truoc-khi-goi-predict" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>Vị trí</em>: Ngay trước dòng <code>predicted_value = float(model.predict(X)[0])</code> trong file <code>app.py</code>.</li>
+<li><em>Mục đích debug</em>: Đảm bảo ma trận <code>X</code> có số lượng cột và thứ tự cột hoàn toàn trùng khớp với danh sách đặc trưng đầu vào <code>FEATURE_COLUMNS</code> mà mô hình yêu cầu. Nếu lệch thứ tự hoặc thiếu cột, scikit-learn sẽ crash hệ thống.</li>
+<li><em>Lệnh debug</em>: <code>print(X.shape)</code> (Đảm bảo kích thước là <code>(1, 52)</code> - 1 hàng và 52 cột đặc trưng).</li>
+</ul>
+<h3 id="chot-chan-4-kiem-tra-logic-phan-cap-rui-ro">Chốt chặn 4: Kiểm tra Logic phân cấp rủi ro<a class="headerlink" href="#chot-chan-4-kiem-tra-logic-phan-cap-rui-ro" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>Vị trí</em>: Trong hàm <code>risk_from_prediction</code> của <code>utils.py</code>.</li>
+<li><em>Mục đích debug</em>: Xác minh xem ngưỡng tĩnh <code>thresholds</code> nạp từ file bundle có khớp với giá trị phân vị tính toán lúc huấn luyện hay không.</li>
+<li><em>Lệnh debug</em>: <code>print("Pred:", predicted_value, "Thresholds:", thresholds)</code>.</li>
+</ul>
+<hr />
+<h2 id="5-ban-o-phan-loai-an-toan-chinh-sua-file-file-modifiability-guide">5. Bản đồ Phân loại An toàn Chỉnh sửa File (File Modifiability Guide)<a class="headerlink" href="#5-ban-o-phan-loai-an-toan-chinh-sua-file-file-modifiability-guide" title="Permanent link">&para;</a></h2>
+<p>Để tránh làm sập hệ thống (break pipeline) khi phát triển mở rộng, hãy tuân thủ bảng phân loại cấp độ an toàn dưới đây:</p>
+<h3 id="cap-o-1-cuc-ky-nguy-hiem-core-pipeline-files">🔴 CẬP ĐỘ 1: CỰC KỲ NGUY HIỂM (Core Pipeline Files)<a class="headerlink" href="#cap-o-1-cuc-ky-nguy-hiem-core-pipeline-files" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Tệp tin</strong>: <strong><code>src/utils.py</code></strong> và <strong><code>src/train_forecast.py</code></strong>.</li>
+<li><strong>Lý do</strong>: Đây là các file cốt lõi chứa logic toán học của cả hệ thống. Một thay đổi nhỏ tại đây (ví dụ: đổi tên cột đặc trưng trong <code>FEATURE_COLUMNS</code> hoặc thay đổi cách tính sin/cos) sẽ lập tức làm mất tính tương thích giữa mô hình đã huấn luyện và API thời gian thực.</li>
+<li><strong>Quy tắc</strong>: Tuyệt đối không chỉnh sửa trực tiếp trên môi trường chạy thực tế. Mọi thay đổi bắt buộc phải được thử nghiệm đồng bộ trong Jupyter Notebook trước, sau đó tiến hành tái huấn luyện toàn bộ hệ thống để xuất bản file <code>.joblib</code> mới tương thích.</li>
+</ul>
+<h3 id="cap-o-2-can-than-trong-deployment-files">🟡 CẤP ĐỘ 2: CẦN THẬN TRỌNG (Deployment Files)<a class="headerlink" href="#cap-o-2-can-than-trong-deployment-files" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Tệp tin</strong>: <strong><code>src/app.py</code></strong>.</li>
+<li><strong>Lý do</strong>: File này chịu trách nhiệm phục vụ API trực tuyến. Chỉnh sửa tại đây không làm hỏng mô hình học máy, nhưng có thể làm thay đổi Schema JSON phản hồi, gây crash ứng dụng client (Gateway hoặc Mobile App) đang kết nối gọi API.</li>
+<li><strong>Quy tắc</strong>: Cho phép bổ sung thêm các endpoint phụ trợ (như <code>/health</code> hoặc endpoints cấu hình), nhưng hạn chế tối đa việc chỉnh sửa cấu trúc của payload yêu cầu <code>/forecast</code> trừ khi có sự đồng bộ từ phía phần cứng biên.</li>
+</ul>
+<h3 id="cap-o-3-an-toan-tuyet-oi-scripts-visuals">🟢 CẤP ĐỘ 3: AN TOÀN TUYỆT ĐỐI (Scripts &amp; Visuals)<a class="headerlink" href="#cap-o-3-an-toan-tuyet-oi-scripts-visuals" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Tệp tin</strong>: <strong><code>src/plot_results.py</code></strong>, <strong><code>src/test_api_local.py</code></strong>, <strong><code>src/test_api.py</code></strong>, <strong><code>src/download_data.py</code></strong>.</li>
+<li><strong>Lý do</strong>: Đây là các file kịch bản (scripts) chạy độc lập bên ngoài pipeline chính, chỉ có nhiệm vụ vẽ biểu đồ, tải file hoặc gọi thử nghiệm API.</li>
+<li><strong>Quy tắc</strong>: Tự do chỉnh sửa, tối ưu hóa hoặc viết lại hoàn toàn để phục vụ nhu cầu làm báo cáo hoặc kiểm thử mở rộng hệ thống mà không sợ làm ảnh hưởng đến hoạt động dự báo của API thời gian thực.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Trở lại mục lục
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u0110\u00e3 sao ch\u00e9p", "clipboard.copy": "Sao ch\u00e9p v\u00e0o b\u1ed9 nh\u1edb t\u1ea1m", "search.result.more.one": "1 t\u1eeb kh\u00e1c trong trang", "search.result.more.other": "# t\u1eeb kh\u00e1c trong trang", "search.result.none": "Kh\u00f4ng t\u00ecm th\u1ea5y t\u00e0i li\u1ec7u li\u00ean quan", "search.result.one": "1 t\u00e0i li\u1ec7u li\u00ean quan", "search.result.other": "# t\u00e0i li\u1ec7u li\u00ean quan", "search.result.placeholder": "Nh\u1eadp \u0111\u1ec3 b\u1eaft \u0111\u1ea7u t\u00ecm ki\u1ebfm", "search.result.term.missing": "Kh\u00f4ng", "select.version": "Ch\u1ecdn phi\u00ean b\u1ea3n"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="../javascripts/mathjax.js"></script>
+      
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>

@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>07. Tầng ra quyết định & Cảnh báo - Lab 4 AIoT Energy Forecasting</title>
+    <style>
+        
+:root {
+    --primary: #4f46e5;
+    --primary-light: #e0e7ff;
+    --primary-hover: #4338ca;
+    --text-dark: #0f172a;
+    --text-muted: #64748b;
+    --bg-slate: #f8fafc;
+    --bg-sidebar: #0f172a;
+    --border-slate: #e2e8f0;
+    --code-bg: #1e293b;
+    --inline-code-bg: #f1f5f9;
+    --inline-code-color: #e11d48;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: var(--text-dark);
+    background-color: var(--bg-slate);
+    line-height: 1.6;
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Sidebar Navigation */
+.sidebar {
+    width: 320px;
+    background-color: var(--bg-sidebar);
+    color: #f8fafc;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 100;
+    box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+}
+
+.sidebar-header {
+    padding: 24px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.sidebar-header h1 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sidebar-header .badge {
+    background-color: var(--primary);
+    color: white;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 9999px;
+    font-weight: 600;
+    margin-top: 4px;
+    display: inline-block;
+}
+
+.sidebar-nav {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 0;
+}
+
+.sidebar-nav-item {
+    display: block;
+    padding: 12px 24px;
+    color: #cbd5e1;
+    text-decoration: none;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    border-left: 4px solid transparent;
+}
+
+.sidebar-nav-item:hover {
+    background-color: rgba(255,255,255,0.05);
+    color: #ffffff;
+    padding-left: 28px;
+}
+
+.sidebar-nav-item.active {
+    background-color: rgba(79, 70, 229, 0.15);
+    color: #ffffff;
+    border-left-color: var(--primary);
+    font-weight: 600;
+}
+
+.sidebar-footer {
+    padding: 16px 24px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    font-size: 11px;
+    color: #94a3b8;
+    text-align: center;
+}
+
+/* Main Content Area */
+.main-wrapper {
+    margin-left: 320px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.top-bar {
+    background-color: #ffffff;
+    border-bottom: 1px solid var(--border-slate);
+    padding: 16px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 90;
+}
+
+.top-bar-title {
+    font-size: 14px;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.top-bar-links a {
+    color: var(--primary);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.top-bar-links a:hover {
+    color: var(--primary-hover);
+    text-decoration: underline;
+}
+
+.content-container {
+    flex: 1;
+    padding: 48px 64px 80px 64px;
+    max-width: 1012px;
+    width: 100%;
+    margin: 0 auto;
+    background-color: #ffffff;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    border-radius: 8px;
+    margin-top: 24px;
+    margin-bottom: 24px;
+}
+
+/* Markdown Styling */
+.markdown-body h1 {
+    font-size: 32px;
+    font-weight: 800;
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--border-slate);
+    color: #0f172a;
+}
+
+.markdown-body h2 {
+    font-size: 22px;
+    font-weight: 700;
+    margin-top: 36px;
+    margin-bottom: 16px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border-slate);
+    color: #1e293b;
+}
+
+.markdown-body h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-top: 28px;
+    margin-bottom: 12px;
+    color: #334155;
+}
+
+.markdown-body h4 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-top: 20px;
+    margin-bottom: 8px;
+    color: #475569;
+}
+
+.markdown-body p {
+    margin-bottom: 16px;
+    color: #334155;
+    text-align: justify;
+}
+
+.markdown-body ul, .markdown-body ol {
+    margin-bottom: 16px;
+    padding-left: 24px;
+}
+
+.markdown-body li {
+    margin-bottom: 8px;
+    color: #334155;
+}
+
+.markdown-body a {
+    color: var(--primary);
+    text-decoration: none;
+    transition: color 0.15s;
+    font-weight: 500;
+}
+
+.markdown-body a:hover {
+    color: var(--primary-hover);
+    text-decoration: underline;
+}
+
+/* Blockquotes */
+.markdown-body blockquote {
+    padding: 12px 24px;
+    border-left: 4px solid var(--border-slate);
+    background-color: var(--bg-slate);
+    margin-bottom: 20px;
+    font-style: italic;
+    color: var(--text-muted);
+}
+
+/* Code block styling */
+.markdown-body pre {
+    background-color: var(--code-bg);
+    padding: 16px;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin-bottom: 20px;
+}
+
+.markdown-body pre code {
+    background-color: transparent;
+    color: #f8fafc;
+    padding: 0;
+    border-radius: 0;
+    font-size: 13.5px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+.markdown-body code {
+    background-color: var(--inline-code-bg);
+    color: var(--inline-code-color);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 85%;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+/* Table styling */
+.markdown-body table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 24px;
+    font-size: 14.5px;
+}
+
+.markdown-body th, .markdown-body td {
+    padding: 12px 16px;
+    border: 1px solid var(--border-slate);
+}
+
+.markdown-body th {
+    background-color: var(--bg-slate);
+    font-weight: 600;
+    text-align: left;
+    color: #1e293b;
+}
+
+.markdown-body tr:nth-child(even) {
+    background-color: #fafbfd;
+}
+
+/* Custom Alert Boxes (GitHub Alerts mapping) */
+.alert {
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    border-radius: 8px;
+    border-left-width: 4px;
+    border-left-style: solid;
+}
+
+.alert-title {
+    font-weight: 700;
+    margin-bottom: 8px;
+    font-size: 14.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.alert-content p {
+    margin-bottom: 0 !important;
+    font-size: 14px;
+    text-align: justify;
+}
+
+.alert-note {
+    background-color: #eff6ff;
+    border-left-color: #3b82f6;
+    color: #1e40af;
+}
+.alert-note .alert-title { color: #1d4ed8; }
+
+.alert-tip {
+    background-color: #f0fdf4;
+    border-left-color: #22c55e;
+    color: #166534;
+}
+.alert-tip .alert-title { color: #15803d; }
+
+.alert-important {
+    background-color: #faf5ff;
+    border-left-color: #a855f7;
+    color: #6b21a8;
+}
+.alert-important .alert-title { color: #7e22ce; }
+
+.alert-warning {
+    background-color: #fffbeb;
+    border-left-color: #f59e0b;
+    color: #92400e;
+}
+.alert-warning .alert-title { color: #b45309; }
+
+.alert-caution {
+    background-color: #fef2f2;
+    border-left-color: #ef4444;
+    color: #991b1b;
+}
+.alert-caution .alert-title { color: #b91c1c; }
+
+/* Mermaid Styling */
+.mermaid {
+    background-color: white !important;
+    border: 1px solid var(--border-slate);
+    border-radius: 8px;
+    padding: 24px;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 24px;
+    overflow-x: auto;
+}
+
+.footer {
+    background-color: #ffffff;
+    border-top: 1px solid var(--border-slate);
+    padding: 24px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: auto;
+}
+
+/* Landing Page Grid */
+.landing-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    margin-top: 24px;
+}
+
+.landing-card {
+    background-color: #ffffff;
+    border: 1px solid var(--border-slate);
+    border-radius: 8px;
+    padding: 20px;
+    text-decoration: none;
+    color: var(--text-dark);
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.landing-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);
+    border-color: var(--primary);
+}
+
+.landing-card h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.landing-card p {
+    font-size: 13.5px;
+    color: var(--text-muted);
+    margin-bottom: 0;
+    text-align: left;
+}
+
+@media (max-width: 1024px) {
+    .sidebar {
+        display: none; /* simple hides sidebar for tablet/mobile to keep script clean */
+    }
+    .main-wrapper {
+        margin-left: 0;
+    }
+    .content-container {
+        padding: 24px;
+        margin-top: 0;
+        margin-bottom: 0;
+        border-radius: 0;
+    }
+}
+
+    </style>
+    <!-- Mermaid.js for drawing diagrams directly in the browser -->
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            securityLevel: 'loose',
+            flowchart: { useMaxWidth: true, htmlLabels: true }
+        });
+    </script>
+</head>
+<body>
+
+    <!-- Left Sidebar Navigation -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h1>🔋 Lab 4 AIoT</h1>
+            <div class="badge">Energy Forecasting</div>
+        </div>
+        <div class="sidebar-nav">
+                    <a href="index.html" class="sidebar-nav-item ">🏡 Trang chủ / Tổng mục lục</a>
+        <a href="00_project_overview.html" class="sidebar-nav-item ">00. Tổng quan dự án</a>
+        <a href="01_architecture.html" class="sidebar-nav-item ">01. Kiến trúc hệ thống AIoT</a>
+        <a href="02_data_flow.html" class="sidebar-nav-item ">02. Luồng dữ liệu tuần tự</a>
+        <a href="03_runtime_and_dependencies.html" class="sidebar-nav-item ">03. Luồng thực thi & Phụ thuộc</a>
+        <a href="04_dataset_and_schema.html" class="sidebar-nav-item ">04. Tập dữ liệu & Điền khuyết</a>
+        <a href="05_feature_engineering.html" class="sidebar-nav-item ">05. Kỹ nghệ đặc trưng thời gian</a>
+        <a href="06_model_training_and_metrics.html" class="sidebar-nav-item ">06. Mô hình hóa & Đo lường sai số</a>
+        <a href="07_decision_layer.html" class="sidebar-nav-item active">07. Tầng ra quyết định & Cảnh báo</a>
+        <a href="08_api_forecast_workflow.html" class="sidebar-nav-item ">08. Triển khai API FastAPI</a>
+        <a href="09_code_review.html" class="sidebar-nav-item ">09. Đánh giá chất lượng mã nguồn</a>
+        <a href="10_safety_fail_safe.html" class="sidebar-nav-item ">10. An toàn & Cơ chế Fail-safe</a>
+        <a href="11_development_roadmap.html" class="sidebar-nav-item ">11. Lộ trình phát triển & Học tập</a>
+        <a href="HANDBOOK.html" class="sidebar-nav-item ">📖 Sách hướng dẫn kỹ thuật (Handbook)</a>
+        </div>
+        <div class="sidebar-footer">
+            Designed by DeepMind Team & Antigravity AI
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="main-wrapper">
+        <div class="top-bar">
+            <div class="top-bar-title">Tài liệu Kỹ thuật Hệ thống Dự báo Phụ tải Điện năng BEMS</div>
+            <div class="top-bar-links">
+                <a href="index.html">🏡 Quay lại Trang chủ</a>
+            </div>
+        </div>
+
+        <div style="padding: 0 40px; flex: 1;">
+            <div class="content-container markdown-body">
+                <h1 id="nhat-ky-du-bao-tang-ra-quyet-inh-van-hanh-thong-minh">NHẬT KÝ DỰ BÁO &amp; TẦNG RA QUYẾT ĐỊNH VẬN HÀNH THÔNG MINH</h1>
+<p>Dự báo số lượng phụ tải điện trong tương lai bằng học máy chỉ là bước trung gian. Trong một hệ thống AIoT hoàn chỉnh, mô hình cần cung cấp khả năng chuyển đổi các con số dự báo thô thành các <strong>quyết định hành động và cảnh báo rủi ro an toàn</strong> mà con người hoặc bộ chấp hành tự động có thể hiểu và thực thi.</p>
+<p>Tài liệu này phân tích chi tiết cơ chế hoạt động của Tầng ra quyết định (Decision Layer) và cấu trúc nhật ký vận hành <code>forecast_log.csv</code> trong <strong>Lab 4</strong>.</p>
+<hr />
+<h2 id="1-co-che-phan-cap-rui-ro-dua-tren-phan-vi-thong-ke-statistical-percentiles">1. Cơ chế Phân cấp Rủi ro dựa trên Phân vị Thống kê (Statistical Percentiles)</h2>
+<p>Thay vì đặt các ngưỡng cảnh báo rủi ro một cách cảm tính (hard-coded tĩnh, ví dụ: cứ &gt; 100 Wh là nguy hiểm), Lab 4 áp dụng phương pháp tiếp cận chuẩn khoa học dữ liệu: <strong>Thiết lập ngưỡng rủi ro động dựa trên phân vị xác suất của dữ liệu huấn luyện lịch sử</strong>.</p>
+<p>Trong quá trình huấn luyện offline (<code>train_forecast.py</code>), hệ thống phân tích phân phối công suất tiêu thụ của tập huấn luyện <code>y_train</code> và xác định 3 ngưỡng cắt tương ứng với 3 cấp độ cảnh báo:
+*   <strong>Ngưỡng Cảnh báo (Warning Threshold)</strong>: Đặt ở phân vị <strong>$70\%$ (70th percentile)</strong> của tập huấn luyện. Có nghĩa là mức phụ tải này cao hơn $70\%$ số ngày hoạt động bình thường trong lịch sử.
+*   <strong>Ngưỡng Cao (High Threshold)</strong>: Đặt ở phân vị <strong>$90\%$ (90th percentile)</strong> của tập huấn luyện. Mức phụ tải cực kỳ hiếm gặp, chỉ xảy ra trong $10\%$ tổng thời gian lịch sử.
+*   <strong>Ngưỡng Tới hạn (Critical Threshold)</strong>: Đặt ở phân vị <strong>$97\%$ (97th percentile)</strong> của tập huấn luyện. Mức quá tải nghiêm trọng, chỉ xảy ra trong $3\%$ thời gian vận hành hệ thống.</p>
+<pre><code class="language-python">risk_thresholds = {
+    &quot;warning&quot;: float(np.quantile(y_train, 0.70)),
+    &quot;high&quot;: float(np.quantile(y_train, 0.90)),
+    &quot;critical&quot;: float(np.quantile(y_train, 0.97)),
+}
+</code></pre>
+<h3 id="nguong-phan-vi-la-tinh-nhung-mang-tinh-thich-ung-ong">Ngưỡng phân vị là tĩnh, nhưng mang tính thích ứng động:</h3>
+<ul>
+<li><strong>Tính thích ứng cao</strong>: Khi di chuyển mô hình sang một ngôi nhà khác có quy mô tiêu thụ điện hoàn toàn khác (ví dụ: biệt thự to tiêu thụ trung bình 500 Wh so với căn hộ nhỏ tiêu thụ trung bình 50 Wh), hệ thống chỉ cần huấn luyện lại và tự động xác định lại các ngưỡng thích ứng một cách hoàn toàn tự động mà không cần kỹ sư phải cấu hình lại mã nguồn.</li>
+</ul>
+<hr />
+<h2 id="2-anh-xa-tu-du-bao-sang-cap-o-rui-ro-hanh-ong-khuyen-nghi">2. Ánh xạ từ Dự báo sang Cấp độ Rủi ro &amp; Hành động Khuyến nghị</h2>
+<p>Tại thời điểm API <code>/forecast</code> thực hiện suy diễn và nhận được giá trị dự báo năng lượng tiêu thụ cho 10 phút tiếp theo là <code>predicted_value</code>, giá trị này sẽ được đưa qua Tầng ra quyết định (Decision Layer) cài đặt trong <code>utils.py</code>:</p>
+<pre class="mermaid">graph TD
+    A[predicted_value từ Mô hình] --> B{So sánh các Ngưỡng}
+
+    B -->|>= Ngưỡng critical| C[CRITICAL]
+    B -->|>= Ngưỡng high| D[HIGH]
+    B -->|>= Ngưỡng warning| E[WARNING]
+    B -->|< Ngưỡng warning| F[NORMAL]
+
+    C --> C1[Khuyến nghị: HUMAN_CHECK_BEFORE_ACTUATOR_CONTROL<br>Con người kiểm duyệt trước khi ngắt phụ tải]
+    D --> D1[Khuyến nghị: REDUCE_NON_CRITICAL_LOAD_OR_CHECK_HVAC<br>Giảm thiết bị không cần thiết, kiểm tra HVAC]
+    E --> E1[Khuyến nghị: MONITOR_AND_PREPARE_ENERGY_SAVING_ACTION<br>Theo dõi và chuẩn bị kích hoạt kịch bản tiết kiệm điện]
+    F --> F1[Khuyến nghị: CONTINUE_MONITORING<br>Tiếp tục giám sát bình thường]
+</pre>
+<h3 id="chi-tiet-cac-cap-o-quyet-inh">Chi tiết các Cấp độ Quyết định:</h3>
+<ol>
+<li><strong>Cấp độ NORMAL (Bình thường)</strong>:<ul>
+<li><em>Điều kiện</em>: <code>predicted_value</code> &lt; Ngưỡng Warning.</li>
+<li><em>Khuyến nghị</em>: <code>CONTINUE_MONITORING</code> - Hệ thống hoạt động trong vùng xanh an toàn, tiếp tục duy trì trạng thái đo đạc.</li>
+</ul>
+</li>
+<li><strong>Cấp độ WARNING (Cảnh báo)</strong>:<ul>
+<li><em>Điều kiện</em>: Ngưỡng Warning $\le$ <code>predicted_value</code> &lt; Ngưỡng High.</li>
+<li><em>Khuyến nghị</em>: <code>MONITOR_AND_PREPARE_ENERGY_SAVING_ACTION</code> - Phụ tải bắt đầu vượt trung bình lịch sử. Hệ thống chuẩn bị sẵn kịch bản dịch chuyển phụ tải hoặc tắt bớt bóng đèn không dùng.</li>
+</ul>
+</li>
+<li><strong>Cấp độ HIGH (Rủi ro cao)</strong>:<ul>
+<li><em>Điều kiện</em>: Ngưỡng High $\le$ <code>predicted_value</code> &lt; Ngưỡng Critical.</li>
+<li><em>Khuyến nghị</em>: <code>REDUCE_NON_CRITICAL_LOAD_OR_CHECK_HVAC</code> - Phụ tải ở mức rất cao. Đề xuất tự động tắt các thiết bị không thiết yếu (bình nước nóng, máy sấy) hoặc chuyển điều hòa sang chế độ tiết kiệm điện (Eco mode) để hạ phụ tải tổng.</li>
+</ul>
+</li>
+<li><strong>Cấp độ CRITICAL (Rủi ro tới hạn)</strong>:<ul>
+<li><em>Điều kiện</em>: <code>predicted_value</code> $\ge$ Ngưỡng Critical.</li>
+<li><em>Khuyến nghị</em>: <code>HUMAN_CHECK_BEFORE_ACTUATOR_CONTROL</code> - Dự báo quá tải nghiêm trọng đe dọa an toàn aptomat tổng. Yêu cầu cảnh báo khẩn cấp tới ứng dụng của người dùng hoặc kỹ sư vận hành tòa nhà kiểm tra thủ công trước khi kích hoạt rơ-le ngắt nguồn thiết bị công suất lớn nhằm tránh ngắt nguồn đột ngột ngoài ý muốn.</li>
+</ul>
+</li>
+</ol>
+<hr />
+<h2 id="3-cau-truc-luu-tru-nhat-ky-du-bao-forecast_logcsv">3. Cấu trúc lưu trữ Nhật ký dự báo <code>forecast_log.csv</code></h2>
+<p>Nhật ký dự báo là tài sản dữ liệu vô giá. Nó ghi lại toàn bộ lịch sử suy diễn của mô hình thời gian thực để phục vụ quá trình hậu kiểm (backtesting), đối soát sai số thực tế và phát hiện hiện tượng lệch mô hình (model drift).</p>
+<p>Mỗi hàng dữ liệu trong <code>forecast_log.csv</code> có schema cấu trúc như sau:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Tên Cột</th>
+<th style="text-align: left;">Ý nghĩa chi tiết</th>
+<th style="text-align: left;">Ví dụ</th>
+<th style="text-align: left;">Tác dụng trong đối soát AIoT</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong><code>timestamp</code></strong></td>
+<td style="text-align: left;">Thời mốc thực hiện dự báo</td>
+<td style="text-align: left;">2016-04-12 14:20:00</td>
+<td style="text-align: left;">Trục thời gian đối chiếu kết quả.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>actual_value</code></strong></td>
+<td style="text-align: left;"><strong>Giá trị thực tế</strong> đo được sau đó</td>
+<td style="text-align: left;">90.0</td>
+<td style="text-align: left;">Dùng làm nhãn đối chuẩn (ground-truth).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>predicted_value</code></strong></td>
+<td style="text-align: left;"><strong>Giá trị mô hình dự báo</strong> trước đó</td>
+<td style="text-align: left;">95.42</td>
+<td style="text-align: left;">Kết quả suy diễn của mô hình.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>forecast_error</code></strong></td>
+<td style="text-align: left;">Sai số thực tế (Dự báo - Thực tế)</td>
+<td style="text-align: left;">5.42</td>
+<td style="text-align: left;">Đánh giá mô hình đoán lệch cao hay thấp tại điểm đó.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>abs_error</code></strong></td>
+<td style="text-align: left;">Trị tuyệt đối sai số</td>
+<td style="text-align: left;">5.42</td>
+<td style="text-align: left;">Tính toán trực tiếp MAE tức thời.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>risk_level</code></strong></td>
+<td style="text-align: left;">Phân cấp rủi ro an toàn gán nhãn</td>
+<td style="text-align: left;">WARNING</td>
+<td style="text-align: left;">Kiểm tra tính chính xác của bộ phân cấp rủi ro.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>recommendation</code></strong></td>
+<td style="text-align: left;">Hành động khuyến nghị phản hồi</td>
+<td style="text-align: left;">MONITOR...</td>
+<td style="text-align: left;">Kiểm tra logic nghiệp vụ điều khiển.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>reason</code></strong></td>
+<td style="text-align: left;">Giải thích chi tiết bằng tiếng Anh</td>
+<td style="text-align: left;">Predicted... thresholds are...</td>
+<td style="text-align: left;">Phục vụ Explainable AI (XAI) cho người dùng.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>model_version</code></strong></td>
+<td style="text-align: left;">Phiên bản mô hình được nạp</td>
+<td style="text-align: left;">gradient_boosting_advanced_v1</td>
+<td style="text-align: left;">Hỗ trợ đối soát kiểm thử A/B nhiều phiên bản model.</td>
+</tr>
+</tbody>
+</table>
+<p>Nhờ có file log này, kỹ sư AIoT có thể lập lịch định kỳ (ví dụ cuối mỗi tuần) chạy một script tự động tính toán lại MAE/RMSE trên toàn bộ file log của tuần đó. Nếu thấy sai số tăng vọt so với lúc huấn luyện offline, đó là chỉ báo rõ ràng cho thấy môi trường sinh hoạt của ngôi nhà đã thay đổi và hệ thống cần kích hoạt quy trình tái huấn luyện mô hình (Model Retraining).</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            © 2026 - Lab 4 AIoT Forecasting & Predictive Analytics - Tài liệu Đào tạo Chuyên sâu
+        </div>
+    </div>
+
+</body>
+</html>

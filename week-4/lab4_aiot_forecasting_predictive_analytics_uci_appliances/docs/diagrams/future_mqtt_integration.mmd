@@ -1,0 +1,16 @@
+graph TD
+    %% Future MQTT Integration
+    subgraph "Edge Device"
+        A[ESP32 Smart Meter] -->|1. Publish raw telemetry| B[MQTT Broker: EMQX]
+    end
+
+    subgraph "AI Cloud Gateway"
+        B -->|2. Subscribe topic| C[MQTT Listener Bridge]
+        C -->|3. HTTP POST /forecast| D[FastAPI Server]
+        D -->|4. predicted_value & Risk| E[Decision Layer]
+        E -->|5. Publish command topic| B
+    end
+
+    subgraph "Actuation"
+        B -->|6. Subscribe command| F[Smart Plug Relay]
+    end

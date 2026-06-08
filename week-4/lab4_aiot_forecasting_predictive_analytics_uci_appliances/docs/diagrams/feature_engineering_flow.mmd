@@ -1,0 +1,16 @@
+graph TD
+    %% Feature Engineering Flow
+    A[Telemetry thô: Appliances, Sensors] --> B{make_supervised_frame}
+    
+    B --> C[1. add_time_features]
+    C --> C1[Tính hour, dayofweek, month]
+    C1 --> C2[Biến đổi lượng giác Sin/Cos]
+    
+    B --> D[2. add_lag_rolling_features]
+    D --> D1[Tính Lag 1, 2, 3, 6, 12, 24]
+    D --> D2[Tính Rolling Mean & Std 3, 6, 12, 24]
+    D --> D3[Tính Delta 1, 3, 6 sai phân]
+    
+    C2 & D1 & D2 & D3 --> E[Ma trận đặc trưng đầy đủ FEATURE_COLUMNS]
+    E --> F{clean_supervised_frame}
+    F -->|Xóa các dòng NaN biên| G[Ma trận dữ liệu toán học sạch sẽ]

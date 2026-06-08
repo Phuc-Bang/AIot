@@ -1,0 +1,23 @@
+graph TD
+    %% Deployment Architecture
+    subgraph "Client / Edge"
+        A[test_api.py / test_api_local.py]
+    end
+
+    subgraph "Server API Gateway"
+        B[FastAPI Application - app.py]
+        C[RAM Memory / joblib Bundle]
+    end
+
+    subgraph "Local Storage / Disk"
+        D[(forecast_model_bundle_v1.joblib)]
+        E[(forecast_metrics.json)]
+        F[(forecast_log.csv)]
+    end
+
+    A -->|HTTP POST Request| B
+    D -->|Nạp khi Cold start| C
+    C -->|Thực thi suy diễn| B
+    B -->|Lưu kết quả dự báo| F
+    B -->|Trả kết quả JSON| A
+    E -->|Đọc sai số| B

@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>01. Kiến trúc hệ thống AIoT - Lab 4 AIoT Energy Forecasting</title>
+    <style>
+        
+:root {
+    --primary: #4f46e5;
+    --primary-light: #e0e7ff;
+    --primary-hover: #4338ca;
+    --text-dark: #0f172a;
+    --text-muted: #64748b;
+    --bg-slate: #f8fafc;
+    --bg-sidebar: #0f172a;
+    --border-slate: #e2e8f0;
+    --code-bg: #1e293b;
+    --inline-code-bg: #f1f5f9;
+    --inline-code-color: #e11d48;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: var(--text-dark);
+    background-color: var(--bg-slate);
+    line-height: 1.6;
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Sidebar Navigation */
+.sidebar {
+    width: 320px;
+    background-color: var(--bg-sidebar);
+    color: #f8fafc;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 100;
+    box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+}
+
+.sidebar-header {
+    padding: 24px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.sidebar-header h1 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sidebar-header .badge {
+    background-color: var(--primary);
+    color: white;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 9999px;
+    font-weight: 600;
+    margin-top: 4px;
+    display: inline-block;
+}
+
+.sidebar-nav {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 0;
+}
+
+.sidebar-nav-item {
+    display: block;
+    padding: 12px 24px;
+    color: #cbd5e1;
+    text-decoration: none;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    border-left: 4px solid transparent;
+}
+
+.sidebar-nav-item:hover {
+    background-color: rgba(255,255,255,0.05);
+    color: #ffffff;
+    padding-left: 28px;
+}
+
+.sidebar-nav-item.active {
+    background-color: rgba(79, 70, 229, 0.15);
+    color: #ffffff;
+    border-left-color: var(--primary);
+    font-weight: 600;
+}
+
+.sidebar-footer {
+    padding: 16px 24px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    font-size: 11px;
+    color: #94a3b8;
+    text-align: center;
+}
+
+/* Main Content Area */
+.main-wrapper {
+    margin-left: 320px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.top-bar {
+    background-color: #ffffff;
+    border-bottom: 1px solid var(--border-slate);
+    padding: 16px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 90;
+}
+
+.top-bar-title {
+    font-size: 14px;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.top-bar-links a {
+    color: var(--primary);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.top-bar-links a:hover {
+    color: var(--primary-hover);
+    text-decoration: underline;
+}
+
+.content-container {
+    flex: 1;
+    padding: 48px 64px 80px 64px;
+    max-width: 1012px;
+    width: 100%;
+    margin: 0 auto;
+    background-color: #ffffff;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    border-radius: 8px;
+    margin-top: 24px;
+    margin-bottom: 24px;
+}
+
+/* Markdown Styling */
+.markdown-body h1 {
+    font-size: 32px;
+    font-weight: 800;
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--border-slate);
+    color: #0f172a;
+}
+
+.markdown-body h2 {
+    font-size: 22px;
+    font-weight: 700;
+    margin-top: 36px;
+    margin-bottom: 16px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border-slate);
+    color: #1e293b;
+}
+
+.markdown-body h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-top: 28px;
+    margin-bottom: 12px;
+    color: #334155;
+}
+
+.markdown-body h4 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-top: 20px;
+    margin-bottom: 8px;
+    color: #475569;
+}
+
+.markdown-body p {
+    margin-bottom: 16px;
+    color: #334155;
+    text-align: justify;
+}
+
+.markdown-body ul, .markdown-body ol {
+    margin-bottom: 16px;
+    padding-left: 24px;
+}
+
+.markdown-body li {
+    margin-bottom: 8px;
+    color: #334155;
+}
+
+.markdown-body a {
+    color: var(--primary);
+    text-decoration: none;
+    transition: color 0.15s;
+    font-weight: 500;
+}
+
+.markdown-body a:hover {
+    color: var(--primary-hover);
+    text-decoration: underline;
+}
+
+/* Blockquotes */
+.markdown-body blockquote {
+    padding: 12px 24px;
+    border-left: 4px solid var(--border-slate);
+    background-color: var(--bg-slate);
+    margin-bottom: 20px;
+    font-style: italic;
+    color: var(--text-muted);
+}
+
+/* Code block styling */
+.markdown-body pre {
+    background-color: var(--code-bg);
+    padding: 16px;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin-bottom: 20px;
+}
+
+.markdown-body pre code {
+    background-color: transparent;
+    color: #f8fafc;
+    padding: 0;
+    border-radius: 0;
+    font-size: 13.5px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+.markdown-body code {
+    background-color: var(--inline-code-bg);
+    color: var(--inline-code-color);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 85%;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+/* Table styling */
+.markdown-body table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 24px;
+    font-size: 14.5px;
+}
+
+.markdown-body th, .markdown-body td {
+    padding: 12px 16px;
+    border: 1px solid var(--border-slate);
+}
+
+.markdown-body th {
+    background-color: var(--bg-slate);
+    font-weight: 600;
+    text-align: left;
+    color: #1e293b;
+}
+
+.markdown-body tr:nth-child(even) {
+    background-color: #fafbfd;
+}
+
+/* Custom Alert Boxes (GitHub Alerts mapping) */
+.alert {
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    border-radius: 8px;
+    border-left-width: 4px;
+    border-left-style: solid;
+}
+
+.alert-title {
+    font-weight: 700;
+    margin-bottom: 8px;
+    font-size: 14.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.alert-content p {
+    margin-bottom: 0 !important;
+    font-size: 14px;
+    text-align: justify;
+}
+
+.alert-note {
+    background-color: #eff6ff;
+    border-left-color: #3b82f6;
+    color: #1e40af;
+}
+.alert-note .alert-title { color: #1d4ed8; }
+
+.alert-tip {
+    background-color: #f0fdf4;
+    border-left-color: #22c55e;
+    color: #166534;
+}
+.alert-tip .alert-title { color: #15803d; }
+
+.alert-important {
+    background-color: #faf5ff;
+    border-left-color: #a855f7;
+    color: #6b21a8;
+}
+.alert-important .alert-title { color: #7e22ce; }
+
+.alert-warning {
+    background-color: #fffbeb;
+    border-left-color: #f59e0b;
+    color: #92400e;
+}
+.alert-warning .alert-title { color: #b45309; }
+
+.alert-caution {
+    background-color: #fef2f2;
+    border-left-color: #ef4444;
+    color: #991b1b;
+}
+.alert-caution .alert-title { color: #b91c1c; }
+
+/* Mermaid Styling */
+.mermaid {
+    background-color: white !important;
+    border: 1px solid var(--border-slate);
+    border-radius: 8px;
+    padding: 24px;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 24px;
+    overflow-x: auto;
+}
+
+.footer {
+    background-color: #ffffff;
+    border-top: 1px solid var(--border-slate);
+    padding: 24px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: auto;
+}
+
+/* Landing Page Grid */
+.landing-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    margin-top: 24px;
+}
+
+.landing-card {
+    background-color: #ffffff;
+    border: 1px solid var(--border-slate);
+    border-radius: 8px;
+    padding: 20px;
+    text-decoration: none;
+    color: var(--text-dark);
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.landing-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);
+    border-color: var(--primary);
+}
+
+.landing-card h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.landing-card p {
+    font-size: 13.5px;
+    color: var(--text-muted);
+    margin-bottom: 0;
+    text-align: left;
+}
+
+@media (max-width: 1024px) {
+    .sidebar {
+        display: none; /* simple hides sidebar for tablet/mobile to keep script clean */
+    }
+    .main-wrapper {
+        margin-left: 0;
+    }
+    .content-container {
+        padding: 24px;
+        margin-top: 0;
+        margin-bottom: 0;
+        border-radius: 0;
+    }
+}
+
+    </style>
+    <!-- Mermaid.js for drawing diagrams directly in the browser -->
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            securityLevel: 'loose',
+            flowchart: { useMaxWidth: true, htmlLabels: true }
+        });
+    </script>
+</head>
+<body>
+
+    <!-- Left Sidebar Navigation -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h1>🔋 Lab 4 AIoT</h1>
+            <div class="badge">Energy Forecasting</div>
+        </div>
+        <div class="sidebar-nav">
+                    <a href="index.html" class="sidebar-nav-item ">🏡 Trang chủ / Tổng mục lục</a>
+        <a href="00_project_overview.html" class="sidebar-nav-item ">00. Tổng quan dự án</a>
+        <a href="01_architecture.html" class="sidebar-nav-item active">01. Kiến trúc hệ thống AIoT</a>
+        <a href="02_data_flow.html" class="sidebar-nav-item ">02. Luồng dữ liệu tuần tự</a>
+        <a href="03_runtime_and_dependencies.html" class="sidebar-nav-item ">03. Luồng thực thi & Phụ thuộc</a>
+        <a href="04_dataset_and_schema.html" class="sidebar-nav-item ">04. Tập dữ liệu & Điền khuyết</a>
+        <a href="05_feature_engineering.html" class="sidebar-nav-item ">05. Kỹ nghệ đặc trưng thời gian</a>
+        <a href="06_model_training_and_metrics.html" class="sidebar-nav-item ">06. Mô hình hóa & Đo lường sai số</a>
+        <a href="07_decision_layer.html" class="sidebar-nav-item ">07. Tầng ra quyết định & Cảnh báo</a>
+        <a href="08_api_forecast_workflow.html" class="sidebar-nav-item ">08. Triển khai API FastAPI</a>
+        <a href="09_code_review.html" class="sidebar-nav-item ">09. Đánh giá chất lượng mã nguồn</a>
+        <a href="10_safety_fail_safe.html" class="sidebar-nav-item ">10. An toàn & Cơ chế Fail-safe</a>
+        <a href="11_development_roadmap.html" class="sidebar-nav-item ">11. Lộ trình phát triển & Học tập</a>
+        <a href="HANDBOOK.html" class="sidebar-nav-item ">📖 Sách hướng dẫn kỹ thuật (Handbook)</a>
+        </div>
+        <div class="sidebar-footer">
+            Designed by DeepMind Team & Antigravity AI
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="main-wrapper">
+        <div class="top-bar">
+            <div class="top-bar-title">Tài liệu Kỹ thuật Hệ thống Dự báo Phụ tải Điện năng BEMS</div>
+            <div class="top-bar-links">
+                <a href="index.html">🏡 Quay lại Trang chủ</a>
+            </div>
+        </div>
+
+        <div style="padding: 0 40px; flex: 1;">
+            <div class="content-container markdown-body">
+                <h1 id="kien-truc-he-thong-aiot-du-bao-phu-tai-ien-thong-minh">KIẾN TRÚC HỆ THỐNG AIoT DỰ BÁO PHỤ TẢI ĐIỆN THÔNG MINH</h1>
+<p>Hệ thống dự báo phụ tải năng lượng (Load Forecasting) trong một ngôi nhà thông minh hoặc tòa nhà thương mại đòi hỏi sự phối hợp nhịp nhàng giữa thiết bị phần cứng cảm biến và hạ tầng phần mềm phân tích dữ liệu chuỗi thời gian.</p>
+<p>Tài liệu này trình bày chi tiết kiến trúc phân tầng chuyên sâu của dự án <strong>Lab 4</strong>, phân tích nơi trí tuệ nhân tạo (AI) vận hành, cách hệ thống ánh xạ vào thực tế tòa nhà thông minh, và kịch bản mở rộng tích hợp phần cứng ESP32 qua giao thức MQTT.</p>
+<hr />
+<h2 id="1-so-o-kien-truc-tong-the-high-level-architecture-diagram">1. Sơ đồ Kiến trúc Tổng thể (High-Level Architecture Diagram)</h2>
+<p>Dưới đây là sơ đồ Mermaid mô tả chi tiết kiến trúc phân tầng tích hợp đa lớp của hệ thống AIoT từ tầng thu thập dữ liệu biên cho đến tầng hiển thị và ra quyết định:</p>
+<pre class="mermaid">graph TD
+    subgraph "1. Dataset Layer (Tập dữ liệu)"
+        A1[UCI Appliances Energy CSV]
+        A2[Offline Fallback Sample CSV]
+    end
+
+    subgraph "2. Preprocessing Layer (Tiền xử lý)"
+        B1[date to datetime64]
+        B2[Sorting & Deduplication]
+        B3[Raw Imputation: raw_medians]
+    end
+
+    subgraph "3. Feature Engineering Layer (Kỹ nghệ đặc trưng)"
+        C1[Lag Features: t-1 to t-24]
+        C2[Rolling Features: mean, std]
+        C3[Delta Features: diff]
+        C4[Cyclic Time Features: sin/cos]
+    end
+
+    subgraph "4. Forecasting Model Layer (Mô hình dự báo)"
+        D1[Last Value & MA Baselines]
+        D2[Linear Regression + Scaler]
+        D3[Random Forest Regressor]
+        D4[Gradient Boosting Advanced]
+    end
+
+    subgraph "5. Evaluation Layer (Đánh giá sai số)"
+        E1[Time-series Split 75/25]
+        E2[MAE / RMSE / MAPE / Bias]
+        E3[forecast_metrics.json]
+    end
+
+    subgraph "6. Decision & Risk Layer (Quyết định & An toàn)"
+        F1[Statistical Quantile Thresholds]
+        F2[Risk Level: Normal, Warning, High, Critical]
+        F3[Recommendation: continue, reduce, human-confirm]
+        F4[Safety Note / Rules Constraint]
+    end
+
+    subgraph "7. API Layer (FastAPI Microservice)"
+        G1[POST /forecast]
+        G2[GET /health & /model-info]
+        G3[forecast_log.csv Logging]
+    end
+
+    subgraph "8. Dashboard Integration Layer (Giao diện & Giám sát)"
+        H1[Smart Home Mobile App]
+        H2[Grafana Telemetry Dashboard]
+        H3[Web UI HMI Control Center]
+    end
+
+    %% Data flow mapping
+    A1 & A2 --> B1
+    B1 --> B2
+    B2 --> B3
+    B3 -->|Raw Cleaned DataFrame| C1 & C2 & C3 & C4
+    C1 & C2 & C3 & C4 -->|Supervised Feature Matrix| D1 & D2 & D3 & D4
+    D1 & D2 & D3 & D4 --> E1
+    E1 --> E2
+    E2 --> E3
+    D4 -->|Best Model Output: predicted_value| F1
+    F1 --> F2
+    F2 --> F3
+    F3 --> F4
+    G1 -->|Validate Payload| B3
+    G1 -->|Execute Pipeline| F4
+    F4 -->|JSON Response| H1 & H2 & H3
+    G3 -->|Store predictions & metrics| H2
+</pre>
+<hr />
+<h2 id="2-giai-thich-chi-tiet-tung-lop-kien-truc-eight-layer-explanation">2. Giải thích Chi tiết Từng Lớp Kiến trúc (Eight-Layer Explanation)</h2>
+<p>Kiến trúc hệ thống của Lab 4 được chia thành 8 lớp chức năng độc lập, có ranh giới module rõ ràng:</p>
+<h3 id="1-dataset-layer-lop-du-lieu-nguon">1. Dataset Layer (Lớp dữ liệu nguồn)</h3>
+<ul>
+<li><strong>Chức năng</strong>: Cung cấp nguồn dữ liệu thô đầu vào phản ánh hoạt động tiêu thụ năng lượng thực tế.</li>
+<li><strong>Trong bài Lab</strong>: Bao gồm tệp dữ liệu chính thống từ kho UCI <code>energydata_complete.csv</code> (nếu tải online) hoặc tệp fallback offline <code>sample_energydata_complete.csv</code> đặt trong thư mục <code>data/</code>. Dữ liệu chứa các mốc thời gian cách nhau 10 phút, lượng điện tiêu thụ của thiết bị (<code>Appliances</code>) và các thông số cảm biến môi trường.</li>
+</ul>
+<h3 id="2-preprocessing-layer-lop-tien-xu-ly-lam-sach">2. Preprocessing Layer (Lớp tiền xử lý &amp; làm sạch)</h3>
+<ul>
+<li><strong>Chức năng</strong>: Chuẩn hóa kiểu dữ liệu, bảo đảm tính tuần tự của chuỗi thời gian và loại bỏ nhiễu.</li>
+<li><strong>Trong bài Lab</strong>: Cài đặt trong hàm <code>load_dataset()</code> và <code>fill_missing_for_api()</code>. Nó chuyển cột <code>date</code> sang kiểu datetime, sắp xếp tăng dần, xóa các dòng trùng lặp mốc thời gian và điền các giá trị cảm biến bị thiếu bằng bộ trung vị thô <code>raw_medians</code> được lưu từ quá trình huấn luyện.</li>
+</ul>
+<h3 id="3-feature-engineering-layer-lop-ky-nghe-ac-trung">3. Feature Engineering Layer (Lớp kỹ nghệ đặc trưng)</h3>
+<ul>
+<li><strong>Chức năng</strong>: Chuyển đổi dữ liệu cảm biến thô tĩnh thành các đặc trưng chuỗi thời gian động biểu diễn xu hướng lịch sử và tính tuần hoàn sinh hoạt.</li>
+<li><strong>Trong bài Lab</strong>: Cài đặt trong hàm <code>add_time_features()</code> và <code>add_lag_rolling_features()</code>. Nó tạo ra:<ul>
+<li><strong>Lag features</strong>: Lượng điện tiêu thụ ở các thời điểm trước ($t-1$, $t-2...$ lên tới 4 tiếng trước).</li>
+<li><strong>Rolling features</strong>: Trung bình trượt và độ lệch chuẩn của lượng điện trong các cửa sổ 30 phút, 1 tiếng, 2 tiếng, 4 tiếng gần nhất.</li>
+<li><strong>Delta features</strong>: Gia tốc thay đổi phụ tải điện năng.</li>
+<li><strong>Cyclic Time features</strong>: Phép quay lượng giác Sin/Cos của giờ trong ngày và ngày trong tuần để bảo toàn khoảng cách thời gian liền kề (ví dụ: mốc 23:50 tối rất gần 00:10 sáng hôm sau).</li>
+</ul>
+</li>
+</ul>
+<h3 id="4-forecasting-model-layer-lop-mo-hinh-du-bao">4. Forecasting Model Layer (Lớp mô hình dự báo)</h3>
+<ul>
+<li><strong>Chức năng</strong>: Thực hiện suy luận toán học từ véc-tơ đặc trưng đầu vào để ngoại suy giá trị phụ tải điện tiêu thụ trong 10 phút tiếp theo.</li>
+<li><strong>Trong bài Lab</strong>: Cài đặt trong <code>train_forecast.py</code> và nạp phục vụ trong <code>app.py</code>. Nó chứa đồng thời các mô hình Baseline để đối chứng (<code>Last Value</code>, <code>Moving Average 6</code>) và các mô hình Học máy từ tuyến tính đơn giản đến phi tuyến phức tạp (<code>Linear Regression</code>, <code>Random Forest</code>, <code>Gradient Boosting</code>). Mô hình xuất sắc nhất sẽ được chọn tự động để đưa vào sản xuất.</li>
+</ul>
+<h3 id="5-evaluation-layer-lop-anh-gia-sai-so-ngoai-tuyen">5. Evaluation Layer (Lớp đánh giá sai số ngoại tuyến)</h3>
+<ul>
+<li><strong>Chức năng</strong>: Kiểm định nghiêm ngặt chất lượng dự báo của mô hình trước khi cho phép triển khai lên môi trường thực tế.</li>
+<li><strong>Trong bài Lab</strong>: Cài đặt trong hàm <code>time_split()</code> và <code>regression_metrics()</code>. Nó phân chia dữ liệu theo dòng thời gian (Time-series Split 75% huấn luyện quá khứ, 25% kiểm thử tương lai) để tránh rò rỉ dữ liệu, và tính toán 4 chỉ số sai số toán học: <strong>MAE, RMSE, MAPE, và Forecast Bias</strong>, lưu kết quả tại <code>outputs/forecast_metrics.json</code>.</li>
+</ul>
+<h3 id="6-decision-risk-layer-lop-quyet-inh-phan-cap-rui-ro">6. Decision &amp; Risk Layer (Lớp quyết định &amp; Phân cấp rủi ro)</h3>
+<ul>
+<li><strong>Chức năng</strong>: Ánh xạ giá trị dự báo năng lượng thô (Wh) sang các hành động vận hành an toàn trong thực tế tòa nhà.</li>
+<li><strong>Trong bài Lab</strong>: Cài đặt trong hàm <code>risk_from_prediction()</code> và <code>recommendation_from_risk()</code>. Sử dụng các ngưỡng phân vị xác suất ($70\%, 90\%, 97\%$) từ tập huấn luyện để xếp hạng rủi ro (<strong>NORMAL, WARNING, HIGH, CRITICAL</strong>) kèm khuyến nghị tương ứng (<strong>CONTINUE, REDUCE, HUMAN_CONFIRM</strong>). Lớp này tích hợp cảnh báo an toàn (<code>safety_note</code>) yêu cầu con người phê duyệt trước khi kích hoạt bộ chấp hành.</li>
+</ul>
+<h3 id="7-api-layer-lop-dich-vu-phuc-vu-truc-tuyen">7. API Layer (Lớp dịch vụ phục vụ trực tuyến)</h3>
+<ul>
+<li><strong>Chức năng</strong>: Phơi mô hình học máy ra môi trường mạng dưới dạng Web Service để tiếp nhận dữ liệu thời gian thực và trả kết quả tức thời.</li>
+<li><strong>Trong bài Lab</strong>: Cài đặt trong file <code>src/app.py</code> sử dụng thư viện <strong>FastAPI</strong>. API thực hiện nạp tệp <code>.joblib</code> khi khởi động (cold start), cung cấp các endpoint <code>/health</code> (kiểm tra trạng thái), <code>/model-info</code> (thông tin mô hình &amp; sai số) và <code>/forecast</code> (suy diễn thời gian thực từ dữ liệu lịch sử thô gửi lên), đồng thời ghi nhật ký dự báo đồng thời vào file nhật ký hệ thống <code>forecast_log.csv</code>.</li>
+</ul>
+<h3 id="8-dashboard-integration-layer-lop-giao-dien-giam-sat">8. Dashboard Integration Layer (Lớp giao diện &amp; Giám sát)</h3>
+<ul>
+<li><strong>Chức năng</strong>: Trực quan hóa dữ liệu đo đạc cảm biến và kết quả dự báo của mô hình để người dùng hoặc kỹ sư tòa nhà dễ dàng theo dõi.</li>
+<li><strong>Trong bài Lab</strong>: Được biểu diễn thông qua các tệp xuất bản đồ thị trong <code>figures/</code> (như biểu đồ so sánh thực tế vs dự báo, sai số theo thời gian và so sánh mô hình), tương đương với việc tích hợp các đồ thị này lên các hệ thống hiển thị trực quan chuyên dụng như <strong>Grafana</strong> hay giao diện ứng dụng Smart Home trên điện thoại.</li>
+</ul>
+<hr />
+<h2 id="3-tri-tue-nhan-tao-ai-song-o-au-trong-he-thong">3. Trí tuệ Nhân tạo (AI) "Sống" ở Đâu trong Hệ thống?</h2>
+<p>Trong kiến trúc hệ thống AIoT của Lab 4, Trí tuệ nhân tạo (AI/ML) không phải là một thực thể chạy tự do mà "sống" tập trung tại <strong>hai trạng thái vận hành cụ thể</strong>:</p>
+<pre class="mermaid">graph LR
+    subgraph "A. Trạng thái Huấn luyện Ngoại tuyến (Offline Training)"
+        A1[train_forecast.py] -->|Đọc dữ liệu lịch sử| A2[Trích xuất Đặc trưng]
+        A2 -->|Học trọng số tuyến tính / Chia nhánh cây quyết định / Sửa sai Gradient| A3[Tạo Model Bundle .joblib]
+    end
+
+    subgraph "B. Trạng thái Suy diễn Trực tuyến (Online Serving)"
+        B1[app.py FastAPI] -->|Nạp Model từ RAM| B2[Chờ Request POST /forecast]
+        B2 -->|Tính đặc trưng động tại điểm t| B3[Inference: model.predict]
+        B3 -->|Trả kết quả dự báo Wh| B4[Decision Layer]
+    end
+
+    A3 -->|Deploy| B1
+</pre>
+<h3 id="1-noi-tru-ngu-trong-giai-oan-huan-luyen-ngoai-tuyen-offline-training-phase">1. Nơi trú ngụ trong giai đoạn Huấn luyện Ngoại tuyến (Offline Training Phase)</h3>
+<ul>
+<li><strong>AI sống trong</strong>: File <code>src/train_forecast.py</code>.</li>
+<li><strong>Bản chất toán học</strong>: AI học hỏi cấu trúc tự tương quan từ dữ liệu quá khứ.<ul>
+<li>Đối với <em>Linear Regression</em>, AI sống trong <strong>ma trận hệ số trọng số $W$ và hệ số chặn $b$</strong> tìm được sau khi giải bài toán tối ưu hóa bình phương tối thiểu (OLS).</li>
+<li>Đối với <em>Random Forest</em> và <em>Gradient Boosting</em>, AI sống trong <strong>cấu trúc phân nhánh phân cấp của hàng trăm cây quyết định</strong> (chứa các quy tắc cắt ngưỡng đặc trưng $X_j &gt; \text{threshold}$).</li>
+</ul>
+</li>
+<li><strong>Đóng gói</strong>: Toàn bộ các tri thức toán học này được đóng băng (serialized) và lưu xuống ổ đĩa thành file nhị phân <code>models/forecast_model_bundle_v1.joblib</code>.</li>
+</ul>
+<h3 id="2-noi-hoat-ong-trong-giai-oan-phuc-vu-truc-tuyen-online-serving-phase">2. Nơi hoạt động trong giai đoạn Phục vụ Trực tuyến (Online Serving Phase)</h3>
+<ul>
+<li><strong>AI sống trong</strong>: RAM của tiến trình FastAPI (<code>src/app.py</code>) khi nạp tệp <code>.joblib</code>.</li>
+<li><strong>Bản chất vận hành</strong>: Khi nhận được request <code>/forecast</code> chứa chuỗi dữ liệu thô lịch sử, AI thức tỉnh. Nó tiếp nhận các đặc trưng động thời gian thực tại mốc thời gian hiện tại $t$, thực hiện phép nhân ma trận (Linear Regression) hoặc duyệt qua hàng nghìn nút của các cây quyết định (Random Forest / Gradient Boosting) để suy diễn ra một con số dự báo Wh duy nhất cho 10 phút sau.</li>
+<li><strong>Lợi ích</strong>: Tách biệt pha huấn luyện (nặng nề, tốn tài nguyên) ra khỏi pha phục vụ (nhẹ nhàng, phản hồi tức thời &lt; 50ms) giúp AI chạy mượt mà ngay trên các máy tính nhúng biên hoặc Edge Gateway.</li>
+</ul>
+<hr />
+<h2 id="4-anh-xa-tu-bai-lab-en-he-thong-van-hanh-ien-toa-nha-thuc-te">4. Ánh xạ từ Bài Lab đến Hệ thống Vận hành Điện Tòa nhà Thực tế</h2>
+<p>Dự án <strong>Lab 4</strong> là một mô hình thu nhỏ hoàn hảo (Digital Twin) của một hệ thống quản lý năng lượng tòa nhà thông minh quy mô công nghiệp (BEMS - Building Energy Management System). Bảng dưới đây thể hiện sự tương thích ánh xạ $1:1$ giữa cấu phần bài Lab và hệ thống thực tế:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Cấu phần trong Lab 4</th>
+<th style="text-align: left;">Tương đương trong Hệ thống Tòa nhà Thực tế (BEMS)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong><code>sample_energydata_complete.csv</code></strong></td>
+<td style="text-align: left;">Cơ sở dữ liệu lịch sử chuỗi thời gian lưu trữ tập trung (ví dụ: <strong>InfluxDB</strong> hoặc <strong>TimescaleDB</strong>) ghi nhận hàng năm trời tiêu thụ điện của tòa nhà.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Cảm biến nhiệt độ/độ ẩm các phòng (<code>T1</code>-<code>T9</code>)</strong></td>
+<td style="text-align: left;">Mạng lưới cảm biến môi trường IoT không dây (chuẩn giao thức <strong>Zigbee/LoraWAN</strong>) lắp đặt tại từng văn phòng, phòng họp, hành lang tòa nhà.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Trạm thời tiết ngoài trời (<code>T_out</code>, <code>Windspeed</code>...)</strong></td>
+<td style="text-align: left;">API dịch vụ dự báo thời tiết khí tượng thủy văn thời gian thực (ví dụ: <strong>OpenWeatherMap API</strong>) tích hợp trực tiếp vào hệ thống.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>train_forecast.py</code></strong></td>
+<td style="text-align: left;">Pipeline tự động hóa huấn luyện mô hình (ML Pipeline) chạy định kỳ mỗi tuần một lần trên Cloud Server hoặc máy chủ ảo AWS/Azure EC2.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>app.py</code> (FastAPI /forecast)</strong></td>
+<td style="text-align: left;">Máy chủ phân tích thông minh đặt tại phòng điều khiển trung tâm (Edge Gateway) chạy liên tục $24/7$ để đưa ra dự báo phụ tải ngắn hạn.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>forecast_log.csv</code></strong></td>
+<td style="text-align: left;">Nhật ký vận hành (Audit Log DB) dùng để đối soát sai lệch công suất, vẽ đồ thị giám sát độ lệch mô hình (Model Drift) phục vụ đội ngũ kỹ sư vận hành.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>risk_level</code> &amp; <code>recommendation</code></strong></td>
+<td style="text-align: left;">Bộ điều khiển tối ưu hóa phụ tải (Load Shedding Controller) đưa ra các tín hiệu điều khiển tòa nhà.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>figures/</code> (forecast_vs_actual.png...)</strong></td>
+<td style="text-align: left;">Giao diện giám sát vận hành trung tâm <strong>Grafana Dashboard</strong> hiển thị công suất dự báo vs thực tế cho giám đốc quản lý tòa nhà theo dõi.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="5-kich-ban-mo-rong-tich-hop-phan-cung-esp32-mqtt-va-telemetry-thuc-te">5. Kịch bản Mở rộng: Tích hợp Phần cứng ESP32, MQTT và Telemetry Thực tế</h2>
+<p>Để nâng cấp dự án Lab 4 từ mô hình giả lập offline thành một hệ thống AIoT chạy thực tế với thiết bị phần cứng, ta cần tích hợp thêm chip nhúng <strong>ESP32</strong> và giao thức truyền tin <strong>MQTT</strong>:</p>
+<pre class="mermaid">graph TD
+    subgraph "Thiết bị Biên (Edge Hardware)"
+        A[Cảm biến CT - Đo Dòng Điện] -->|Đọc tín hiệu Analog| B[Vi điều khiển ESP32]
+        C[Cảm biến DHT22 - Đo T & RH] -->|Đọc tín hiệu Digital| B
+    end
+
+    subgraph "Hạ tầng Truyền thông (MQTT Ingestion)"
+        B -->|Mạng Wi-Fi: Gửi JSON Payload| D[MQTT Broker - EMQX / Mosquitto]
+        D -->|Giao thức MQTT Client| E[Bridge Service - Kafka hoặc MQTT Listener]
+    end
+
+    subgraph "Hạ tầng Phân tích & AI Server"
+        E -->|Lưu trữ dữ liệu thô| F[(TimescaleDB)]
+        E -->|Gọi API thời gian thực| G[FastAPI /forecast app.py]
+        G -->|Trả kết quả dự báo & khuyến nghị| H[Decision Layer]
+        H -->|Gửi lệnh điều khiển ngược lại qua MQTT| D
+        D -->|Lệnh tắt/bật Smart Relay| B
+    end
+</pre>
+<h3 id="1-thay-oi-o-tang-thiet-bi-bien-esp32-edge-hardware">1. Thay đổi ở tầng thiết bị Biên (ESP32 Edge Hardware)</h3>
+<ul>
+<li><strong>Phần cứng</strong>: Lắp đặt vi điều khiển <strong>ESP32</strong> kết nối với cảm biến dòng điện <strong>non-invasive CT (SCT-013)</strong> kẹp vào dây nguồn tổng để đo công suất <code>Appliances</code> thời gian thực, và cảm biến <strong>DHT22</strong> để đo nhiệt độ/độ ẩm phòng.</li>
+<li><strong>Logic lập trình (C++ / MicroPython)</strong>: ESP32 được lập trình để cứ mỗi 10 phút một lần, nó thu thập dữ liệu cảm biến, đóng gói thành gói tin JSON thô:
+    <code>json
+    {
+      "date": "2026-05-26 07:45:00",
+      "Appliances": 120.0,
+      "lights": 10.0,
+      "T1": 25.4,
+      "RH_1": 60.2,
+      "T_out": 30.5
+    }</code></li>
+</ul>
+<h3 id="2-thay-oi-o-tang-truyen-thong-mqtt-ingestion">2. Thay đổi ở tầng truyền thông (MQTT Ingestion)</h3>
+<ul>
+<li><strong>Giao thức</strong>: Thay vì gọi HTTP POST trực tiếp lên FastAPI (giao thức HTTP nặng và tốn băng thông), ESP32 kết nối Wi-Fi và xuất bản (Publish) gói tin JSON trên vào một <strong>MQTT Topic</strong> (ví dụ: <code>smarthome/telemetry/raw</code>).</li>
+<li>Một <strong>MQTT Broker</strong> trung gian (như <em>EMQX</em> hoặc <em>Mosquitto</em>) chịu trách nhiệm phân phối gói tin này.</li>
+</ul>
+<h3 id="3-thay-oi-o-tang-ai-server-mqtt-bridge-listener">3. Thay đổi ở tầng AI Server (MQTT Bridge Listener)</h3>
+<ul>
+<li>Chúng ta viết thêm một dịch vụ phụ trợ <strong>MQTT Listener (Bridge)</strong> bằng Python. Dịch vụ này đăng ký (Subscribe) topic <code>smarthome/telemetry/raw</code>:<ol>
+<li>Khi nhận được tin nhắn MQTT thô từ ESP32 gửi lên, Listener lập tức lưu dữ liệu thô này vào Database chuỗi thời gian (<strong>TimescaleDB</strong>).</li>
+<li>Đồng thời, Listener truy vấn lịch sử 24 điểm gần nhất từ Database, gọi API <code>/forecast</code> của FastAPI để lấy kết quả dự báo, rủi ro và khuyến nghị.</li>
+<li>Nếu cấp độ rủi ro là <strong>HIGH</strong> hoặc <strong>CRITICAL</strong> và được con người phê duyệt: Listener xuất bản một tin nhắn điều khiển ngược lại vào topic lệnh (ví dụ: <code>smarthome/actuator/control</code> với payload <code>{"relay_state": "OFF"}</code>).</li>
+<li>ESP32 đăng ký topic lệnh này, nhận được tín hiệu và lập tức ngắt rơ-le vật lý (Smart Relay) kết nối với thiết bị để bảo vệ quá tải.</li>
+</ol>
+</li>
+</ul>
+            </div>
+        </div>
+
+        <div class="footer">
+            © 2026 - Lab 4 AIoT Forecasting & Predictive Analytics - Tài liệu Đào tạo Chuyên sâu
+        </div>
+    </div>
+
+</body>
+</html>

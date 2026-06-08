@@ -1,0 +1,38 @@
+LAB 4 v4 UPGRADE - LOCAL SMOKE TEST LOG
+Date: 2026-05-25
+Environment: sandbox, no guaranteed Internet access. Official UCI download may fall back to sample data.
+
+Commands executed:
+1) python src/prepare_datasets.py
+2) python src/train_classical_models.py
+3) python src/plot_results.py
+4) python src/compare_two_datasets.py
+5) python src/test_local_pipeline.py
+6) python src/train_lstm.py --datasets appliances --epochs 12 --hidden-size 32 --batch-size 128 --max-sequences 1200
+
+Classical pipeline result:
+LOCAL_PIPELINE_TEST_PASS
+
+LSTM optional run result:
+
+================================================================================
+Training optional LSTM for appliances
+================================================================================
+appliances epoch 01: train_loss=0.96667 val_loss=0.98051
+appliances epoch 02: train_loss=0.94114 val_loss=0.96871
+appliances epoch 03: train_loss=0.92066 val_loss=0.95475
+appliances epoch 04: train_loss=0.89624 val_loss=0.93726
+appliances epoch 05: train_loss=0.86705 val_loss=0.91600
+appliances epoch 06: train_loss=0.83465 val_loss=0.89427
+appliances epoch 07: train_loss=0.80244 val_loss=0.87535
+appliances epoch 08: train_loss=0.77307 val_loss=0.86119
+appliances epoch 09: train_loss=0.74641 val_loss=0.84900
+appliances epoch 10: train_loss=0.71935 val_loss=0.83259
+appliances epoch 11: train_loss=0.69099 val_loss=0.81101
+appliances epoch 12: train_loss=0.66344 val_loss=0.78519
+   dataset         model split       mae      rmse     mape       r2  bias_pred_minus_actual  epochs_ran  hidden_size  sequence_length
+appliances LSTM_optional  test 32.556875 47.133017 36.43376 0.206355               -5.924077          12           32               24
+
+Note:
+- The LSTM is intentionally included as an exploratory extension. It is not expected to always outperform classical baselines on small tabular time-series datasets.
+- Students should compare LSTM with Last Value, Ridge, Random Forest, and Gradient Boosting, then explain why a deeper model may or may not help.

@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📖 Sách hướng dẫn kỹ thuật (Handbook) - Lab 4 AIoT Energy Forecasting</title>
+    <style>
+        
+:root {
+    --primary: #4f46e5;
+    --primary-light: #e0e7ff;
+    --primary-hover: #4338ca;
+    --text-dark: #0f172a;
+    --text-muted: #64748b;
+    --bg-slate: #f8fafc;
+    --bg-sidebar: #0f172a;
+    --border-slate: #e2e8f0;
+    --code-bg: #1e293b;
+    --inline-code-bg: #f1f5f9;
+    --inline-code-color: #e11d48;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: var(--text-dark);
+    background-color: var(--bg-slate);
+    line-height: 1.6;
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Sidebar Navigation */
+.sidebar {
+    width: 320px;
+    background-color: var(--bg-sidebar);
+    color: #f8fafc;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 100;
+    box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+}
+
+.sidebar-header {
+    padding: 24px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.sidebar-header h1 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sidebar-header .badge {
+    background-color: var(--primary);
+    color: white;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 9999px;
+    font-weight: 600;
+    margin-top: 4px;
+    display: inline-block;
+}
+
+.sidebar-nav {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 0;
+}
+
+.sidebar-nav-item {
+    display: block;
+    padding: 12px 24px;
+    color: #cbd5e1;
+    text-decoration: none;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    border-left: 4px solid transparent;
+}
+
+.sidebar-nav-item:hover {
+    background-color: rgba(255,255,255,0.05);
+    color: #ffffff;
+    padding-left: 28px;
+}
+
+.sidebar-nav-item.active {
+    background-color: rgba(79, 70, 229, 0.15);
+    color: #ffffff;
+    border-left-color: var(--primary);
+    font-weight: 600;
+}
+
+.sidebar-footer {
+    padding: 16px 24px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    font-size: 11px;
+    color: #94a3b8;
+    text-align: center;
+}
+
+/* Main Content Area */
+.main-wrapper {
+    margin-left: 320px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.top-bar {
+    background-color: #ffffff;
+    border-bottom: 1px solid var(--border-slate);
+    padding: 16px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 90;
+}
+
+.top-bar-title {
+    font-size: 14px;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.top-bar-links a {
+    color: var(--primary);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.top-bar-links a:hover {
+    color: var(--primary-hover);
+    text-decoration: underline;
+}
+
+.content-container {
+    flex: 1;
+    padding: 48px 64px 80px 64px;
+    max-width: 1012px;
+    width: 100%;
+    margin: 0 auto;
+    background-color: #ffffff;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    border-radius: 8px;
+    margin-top: 24px;
+    margin-bottom: 24px;
+}
+
+/* Markdown Styling */
+.markdown-body h1 {
+    font-size: 32px;
+    font-weight: 800;
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--border-slate);
+    color: #0f172a;
+}
+
+.markdown-body h2 {
+    font-size: 22px;
+    font-weight: 700;
+    margin-top: 36px;
+    margin-bottom: 16px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border-slate);
+    color: #1e293b;
+}
+
+.markdown-body h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-top: 28px;
+    margin-bottom: 12px;
+    color: #334155;
+}
+
+.markdown-body h4 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-top: 20px;
+    margin-bottom: 8px;
+    color: #475569;
+}
+
+.markdown-body p {
+    margin-bottom: 16px;
+    color: #334155;
+    text-align: justify;
+}
+
+.markdown-body ul, .markdown-body ol {
+    margin-bottom: 16px;
+    padding-left: 24px;
+}
+
+.markdown-body li {
+    margin-bottom: 8px;
+    color: #334155;
+}
+
+.markdown-body a {
+    color: var(--primary);
+    text-decoration: none;
+    transition: color 0.15s;
+    font-weight: 500;
+}
+
+.markdown-body a:hover {
+    color: var(--primary-hover);
+    text-decoration: underline;
+}
+
+/* Blockquotes */
+.markdown-body blockquote {
+    padding: 12px 24px;
+    border-left: 4px solid var(--border-slate);
+    background-color: var(--bg-slate);
+    margin-bottom: 20px;
+    font-style: italic;
+    color: var(--text-muted);
+}
+
+/* Code block styling */
+.markdown-body pre {
+    background-color: var(--code-bg);
+    padding: 16px;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin-bottom: 20px;
+}
+
+.markdown-body pre code {
+    background-color: transparent;
+    color: #f8fafc;
+    padding: 0;
+    border-radius: 0;
+    font-size: 13.5px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+.markdown-body code {
+    background-color: var(--inline-code-bg);
+    color: var(--inline-code-color);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 85%;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+/* Table styling */
+.markdown-body table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 24px;
+    font-size: 14.5px;
+}
+
+.markdown-body th, .markdown-body td {
+    padding: 12px 16px;
+    border: 1px solid var(--border-slate);
+}
+
+.markdown-body th {
+    background-color: var(--bg-slate);
+    font-weight: 600;
+    text-align: left;
+    color: #1e293b;
+}
+
+.markdown-body tr:nth-child(even) {
+    background-color: #fafbfd;
+}
+
+/* Custom Alert Boxes (GitHub Alerts mapping) */
+.alert {
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    border-radius: 8px;
+    border-left-width: 4px;
+    border-left-style: solid;
+}
+
+.alert-title {
+    font-weight: 700;
+    margin-bottom: 8px;
+    font-size: 14.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.alert-content p {
+    margin-bottom: 0 !important;
+    font-size: 14px;
+    text-align: justify;
+}
+
+.alert-note {
+    background-color: #eff6ff;
+    border-left-color: #3b82f6;
+    color: #1e40af;
+}
+.alert-note .alert-title { color: #1d4ed8; }
+
+.alert-tip {
+    background-color: #f0fdf4;
+    border-left-color: #22c55e;
+    color: #166534;
+}
+.alert-tip .alert-title { color: #15803d; }
+
+.alert-important {
+    background-color: #faf5ff;
+    border-left-color: #a855f7;
+    color: #6b21a8;
+}
+.alert-important .alert-title { color: #7e22ce; }
+
+.alert-warning {
+    background-color: #fffbeb;
+    border-left-color: #f59e0b;
+    color: #92400e;
+}
+.alert-warning .alert-title { color: #b45309; }
+
+.alert-caution {
+    background-color: #fef2f2;
+    border-left-color: #ef4444;
+    color: #991b1b;
+}
+.alert-caution .alert-title { color: #b91c1c; }
+
+/* Mermaid Styling */
+.mermaid {
+    background-color: white !important;
+    border: 1px solid var(--border-slate);
+    border-radius: 8px;
+    padding: 24px;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 24px;
+    overflow-x: auto;
+}
+
+.footer {
+    background-color: #ffffff;
+    border-top: 1px solid var(--border-slate);
+    padding: 24px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: auto;
+}
+
+/* Landing Page Grid */
+.landing-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    margin-top: 24px;
+}
+
+.landing-card {
+    background-color: #ffffff;
+    border: 1px solid var(--border-slate);
+    border-radius: 8px;
+    padding: 20px;
+    text-decoration: none;
+    color: var(--text-dark);
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.landing-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);
+    border-color: var(--primary);
+}
+
+.landing-card h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.landing-card p {
+    font-size: 13.5px;
+    color: var(--text-muted);
+    margin-bottom: 0;
+    text-align: left;
+}
+
+@media (max-width: 1024px) {
+    .sidebar {
+        display: none; /* simple hides sidebar for tablet/mobile to keep script clean */
+    }
+    .main-wrapper {
+        margin-left: 0;
+    }
+    .content-container {
+        padding: 24px;
+        margin-top: 0;
+        margin-bottom: 0;
+        border-radius: 0;
+    }
+}
+
+    </style>
+    <!-- Mermaid.js for drawing diagrams directly in the browser -->
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            securityLevel: 'loose',
+            flowchart: { useMaxWidth: true, htmlLabels: true }
+        });
+    </script>
+</head>
+<body>
+
+    <!-- Left Sidebar Navigation -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h1>🔋 Lab 4 AIoT</h1>
+            <div class="badge">Energy Forecasting</div>
+        </div>
+        <div class="sidebar-nav">
+                    <a href="index.html" class="sidebar-nav-item ">🏡 Trang chủ / Tổng mục lục</a>
+        <a href="00_project_overview.html" class="sidebar-nav-item ">00. Tổng quan dự án</a>
+        <a href="01_architecture.html" class="sidebar-nav-item ">01. Kiến trúc hệ thống AIoT</a>
+        <a href="02_data_flow.html" class="sidebar-nav-item ">02. Luồng dữ liệu tuần tự</a>
+        <a href="03_runtime_and_dependencies.html" class="sidebar-nav-item ">03. Luồng thực thi & Phụ thuộc</a>
+        <a href="04_dataset_and_schema.html" class="sidebar-nav-item ">04. Tập dữ liệu & Điền khuyết</a>
+        <a href="05_feature_engineering.html" class="sidebar-nav-item ">05. Kỹ nghệ đặc trưng thời gian</a>
+        <a href="06_model_training_and_metrics.html" class="sidebar-nav-item ">06. Mô hình hóa & Đo lường sai số</a>
+        <a href="07_decision_layer.html" class="sidebar-nav-item ">07. Tầng ra quyết định & Cảnh báo</a>
+        <a href="08_api_forecast_workflow.html" class="sidebar-nav-item ">08. Triển khai API FastAPI</a>
+        <a href="09_code_review.html" class="sidebar-nav-item ">09. Đánh giá chất lượng mã nguồn</a>
+        <a href="10_safety_fail_safe.html" class="sidebar-nav-item ">10. An toàn & Cơ chế Fail-safe</a>
+        <a href="11_development_roadmap.html" class="sidebar-nav-item ">11. Lộ trình phát triển & Học tập</a>
+        <a href="HANDBOOK.html" class="sidebar-nav-item active">📖 Sách hướng dẫn kỹ thuật (Handbook)</a>
+        </div>
+        <div class="sidebar-footer">
+            Designed by DeepMind Team & Antigravity AI
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="main-wrapper">
+        <div class="top-bar">
+            <div class="top-bar-title">Tài liệu Kỹ thuật Hệ thống Dự báo Phụ tải Điện năng BEMS</div>
+            <div class="top-bar-links">
+                <a href="index.html">🏡 Quay lại Trang chủ</a>
+            </div>
+        </div>
+
+        <div style="padding: 0 40px; flex: 1;">
+            <div class="content-container markdown-body">
+                <h1 id="sach-huong-dan-ky-thuat-phan-tich-du-bao-nang-luong-cho-he-thong-aiot-smart-home-bems">SÁCH HƯỚNG DẪN KỸ THUẬT: PHÂN TÍCH DỰ BÁO NĂNG LƯỢNG CHO HỆ THỐNG AIoT (SMART HOME BEMS)</h1>
+<hr />
+<h2 id="loi-mo-au-huong-dan-tiep-can">🧭 LỜI MỞ ĐẦU &amp; HƯỚNG DẪN TIẾP CẬN</h2>
+<p>Chào mừng các kỹ sư AI trẻ, các nhà nghiên cứu nhúng và kiến trúc sư hệ thống AIoT tương lai đến với <strong>Sách hướng dẫn Kỹ thuật chuyên sâu (Technical Handbook)</strong> của dự án <strong>Lab 4: Forecasting &amp; Predictive Analytics</strong>.</p>
+<p>Dự án này là một mô hình thu nhỏ hoàn hảo (Digital Twin) của một hệ thống quản lý năng lượng tòa nhà thông minh thực tế (BEMS - Building Energy Management System). Cuốn sách hướng dẫn này được biên soạn nhằm chuyển đổi tri thức của toàn bộ 16 tệp tài liệu riêng lẻ thành một bộ cẩm nang duy nhất, dẫn dắt tư duy của người học một cách tuần tự từ lý thuyết học máy chuỗi thời gian đến thực tế chốt chặn an toàn vật lý và MLOps quy mô công nghiệp.</p>
+<hr />
+<h2 id="muc-luc-table-of-contents">📌 MỤC LỤC (TABLE OF CONTENTS)</h2>
+<ol>
+<li><strong><a href="#1-từ-điển-thuật-ngữ-chuyên-ngành-glossary">Từ điển Thuật ngữ Chuyên ngành (Glossary)</a></strong></li>
+<li><strong><a href="#2-tóm-tắt-kiến-trúc-hệ-thống-8-lớp-architecture-summary">Tóm tắt Kiến trúc Hệ thống 8 Lớp (Architecture Summary)</a></strong></li>
+<li><strong><a href="#3-kỹ-nghệ-đặc-trưng--pipeline-học-có-giám-sát-feature-engineering--pipeline">Kỹ nghệ Đặc trưng &amp; Pipeline học có giám sát (Feature Engineering &amp; Pipeline)</a></strong></li>
+<li><strong><a href="#4-mô-hình-hóa--đánh-giá-sai-số-toán-học-modeling--metrics">Mô hình hóa &amp; Đánh giá sai số toán học (Modeling &amp; Metrics)</a></strong></li>
+<li><strong><a href="#5-quy-trình-hoạt-động-api-fastapi-thời-gian-thực-fastapi-serving">Quy trình Hoạt động API FastAPI thời gian thực (FastAPI Serving)</a></strong></li>
+<li><strong><a href="#6-thiết-kế-an-toàn-fail-safe--khóa-chốt-biên-nhúng-safety--fail-safe">Thiết kế An toàn, Fail-safe &amp; Khóa chốt Biên nhúng (Safety &amp; Fail-safe)</a></strong></li>
+<li><strong><a href="#7-kịch-bản-gỡ-lỗi--khắc-phục-sự-cố-chi-tiết-debugging--troubleshooting">Kịch bản Gỡ lỗi &amp; Khắc phục Sự cố chi tiết (Debugging &amp; Troubleshooting)</a></strong></li>
+<li><strong><a href="#8-lỗi-thường-gặp--câu-hỏi-thường-gặp-common-mistakes--faq">Lỗi Thường Gặp &amp; Câu hỏi Thường Gặp (Common Mistakes &amp; FAQ)</a></strong></li>
+<li><strong><a href="#9-lưu-y-triển-khai--lộ-trình-nâng-cấp-doanh-nghiệp-deployment--roadmap">Lưu ý Triển khai &amp; Lộ trình Nâng cấp Doanh nghiệp (Deployment &amp; Roadmap)</a></strong></li>
+</ol>
+<hr />
+<h2 id="1-tu-ien-thuat-ngu-chuyen-nganh-glossary">1. TỪ ĐIỂN THUẬT NGỮ CHUYÊN NGÀNH (GLOSSARY)</h2>
+<ul>
+<li><strong>AIoT (Artificial Intelligence of Things)</strong>: Sự kết hợp giữa Trí tuệ nhân tạo (AI) và Internet vạn vật (IoT) nhằm tạo ra các hệ thống có khả năng tự cảm nhận, tự học hỏi và ra quyết định thông minh trực tiếp trên các thiết bị biên hoặc đám mây.</li>
+<li><strong>BEMS (Building Energy Management System)</strong>: Hệ thống quản lý năng lượng tòa nhà, tích hợp phần cứng và phần mềm để giám sát, điều khiển và tối ưu hóa việc tiêu thụ điện năng của HVAC, chiếu sáng và các thiết bị công suất lớn.</li>
+<li><strong>Lag Feature (Đặc trưng trễ)</strong>: Phép toán lấy giá trị của một biến số trong quá khứ ($t-k$) làm đặc trưng đầu vào để mô hình hóa xu thế quán tính tại thời điểm hiện tại $t$.</li>
+<li><strong>Rolling Feature (Đặc trưng cửa sổ trượt)</strong>: Các chỉ số thống kê (như trung bình cộng hoặc độ lệch chuẩn) tính toán trên một cửa sổ thời gian có độ rộng $W$ trượt lùi về quá khứ từ mốc hiện tại $t$.</li>
+<li><strong>Delta Feature (Đặc trưng sai phân/vi phân)</strong>: Mức độ thay đổi giá trị của thông số so với một khoảng thời gian trước đó, thể hiện gia tốc hay tốc độ biến động của hệ thống.</li>
+<li><strong>Cyclic Time Feature (Đặc trưng thời gian tuần hoàn lượng giác)</strong>: Phép chiếu các mốc thời gian (như giờ, ngày) lên vòng tròn lượng giác thông qua hàm số Sin và Cos để bảo toàn khoảng cách địa lý liền kề giữa thời điểm đầu ngày và cuối ngày.</li>
+<li><strong>Forecasting Horizon (Chân trời dự báo)</strong>: Khoảng thời gian xa nhất trong tương lai mà mô hình được yêu cầu đưa ra dự báo chính xác (Trong bài lab, Horizon là 1 bước thời gian = 10 phút).</li>
+<li><strong>Data Leakage (Rò rỉ dữ liệu tương lai)</strong>: Hiện tượng thông tin của tập kiểm thử hoặc dữ liệu tương lai vô tình lọt vào quá trình huấn luyện mô hình, khiến kết quả đánh giá ngoại tuyến đạt điểm số cao giả lập nhưng mô hình hoàn toàn thất bại khi chạy thực tế.</li>
+<li><strong>Underestimation (Dự báo lệch thấp)</strong>: Sai số dự báo có xu hướng âm ($\text{Bias} &lt; 0$), khi mô hình dự báo công suất tiêu thụ điện sắp tới thấp hơn nhiều so với thực tế xảy ra, đe dọa an toàn cháy nổ do quá tải aptomat tổng.</li>
+<li><strong>Overestimation (Dự báo lệch cao)</strong>: Sai số dự báo có xu hướng dương ($\text{Bias} &gt; 0$), khi mô hình dự báo quá tải ảo khiến hệ thống tự động tiết giảm phụ tải thừa thãi, gây bất tiện sinh hoạt cho con người.</li>
+<li><strong>Human-in-the-Loop (HITL - Vòng lặp phê duyệt của con người)</strong>: Triết lý thiết kế hệ thống thông minh yêu cầu phải có sự xác nhận chủ động của con người đối với các quyết định điều khiển vật lý mang tính critical (nguy hiểm) trước khi lệnh được gửi xuống thiết bị phần cứng.</li>
+<li><strong>Safety Gateway (Cổng an toàn vật lý cứng)</strong>: Thiết bị biên nhúng độc lập (như ESP32 Gateway) áp dụng các quy tắc logic cứng (hard-coded safety rules) để kiểm định chéo các lệnh nhận từ đám mây, bảo đảm an toàn điện kể cả khi mất kết nối mạng.</li>
+<li><strong>Model Drift (Độ lệch mô hình)</strong>: Hiện tượng hiệu năng dự báo của mô hình bị suy giảm nghiêm trọng theo thời gian do sự thay đổi phân phối dữ liệu thực tế (Data Drift) so với dữ liệu huấn luyện lịch sử.</li>
+</ul>
+<hr />
+<h2 id="2-tom-tat-kien-truc-he-thong-8-lop-architecture-summary">2. TÓM TẮT KIẾN TRÚC HỆ THỐNG 8 LỚP (ARCHITECTURE SUMMARY)</h2>
+<p>Hệ thống được thiết kế theo mô hình kiến trúc phân tầng độc lập chặt chẽ từ sensor thô biên nhúng lên API đệm và hiển thị:</p>
+<pre class="mermaid">graph TD
+    subgraph "TẦNG DỮ LIỆU & LÀM SẠCH (Data & Preprocessing)"
+        L1[1. Dataset Layer: CSV data] --> L2[2. Preprocessing: Sorting & raw_medians Imputation]
+    end
+
+    subgraph "TẦNG HỌC MÁY & ĐÁNH GIÁ (Machine Learning & Metrics)"
+        L2 --> L3[3. Feature Engineering: Lag, Rolling, Delta, Sin/Cos]
+        L3 --> L4[4. Forecasting Model: Baselines vs LR / RF / Gradient Boosting]
+        L4 --> L5[5. Evaluation: Chronological Time split & MAE/RMSE/MAPE/Bias]
+    end
+
+    subgraph "TẦNG VẬN HÀNH AN TOÀN (Serving & Safety Gateway)"
+        L4 -->|predicted_value| L6[6. Decision Layer: Quantile thresholds & Risk Level Mapping]
+        L6 --> L7[7. API Layer: FastAPI Serving & forecast_log.csv Audit]
+        L7 --> L8[8. Dashboard Integration: Mobile App & Grafana Visualization]
+    end
+</pre>
+<h3 id="chi-tiet-8-lop">Chi tiết 8 Lớp:</h3>
+<ol>
+<li><strong>Dataset Layer</strong>: UCI Appliances Dataset đo đạc chu kỳ 10 phút lượng điện thiết bị gia dụng tiêu thụ, nhiệt độ/độ ẩm các phòng và các biến khí tượng ngoài trời.</li>
+<li><strong>Preprocessing Layer</strong>: Định dạng kiểu thời gian, triệt tiêu dữ liệu trùng lặp và điền khuyết thiếu dữ liệu thô thời gian thực bằng bộ trung vị thô <code>raw_medians</code>.</li>
+<li><strong>Feature Engineering Layer</strong>: Tính toán đặc trưng chuỗi thời gian động biểu diễn quán tính, xu hướng, gia tốc và vòng lặp ngày/đêm tuần hoàn lượng giác.</li>
+<li><strong>Forecasting Model Layer</strong>: Chứa 5 mô hình baselines và học máy. Mô hình tốt nhất (Gradient Boosting) được nạp trực tiếp vào RAM để phục vụ dự báo Wh cho 10 phút sau.</li>
+<li><strong>Evaluation Layer</strong>: Phân chia mốc cắt thời gian tuyến tính (Time-series Split) và đo lường khoảng cách sai lệch thực tế bằng các chỉ số hồi quy MAE, RMSE, MAPE và xu hướng lệch Bias.</li>
+<li><strong>Decision Layer</strong>: Ánh xạ giá trị dự báo Wh sang 4 cấp rủi ro (NORMAL, WARNING, HIGH, CRITICAL) và chỉ thị khuyến nghị hành động tương ứng thông qua phân vị thống kê ($70\%, 90\%, 97\%$).</li>
+<li><strong>API Layer</strong>: Triển khai microservice FastAPI phơi mô hình ra môi trường mạng qua <code>/forecast</code> endpoint và lưu nhật ký đối soát vào <code>forecast_log.csv</code>.</li>
+<li><strong>Dashboard Integration</strong>: Cung cấp đồ thị hiển thị Actual vs Forecasted cho Grafana Dashboard hoặc giao diện di động BEMS.</li>
+</ol>
+<hr />
+<h2 id="3-ky-nghe-ac-trung-pipeline-hoc-co-giam-sat-feature-engineering-pipeline">3. KỸ NGHỆ ĐẶC TRƯNG &amp; PIPELINE HỌC CÓ GIÁM SÁT (FEATURE ENGINEERING &amp; PIPELINE)</h2>
+<h3 id="1-tai-sao-telemetry-tho-la-khong-u">1. Tại sao Telemetry thô là KHÔNG ĐỦ?</h3>
+<p>Nếu chỉ cung cấp công suất điện tại thời điểm hiện tại $t$ (ví dụ: $80$ Wh), mô hình không thể biết phụ tải đang tăng vọt đột ngột hay đang giảm mạnh, làm mất đi khả năng ngoại suy xu hướng.</p>
+<h3 id="2-chi-tiet-4-nhom-ac-trung-uoc-kien-nghe-hoa">2. Chi tiết 4 Nhóm Đặc trưng được kiến nghệ hóa:</h3>
+<h4 id="nhom-a-lag-features-quan-tinh-hanh-vi">Nhóm A: Lag Features (Quán tính hành vi)</h4>
+<p>Lấy giá trị lượng điện của quá khứ để đoán tương lai:
+$$\text{Lag}<em t-k="t-k">k(y_t) = y</em>$$</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Thời gian</th>
+<th style="text-align: left;">Appliances thực tế</th>
+<th style="text-align: left;">appliances_lag_1</th>
+<th style="text-align: left;">appliances_lag_2</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">12:00:00</td>
+<td style="text-align: left;"><strong>60 Wh</strong></td>
+<td style="text-align: left;">NaN</td>
+<td style="text-align: left;">NaN</td>
+</tr>
+<tr>
+<td style="text-align: left;">12:10:00</td>
+<td style="text-align: left;"><strong>80 Wh</strong></td>
+<td style="text-align: left;"><strong>60 Wh</strong></td>
+<td style="text-align: left;">NaN</td>
+</tr>
+<tr>
+<td style="text-align: left;">12:20:00</td>
+<td style="text-align: left;"><strong>110 Wh</strong></td>
+<td style="text-align: left;"><strong>80 Wh</strong></td>
+<td style="text-align: left;"><strong>60 Wh</strong></td>
+</tr>
+</tbody>
+</table>
+<h4 id="nhom-b-rolling-features-trung-binh-truot-min-nhieu">Nhóm B: Rolling Features (Trung bình trượt mịn nhiễu)</h4>
+<p>Tính thống kê trên cửa sổ trượt $W$ lùi về quá khứ để lọc gai nhiễu tức thời:
+$$\text{Rolling Mean}_3(y_t) = \frac{50 + 60 + 100}{3} = 70\text{ Wh}$$</p>
+<h4 id="nhom-c-delta-features-gia-toc-bien-ong">Nhóm C: Delta Features (Gia tốc biến động)</h4>
+<p>Đo lường mức chênh lệch phụ tải so với mốc trước đó để phát hiện khoảnh khắc đóng ngắt thiết bị lớn:
+$$\Delta_1(y_t) = y_t - y_{t-1}$$</p>
+<h4 id="nhom-d-cyclic-time-features-tuan-hoan-luong-giac-sincos">Nhóm D: Cyclic Time Features (Tuần hoàn lượng giác Sin/Cos)</h4>
+<p>Khắc phục lỗi đứt gãy khoảng cách thời gian cuối ngày cũ (23:50) và đầu ngày mới (00:10). Chiếu mốc thời gian lên vòng tròn lượng giác chu kỳ 24 giờ:
+$$\theta = \frac{2\pi \cdot \text{Hour}}{24.0}, \quad Hour_Sin = \sin(\theta), \quad Hour_Cos = \cos(\theta)$$
+<em>Ý nghĩa</em>: Giúp mô hình hiểu được tính chất liên tục của chu kỳ sinh hoạt sinh học ngày/đêm và các ngày trong tuần (<code>is_weekend</code>).</p>
+<h3 id="3-tao-nhan-hoc-co-giam-sat-bang-dich-chuyen-shifting">3. Tạo nhãn Học có giám sát bằng dịch chuyển Shifting</h3>
+<p>Ta dịch chuyển âm (shift ngược tương lai) cột phụ tải điện $h=1$ bước thời gian:
+$$\text{target_future}<em t_1="t+1">t = y</em>$$
+Tại thời điểm hiện tại $t$, ta sử dụng các đặc trưng Lag/Rolling quá khứ để huấn luyện mô hình đi tìm ánh xạ dự báo nhãn của tương lai $t+1$ một cách chính xác nhất. Hàm <code>clean_supervised_frame</code> tự động loại bỏ 24 dòng đầu (thiếu Lag) và 1 dòng cuối (chưa có nhãn tương lai) để ma trận dữ liệu toán học không bị khuyết rỗng <code>NaN</code>.</p>
+<h3 id="4-co-che-phong-chong-ro-ri-du-lieu-data-leakage">4. Cơ chế phòng chống Rò rỉ dữ liệu (Data Leakage)</h3>
+<ol>
+<li><strong>Tuyệt đối không dùng shift âm cho đặc trưng</strong>: Chỉ duy nhất nhãn <code>target_future</code> được dùng shift âm. Tất cả các đặc trưng Lag/Rolling phải dùng shift dương hoặc trượt về quá khứ.</li>
+<li><strong>Bắt buộc chia dữ liệu theo dòng thời gian (Chronological Split)</strong>: Cắt bảng dữ liệu tuyến tính 75% Train quá khứ và 25% Test tương lai. Cấm dùng <code>train_test_split(..., shuffle=True)</code> vì sẽ làm tráo đổi trật tự thời gian và rò rỉ dữ liệu tương lai vào tập huấn luyện.</li>
+</ol>
+<hr />
+<h2 id="4-mo-hinh-hoa-anh-gia-sai-so-toan-hoc-modeling-metrics">4. MÔ HÌNH HÓA &amp; ĐÁNH GIÁ SAI SỐ TOÁN HỌC (MODELING &amp; METRICS)</h2>
+<h3 id="1-phan-tich-5-thuat-toan-hoi-quy-regressors">1. Phân tích 5 Thuật toán Hồi quy (Regressors)</h3>
+<ul>
+<li><strong>Last Value Baseline</strong>: $\hat{y}_{t+1} = y_t$. Mốc đối chứng tối thiểu, mô hình AI chỉ có giá trị khi vượt qua được Last Value.</li>
+<li><strong>Moving Average 6 Baseline</strong>: Dự báo bằng trung bình 1 tiếng gần nhất. Lọc nhiễu gai tức thời.</li>
+<li><strong>Linear Regression + Scaler</strong>: Mô hình hồi quy tuyến tính dễ giải giải thích hệ số ảnh hưởng vật lý của nhiệt độ phòng lên phụ tải Wh. Yêu cầu chuẩn hóa StandardScaler.</li>
+<li><strong>Random Forest Regressor</strong>: Thuật toán phi tuyến mạnh mẽ sử dụng phương pháp Bagging ngẫu nhiên hóa đặc trưng tại các nút cây quyết định, chống quá khớp vượt trội.</li>
+<li><strong>Gradient Boosting Regressor</strong>: Thuật toán phi tuyến sử dụng phương pháp Boosting, huấn luyện các cây quyết định tuần tự để cây sau liên tục sửa sai phần dư cho cây trước, mang lại độ chính xác dự báo cao nhất trên dữ liệu dạng bảng.</li>
+</ul>
+<h3 id="2-cac-chi-so-sai-so-toan-hoc-y-nghia-vat-ly-aiot">2. Các chỉ số Sai số Toán học &amp; Ý nghĩa Vật lý AIoT</h3>
+<h4 id="chi-so-a-mae-mean-absolute-error-sai-so-tuyet-oi-trung-binh">Chỉ số A: MAE (Mean Absolute Error - Sai số tuyệt đối trung bình)</h4>
+<p>$$\text{MAE} = \frac{1}{N} \sum_{i=1}^{N} |y_i - \hat{y}_i|$$
+<em>Ý nghĩa</em>: Độ lệch trung bình Wh vật lý thực tế trên mỗi điểm dự báo. Rất dễ giải thích cho khách hàng (ví dụ: trung bình đoán lệch khoảng 30 Wh điện).</p>
+<h4 id="chi-so-b-rmse-root-mean-squared-error-can-bac-hai-sai-so-binh-phuong-trung-binh">Chỉ số B: RMSE (Root Mean Squared Error - Căn bậc hai sai số bình phương trung bình)</h4>
+<p>$$\text{RMSE} = \sqrt{\frac{1}{N} \sum_{i=1}^{N} (y_i - \hat{y}_i)^2}$$
+<em>Ý nghĩa</em>: Phạt rất nặng các <strong>sai số lệch cực đoan (outliers)</strong> do có phép bình phương. Trong AIoT, RMSE là chỉ số tối mật vì một sai lệch dự báo cực lớn (quá tải đột ngột) sẽ đe dọa trực tiếp an toàn aptomat tổng gây cháy nổ lưới điện.</p>
+<h4 id="chi-so-c-mape-mean-absolute-percentage-error-sai-so-phan-tram-tuyet-oi-trung-binh">Chỉ số C: MAPE (Mean Absolute Percentage Error - Sai số phần trăm tuyệt đối trung bình)</h4>
+<p>$$\text{MAPE (\%)} = \frac{100\%}{N} \sum_{i=1}^{N} \frac{|y_i - \hat{y}_i|}{|y_i|}$$
+<em>Ý nghĩa</em>: Đánh giá sai số độc lập với quy mô hệ thống. Lệch 10 Wh khi thiết bị tiêu thụ 20 Wh là cực lớn ($50\%$), nhưng lệch 10 Wh khi phụ tải tòa nhà đang là 1000 Wh lại là vô cùng nhỏ ($1\%$).</p>
+<h4 id="chi-so-d-forecast-bias-xu-huong-lech-du-bao">Chỉ số D: Forecast Bias (Xu hướng lệch dự báo)</h4>
+<p>$$\text{Forecast Bias} = \frac{1}{N} \sum_{i=1}^{N} (\hat{y}_i - y_i)$$
+<em>Ý nghĩa</em>: Giữ nguyên dấu để đo lường xu hướng hệ thống:
+*   $\text{Bias} &gt; 0$ (Overestimation): Mô hình đang có xu hướng đoán cao hơn thực tế (gây cảnh báo giả, ngắt tải phụ thừa thãi).
+*   $\text{Bias} &lt; 0$ (Underestimation): Mô hình đang đoán thấp hơn thực tế (cực kỳ nguy hiểm, gây bất ngờ quá tải dòng điện vật lý làm sập nhảy aptomat).</p>
+<hr />
+<h2 id="5-quy-trinh-hoat-ong-api-fastapi-thoi-gian-thuc-fastapi-serving">5. QUY TRÌNH HOẠT ĐỘNG API FASTAPI THỜI GIAN THỰC (FASTAPI SERVING)</h2>
+<p>FastAPI Server (<code>app.py</code>) phơi mô hình toán học ra môi trường mạng để Gateway biên gửi telemetry lên phục vụ dự báo.</p>
+<h3 id="1-so-o-tuan-tu-cua-luong-api-sequence-serving-flow">1. Sơ đồ Tuần tự của Luồng API (Sequence Serving Flow)</h3>
+<pre class="mermaid">sequenceDiagram
+    autonumber
+    participant Gateway as Edge Gateway (Client)
+    participant API as FastAPI Server (app.py)
+    participant RAM as Memory (joblib Bundle)
+
+    Note over API: Nạp mô hình một lần khi khởi động (Cold Start)
+    API->>RAM: load("forecast_model_bundle_v1.joblib")
+
+    Gateway->>API: Gửi HTTP POST /forecast (Mảng JSON history >= 24 điểm)
+    API->>API: Điền khuyết dữ liệu thô bằng raw_medians
+    API->>API: Tính đặc trưng chuỗi thời gian (make_supervised_frame)
+    API->>API: Lấy bản ghi cuối cùng t (latest row) và điền khuyết đặc trưng bằng feature_medians
+    API->>API: Suy diễn: model.predict(X_latest) -> predicted_value Wh
+    API->>API: Ánh xạ predicted_value sang risk_level & recommendation
+    API->>API: Ghi log đối soát vào outputs/forecast_log.csv
+    API-->>Gateway: Trả phản hồi JSON (predicted_value, risk_level, recommendation, safety_note)
+</pre>
+<h3 id="2-goi-tin-yeu-cau-mau-json-request-payload">2. Gói tin Yêu cầu Mẫu (JSON Request Payload)</h3>
+<p>Client (Gateway) gửi POST lên endpoint <code>/forecast</code>:</p>
+<pre><code class="language-json">{
+  &quot;history&quot;: [
+    {
+      &quot;date&quot;: &quot;2016-01-21 12:00:00&quot;,
+      &quot;Appliances&quot;: 80.0,
+      &quot;lights&quot;: 10.0,
+      &quot;T1&quot;: 21.5,
+      &quot;RH_1&quot;: 45.2,
+      &quot;T_out&quot;: 6.2
+    },
+    &quot;...[Gửi tiếp 22 điểm đo trung gian cách nhau 10 phút]...&quot;,
+    {
+      &quot;date&quot;: &quot;2016-01-21 15:50:00&quot;,
+      &quot;Appliances&quot;: 120.0,
+      &quot;lights&quot;: 20.0,
+      &quot;T1&quot;: 22.1,
+      &quot;RH_1&quot;: 46.1,
+      &quot;T_out&quot;: 7.8
+    }
+  ]
+}
+</code></pre>
+<h3 id="3-goi-tin-phan-hoi-mau-json-response-payload">3. Gói tin Phản hồi Mẫu (JSON Response Payload)</h3>
+<pre><code class="language-json">{
+  &quot;model_output&quot;: {
+    &quot;target&quot;: &quot;Appliances&quot;,
+    &quot;forecast_horizon_minutes&quot;: 10,
+    &quot;predicted_value&quot;: 135.4215,
+    &quot;unit&quot;: &quot;Wh per 10-minute interval&quot;,
+    &quot;model_version&quot;: &quot;gradient_boosting_advanced_v1&quot;
+  },
+  &quot;decision&quot;: {
+    &quot;risk_level&quot;: &quot;WARNING&quot;,
+    &quot;recommendation&quot;: &quot;MONITOR_AND_PREPARE_ENERGY_SAVING_ACTION&quot;,
+    &quot;reason&quot;: &quot;Predicted appliance energy is 135.42 Wh; warning/high/critical thresholds are 80.25/142.10/225.40 Wh.&quot;,
+    &quot;safety_note&quot;: &quot;Forecast output is a recommendation signal, not an automatic actuator command. Apply safety rules and human confirmation before control.&quot;
+  },
+  &quot;api_check&quot;: {
+    &quot;latency_ms&quot;: 14.25,
+    &quot;input_points&quot;: 24,
+    &quot;warnings&quot;: []
+  }
+}
+</code></pre>
+<hr />
+<h2 id="6-thiet-ke-an-toan-fail-safe-khoa-chot-bien-nhung-safety-fail-safe">6. THIẾT KẾ AN TOÀN, FAIL-SAFE &amp; KHÓA CHỐT BIÊN NHÚNG (SAFETY &amp; FAIL-SAFE)</h2>
+<p>Học máy luôn có xác suất dự báo sai số cực đoan. Trong hệ thống AIoT điều khiển cơ điện vật lý, chúng ta áp dụng triết lý thiết kế bảo vệ đa lớp:</p>
+<h3 id="1-kien-truc-safety-gateway-khoa-cung-nhung-esp32-c">1. Kiến trúc Safety Gateway khóa cứng nhúng (ESP32 C++)</h3>
+<p>Gateway ở biên (ESP32) trực tiếp ngắt/bật Rơ-le (Smart Plug) không tin tưởng tuyệt đối vào Cloud API. ESP32 được lập trình sẵn các <strong>quy tắc khóa cứng an toàn vật lý (Hard-coded safety rules)</strong>:
+*   <em>Quy tắc 1 (Bảo vệ tủ lạnh)</em>: Không bao giờ ngắt nguồn tủ lạnh (<code>refrigerator</code>) nếu nhiệt độ thực tế của tủ đang ấm lên ($T_{\text{tủ}} &gt; 6^{\circ}\text{C}$), bất chấp mô hình AI dự báo quá tải nghiêm trọng ra sao.
+*   <em>Quy tắc 2 (Ngắt dòng khẩn cấp)</em>: Ngắt nguồn Rơ-le lập tức nếu cảm biến CT đo dòng điện vượt dòng định mức định mức vật lý ($I &gt; 16.0$ Ampe) để phòng chống cháy nổ đường dây.</p>
+<h3 id="2-logic-du-phong-sup-mang-noi-hat-edge-local-baseline-fallback">2. Logic dự phòng sụp mạng nội hạt (Edge Local Baseline Fallback)</h3>
+<p>Nếu mất kết nối mạng Wi-Fi hoặc API Server bị sập (ping timeout 3 lần liên tiếp), Gateway ở biên tự động chuyển sang chế độ <strong>Safe Mode cục bộ</strong>:
+*   Sử dụng thuật toán đơn giản <strong>Last Value Baseline</strong> ngay trên chip nhúng.
+*   Nếu dòng điện hiện tại $&gt; 80\%$ công suất an toàn thiết kế $\rightarrow$ Tự động tiết giảm Eco Mode cho các Smart Plug phụ tải không quan trọng.</p>
+<h3 id="3-quy-tac-hoi-quy-phan-vi-chong-rui-ro-lech-thap-prediction-intervals">3. Quy tắc Hồi quy phân vị chống rủi ro lệch thấp (Prediction Intervals)</h3>
+<p>Huấn luyện mô hình Gradient Boosting với hàm mất mát Quantile Loss để xuất ra 3 giá trị cận: tối thiểu (<code>pred_low</code>), trung bình (<code>pred_mean</code>), và tối đa (<code>pred_high</code>) với độ tin cậy $90\%$.
+*   <em>Quy tắc</em>: Nếu khoảng dao động bất định quá lớn (mô hình bị bối rối), hệ thống bỏ qua giá trị trung bình và sử dụng cận trên <strong><code>pred_high</code></strong> để tính toán cấp rủi ro, bảo đảm luôn dự phòng dư công suất an toàn nhất.</p>
+<h3 id="4-quy-tac-con-nguoi-kiem-duyet-human-in-the-loop">4. Quy tắc Con người kiểm duyệt (Human-in-the-loop)</h3>
+<ul>
+<li>Chỉ phát cảnh báo rủi ro tới người dùng nếu giá trị dự báo vượt ngưỡng liên tục trong 3 chu kỳ đo liên tiếp (30 phút) để loại bỏ cảnh báo giả gây bão hòa cảnh báo (Alert Fatigue).</li>
+<li>Khi có tín hiệu cảnh báo quá tải <strong>CRITICAL</strong>: Hệ thống gửi thông báo đẩy (Push Notification) lên App điện thoại chờ kỹ sư trực vận hành bấm <strong>"XÁC NHẬN" (Approve)</strong> trong 120 giây mới đóng rơ-le. Quá thời gian timeout tự động hủy lệnh để giữ nguyên trạng thái an toàn vật lý.</li>
+</ul>
+<hr />
+<h2 id="7-kich-ban-go-loi-khac-phuc-su-co-chi-tiet-debugging-troubleshooting">7. KỊCH BẢN GỠ LỖI &amp; KHẮC PHỤC SỰ CỐ CHI TIẾT (DEBUGGING &amp; TROUBLESHOOTING)</h2>
+<p>Khi chạy hệ thống hoặc phát triển mở rộng, hãy tham khảo cẩm nang debug dưới đây:</p>
+<h3 id="kich-ban-1-loi-keyerror-lights-hoac-keyerror-t_out-khi-goi-api">Kịch bản 1: Lỗi <code>KeyError: 'lights'</code> hoặc <code>KeyError: 'T_out'</code> khi gọi API</h3>
+<ul>
+<li><strong>Nguyên nhân</strong>: Client (Gateway) gửi payload JSON bị thiếu một hoặc nhiều trường dữ liệu tùy chọn do cảm biến ở biên bị hỏng hóc hoặc rơi gói tin mạng.</li>
+<li><strong>Cách Debug</strong>: Chèn lệnh in DataFrame ngay sau khi tiếp nhận request trong <code>app.py</code>: <code>print(df.isnull().sum())</code>.</li>
+<li><strong>Giải pháp</strong>: Đảm bảo đã gọi hàm <code>fill_missing_for_api(df, model_bundle["raw_medians"])</code> đầu tiên trong hàm API <code>/forecast</code>. Hàm này sẽ tự động tạo các cột bị thiếu và điền giá trị trung vị tĩnh lịch sử để tránh lỗi crash hệ thống.</li>
+</ul>
+<h3 id="kich-ban-2-gia-tri-predicted_value-tra-ve-nan-hoac-null-o-thoi-gian-thuc">Kịch bản 2: Giá trị <code>predicted_value</code> trả về <code>NaN</code> hoặc <code>Null</code> ở thời gian thực</h3>
+<ul>
+<li><strong>Nguyên nhân</strong>: Client gửi chuỗi lịch sử quá ngắn (ví dụ &lt; 24 điểm đo thô). Hàm <code>.rolling(window=24).mean()</code> thiếu dữ liệu lịch sử nên trả về đặc trưng <code>NaN</code>, kéo theo mô hình hồi quy tính toán ra kết quả <code>NaN</code>.</li>
+<li><strong>Cách Debug</strong>: Kiểm tra chiều dài chuỗi trong log API: <code>print(len(payload.history))</code>.</li>
+<li><strong>Giải pháp</strong>: Tích hợp lớp phòng vệ thứ hai điền khuyết đặc trưng bằng trung vị đặc trưng lịch sử (<code>feature_medians</code>) trước khi gọi predict:
+    <code>python
+    X = latest[feature_columns].fillna(model_bundle["feature_medians"]).fillna(0.0)</code></li>
+</ul>
+<h3 id="kich-ban-3-thoi-gian-xu-ly-api-bi-tre-qua-lau-1-giay">Kịch bản 3: Thời gian xử lý API bị trễ quá lâu (&gt; 1 giây)</h3>
+<ul>
+<li><strong>Nguyên nhân</strong>: Nạp mô hình nhị phân <code>.joblib</code> trong mỗi vòng lặp gọi hàm của request, hoặc thực hiện tính toán đặc trưng chuỗi lớn trực tiếp bằng Pandas trong RAM.</li>
+<li><strong>Cách Debug</strong>: Sử dụng thư viện <code>time</code> đo đạc latency tức thời của API.</li>
+<li><strong>Giải pháp</strong>: Bảo đảm nạp <code>joblib.load()</code> ở phạm vi biến toàn cục (Global Scope) một lần duy nhất khi khởi động Server FastAPI (Cold Start), giúp thời gian suy diễn tức thời đạt &lt; 50ms.</li>
+</ul>
+<hr />
+<h2 id="8-loi-thuong-gap-cau-hoi-thuong-gap-common-mistakes-faq">8. LỖI THƯỜNG GẶP &amp; CÂU HỎI THƯỜNG GẶP (COMMON MISTAKES &amp; FAQ)</h2>
+<h3 id="loi-thuong-gap-common-mistakes">Lỗi thường gặp (Common Mistakes)</h3>
+<ol>
+<li><strong>Sử dụng Random Split để huấn luyện chuỗi thời gian</strong>: Khiến mô hình bị rò rỉ dữ liệu tương lai (Data Leakage), dẫn đến sai số MAE lúc kiểm thử gần như bằng 0 nhưng sụp đổ hoàn toàn khi chạy thực tế. <em>Khắc phục</em>: Luôn sử dụng <code>time_split()</code>.</li>
+<li><strong>Tự động ngắt điện thiết bị bằng AI</strong>: Cho phép mô hình dự báo trực tiếp kích hoạt rơ-le ngắt nguồn thiết bị quan trọng mà không qua lớp kiểm định an toàn vật lý biên cứng và phê duyệt con người. <em>Khắc phục</em>: Tích hợp Safety Gateway nhúng và quy trình duyệt HITL.</li>
+<li><strong>Chỉnh sửa trực tiếp file <code>src/utils.py</code> trên server trực tuyến</strong>: Làm lệch cấu trúc đặc trưng đầu vào (<code>FEATURE_COLUMNS</code>) khiến mô hình đã huấn luyện bị lệch pha và crash hệ thống tức thời. <em>Khắc phục</em>: Thử nghiệm trong Notebook trước, tái huấn luyện và đóng gói <code>.joblib</code> mới đồng bộ.</li>
+</ol>
+<h3 id="cau-hoi-thuong-gap-faq">Câu hỏi thường gặp (FAQ)</h3>
+<ul>
+<li><strong>Q: Tại sao Lab 4 không dùng các chỉ số Precision, Recall, F1 như Lab 3?</strong><ul>
+<li><em>A</em>: Lab 3 (Anomaly Detection) là bài toán phân loại nhị phân (Bất thường vs Bình thường), nên dùng các chỉ số đếm đúng/sai của nhãn phân loại. Lab 4 là bài toán hồi quy (Regression) dự báo giá trị số thực liên tục Wh trong tương lai, nên bắt buộc dùng các chỉ số đo khoảng cách sai lệch vật lý như MAE, RMSE, MAPE.</li>
+</ul>
+</li>
+<li><strong>Q: Tại sao sử dụng Median (Trung vị) để điền khuyết thay vì Mean (Trung bình)?</strong><ul>
+<li><em>A</em>: Trong dữ liệu AIoT, cảm biến thường bị nhiễu tạo ra các gai nhọn cực đoan (outliers, ví dụ lỗi nhiệt độ vọt lên 100°C). Giá trị trung bình (Mean) bị kéo lệch rất mạnh bởi các outliers này, trong khi Trung vị (Median) chọn giá trị đứng ở giữa phân phối nên hoàn toàn chống chịu tốt với nhiễu, giúp mô hình đạt sự ổn định cực cao.</li>
+</ul>
+</li>
+<li><strong>Q: Tại sao ESP32 Edge Gateway cần gửi tối thiểu 24 điểm đo thô trong request API?</strong><ul>
+<li><em>A</em>: Vì các đặc trưng cửa sổ trượt lớn nhất trong code là trung bình trượt 4 tiếng (<code>rolling_mean_24</code>) và độ trễ 4 tiếng (<code>lag_24</code>). Với chu kỳ đo 10 phút một lần, 24 điểm là độ dài tối thiểu để tính toán đầy đủ các đặc trưng này mà không bị giá trị rỗng <code>NaN</code>.</li>
+</ul>
+</li>
+</ul>
+<hr />
+<h2 id="9-luu-y-trien-khai-lo-trinh-nang-cap-doanh-nghiep-deployment-roadmap">9. LƯU Ý TRIỂN KHAI &amp; LỘ TRÌNH NÂNG CẤP DOANH NGHIỆP (DEPLOYMENT &amp; ROADMAP)</h2>
+<p>Để chuyển đổi một bài lab lớp học (POC) thành một hệ sinh thái AIoT quản lý năng lượng quy mô doanh nghiệp phục vụ hàng triệu tòa nhà thông minh đồng thời, kỹ sư cần thực hiện lộ trình nâng cấp 3 giai đoạn:</p>
+<h3 id="1-giai-oan-1-trien-khai-caching-lich-su-bang-redis-noi-hat">1. Giai đoạn 1: Triển khai Caching lịch sử bằng Redis nội hạt</h3>
+<ul>
+<li><strong>Hành động</strong>: Tích hợp cơ sở dữ liệu đệm <strong>Redis</strong> ngay tại FastAPI Backend.</li>
+<li><strong>Tác dụng</strong>: Edge Gateway biên <strong>chỉ cần gửi duy nhất 1 điểm dữ liệu mới nhất</strong> thời điểm $t$ lên API (tiết kiệm 95% băng thông mạng 3G/4G). Server FastAPI tự động ghi đè điểm mới vào danh sách liên kết trượt (Redis List) có độ dài cố định 24 phần tử để tính toán đặc trưng.</li>
+</ul>
+<h3 id="2-giai-oan-2-tach-biet-feature-store-timeseries-db-phan-tan">2. Giai đoạn 2: Tách biệt Feature Store &amp; TimeSeries DB phân tán</h3>
+<ul>
+<li><strong>Hành động</strong>: Triển khai cơ sở dữ liệu chuỗi thời gian chuyên dụng <strong>TimescaleDB</strong> để ghi vĩnh viễn toàn bộ nhật ký telemetry. Tích hợp <strong>Feast Feature Store</strong> (online store chạy bằng Redis Cluster).</li>
+<li><strong>Tác dụng</strong>: Một tiến trình tính toán luồng chạy nền (<strong>Apache Flink / Faust</strong>) liên tục tính sẵn các đặc trưng Lag, Rolling và ghi vào Feast Store. FastAPI khi cần dự báo chỉ việc truy vấn Feast lấy nhanh véc-tơ đặc trưng tính sẵn trong &lt; 2ms, giải phóng hoàn toàn tài nguyên CPU cho API Server.</li>
+</ul>
+<h3 id="3-giai-oan-3-mlops-tu-ong-hoa-triton-serving-tai-cao">3. Giai đoạn 3: MLOps tự động hóa &amp; Triton Serving tải cao</h3>
+<ul>
+<li><strong>Hành động</strong>: Tích hợp <strong>MLflow Model Registry</strong> để tự động lưu lịch sử huấn luyện và đánh số phiên bản mô hình. Chuyển giao phục vụ mô hình cho <strong>Triton Model Server</strong> (NVIDIA) để tối ưu luồng suy diễn phần cứng.</li>
+<li><strong>Tác dụng</strong>: Tích hợp Prometheus/Grafana để đo lường độ lệch phân phối dữ liệu (Data Drift) và sai số dự báo thời gian thực từ clickhouse log. Tự động kích hoạt pipeline huấn luyện lại mô hình (Continuous Training) khi sai số vượt ngưỡng an toàn, thiết lập vòng lặp AIoT khép kín tự vận hành $24/7$.</li>
+</ul>
+            </div>
+        </div>
+
+        <div class="footer">
+            © 2026 - Lab 4 AIoT Forecasting & Predictive Analytics - Tài liệu Đào tạo Chuyên sâu
+        </div>
+    </div>
+
+</body>
+</html>

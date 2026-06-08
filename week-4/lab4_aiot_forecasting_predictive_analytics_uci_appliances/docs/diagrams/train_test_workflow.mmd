@@ -1,0 +1,17 @@
+graph TD
+    %% Train/Test Workflow
+    A[Raw CSV] --> B[Pipeline Kỹ nghệ đặc trưng]
+    B --> C[Ma trận Supervised Frame]
+    C --> D{time_split 75/25}
+    
+    D -->|75% Quá khứ| E[Train DataFrame]
+    D -->|25% Tương lai| F[Test DataFrame]
+    
+    E --> G[Huấn luyện 3 mô hình ML: LR, RF, GB]
+    G --> H[Xuất bản mô hình xuất sắc nhất]
+    
+    F --> I[Mô phỏng suy diễn Test set]
+    I --> J[Tính toán MAE, RMSE, MAPE, Bias]
+    J --> K[Lưu outputs/forecast_metrics.json]
+    
+    H --> L[Đóng gói Bundle .joblib]

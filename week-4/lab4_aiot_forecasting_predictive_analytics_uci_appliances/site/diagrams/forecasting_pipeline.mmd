@@ -1,0 +1,23 @@
+graph LR
+    %% Forecasting Pipeline with Target Shifting
+    subgraph "Dữ liệu Quá khứ & Hiện tại (Thời điểm t)"
+        A[X_t: Cảm biến tại t]
+        B[X_t: Lag features]
+        C[X_t: Rolling features]
+        D[X_t: Delta features]
+        E[X_t: Cyclic Time features]
+    end
+
+    subgraph "Dữ liệu Tương lai (Thời điểm t+h)"
+        F[Appliances tại t+h] -->|Shift -h| G[target_future tại t]
+    end
+
+    subgraph "Mô hình Học máy (Model Training)"
+        H[Đầu vào: Feature Matrix X]
+        I[Đầu ra: Target vector Y]
+        J[Huấn luyện: X --> Y]
+    end
+
+    A & B & C & D & E --> H
+    G --> I
+    H & I --> J

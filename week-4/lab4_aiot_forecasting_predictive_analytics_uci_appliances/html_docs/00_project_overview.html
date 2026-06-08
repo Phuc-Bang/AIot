@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>00. Tổng quan dự án - Lab 4 AIoT Energy Forecasting</title>
+    <style>
+        
+:root {
+    --primary: #4f46e5;
+    --primary-light: #e0e7ff;
+    --primary-hover: #4338ca;
+    --text-dark: #0f172a;
+    --text-muted: #64748b;
+    --bg-slate: #f8fafc;
+    --bg-sidebar: #0f172a;
+    --border-slate: #e2e8f0;
+    --code-bg: #1e293b;
+    --inline-code-bg: #f1f5f9;
+    --inline-code-color: #e11d48;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: var(--text-dark);
+    background-color: var(--bg-slate);
+    line-height: 1.6;
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Sidebar Navigation */
+.sidebar {
+    width: 320px;
+    background-color: var(--bg-sidebar);
+    color: #f8fafc;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 100;
+    box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+}
+
+.sidebar-header {
+    padding: 24px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.sidebar-header h1 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sidebar-header .badge {
+    background-color: var(--primary);
+    color: white;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 9999px;
+    font-weight: 600;
+    margin-top: 4px;
+    display: inline-block;
+}
+
+.sidebar-nav {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 0;
+}
+
+.sidebar-nav-item {
+    display: block;
+    padding: 12px 24px;
+    color: #cbd5e1;
+    text-decoration: none;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    border-left: 4px solid transparent;
+}
+
+.sidebar-nav-item:hover {
+    background-color: rgba(255,255,255,0.05);
+    color: #ffffff;
+    padding-left: 28px;
+}
+
+.sidebar-nav-item.active {
+    background-color: rgba(79, 70, 229, 0.15);
+    color: #ffffff;
+    border-left-color: var(--primary);
+    font-weight: 600;
+}
+
+.sidebar-footer {
+    padding: 16px 24px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    font-size: 11px;
+    color: #94a3b8;
+    text-align: center;
+}
+
+/* Main Content Area */
+.main-wrapper {
+    margin-left: 320px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.top-bar {
+    background-color: #ffffff;
+    border-bottom: 1px solid var(--border-slate);
+    padding: 16px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 90;
+}
+
+.top-bar-title {
+    font-size: 14px;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.top-bar-links a {
+    color: var(--primary);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.top-bar-links a:hover {
+    color: var(--primary-hover);
+    text-decoration: underline;
+}
+
+.content-container {
+    flex: 1;
+    padding: 48px 64px 80px 64px;
+    max-width: 1012px;
+    width: 100%;
+    margin: 0 auto;
+    background-color: #ffffff;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    border-radius: 8px;
+    margin-top: 24px;
+    margin-bottom: 24px;
+}
+
+/* Markdown Styling */
+.markdown-body h1 {
+    font-size: 32px;
+    font-weight: 800;
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--border-slate);
+    color: #0f172a;
+}
+
+.markdown-body h2 {
+    font-size: 22px;
+    font-weight: 700;
+    margin-top: 36px;
+    margin-bottom: 16px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border-slate);
+    color: #1e293b;
+}
+
+.markdown-body h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-top: 28px;
+    margin-bottom: 12px;
+    color: #334155;
+}
+
+.markdown-body h4 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-top: 20px;
+    margin-bottom: 8px;
+    color: #475569;
+}
+
+.markdown-body p {
+    margin-bottom: 16px;
+    color: #334155;
+    text-align: justify;
+}
+
+.markdown-body ul, .markdown-body ol {
+    margin-bottom: 16px;
+    padding-left: 24px;
+}
+
+.markdown-body li {
+    margin-bottom: 8px;
+    color: #334155;
+}
+
+.markdown-body a {
+    color: var(--primary);
+    text-decoration: none;
+    transition: color 0.15s;
+    font-weight: 500;
+}
+
+.markdown-body a:hover {
+    color: var(--primary-hover);
+    text-decoration: underline;
+}
+
+/* Blockquotes */
+.markdown-body blockquote {
+    padding: 12px 24px;
+    border-left: 4px solid var(--border-slate);
+    background-color: var(--bg-slate);
+    margin-bottom: 20px;
+    font-style: italic;
+    color: var(--text-muted);
+}
+
+/* Code block styling */
+.markdown-body pre {
+    background-color: var(--code-bg);
+    padding: 16px;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin-bottom: 20px;
+}
+
+.markdown-body pre code {
+    background-color: transparent;
+    color: #f8fafc;
+    padding: 0;
+    border-radius: 0;
+    font-size: 13.5px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+.markdown-body code {
+    background-color: var(--inline-code-bg);
+    color: var(--inline-code-color);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 85%;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+/* Table styling */
+.markdown-body table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 24px;
+    font-size: 14.5px;
+}
+
+.markdown-body th, .markdown-body td {
+    padding: 12px 16px;
+    border: 1px solid var(--border-slate);
+}
+
+.markdown-body th {
+    background-color: var(--bg-slate);
+    font-weight: 600;
+    text-align: left;
+    color: #1e293b;
+}
+
+.markdown-body tr:nth-child(even) {
+    background-color: #fafbfd;
+}
+
+/* Custom Alert Boxes (GitHub Alerts mapping) */
+.alert {
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    border-radius: 8px;
+    border-left-width: 4px;
+    border-left-style: solid;
+}
+
+.alert-title {
+    font-weight: 700;
+    margin-bottom: 8px;
+    font-size: 14.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.alert-content p {
+    margin-bottom: 0 !important;
+    font-size: 14px;
+    text-align: justify;
+}
+
+.alert-note {
+    background-color: #eff6ff;
+    border-left-color: #3b82f6;
+    color: #1e40af;
+}
+.alert-note .alert-title { color: #1d4ed8; }
+
+.alert-tip {
+    background-color: #f0fdf4;
+    border-left-color: #22c55e;
+    color: #166534;
+}
+.alert-tip .alert-title { color: #15803d; }
+
+.alert-important {
+    background-color: #faf5ff;
+    border-left-color: #a855f7;
+    color: #6b21a8;
+}
+.alert-important .alert-title { color: #7e22ce; }
+
+.alert-warning {
+    background-color: #fffbeb;
+    border-left-color: #f59e0b;
+    color: #92400e;
+}
+.alert-warning .alert-title { color: #b45309; }
+
+.alert-caution {
+    background-color: #fef2f2;
+    border-left-color: #ef4444;
+    color: #991b1b;
+}
+.alert-caution .alert-title { color: #b91c1c; }
+
+/* Mermaid Styling */
+.mermaid {
+    background-color: white !important;
+    border: 1px solid var(--border-slate);
+    border-radius: 8px;
+    padding: 24px;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 24px;
+    overflow-x: auto;
+}
+
+.footer {
+    background-color: #ffffff;
+    border-top: 1px solid var(--border-slate);
+    padding: 24px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: auto;
+}
+
+/* Landing Page Grid */
+.landing-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    margin-top: 24px;
+}
+
+.landing-card {
+    background-color: #ffffff;
+    border: 1px solid var(--border-slate);
+    border-radius: 8px;
+    padding: 20px;
+    text-decoration: none;
+    color: var(--text-dark);
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.landing-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);
+    border-color: var(--primary);
+}
+
+.landing-card h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.landing-card p {
+    font-size: 13.5px;
+    color: var(--text-muted);
+    margin-bottom: 0;
+    text-align: left;
+}
+
+@media (max-width: 1024px) {
+    .sidebar {
+        display: none; /* simple hides sidebar for tablet/mobile to keep script clean */
+    }
+    .main-wrapper {
+        margin-left: 0;
+    }
+    .content-container {
+        padding: 24px;
+        margin-top: 0;
+        margin-bottom: 0;
+        border-radius: 0;
+    }
+}
+
+    </style>
+    <!-- Mermaid.js for drawing diagrams directly in the browser -->
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            securityLevel: 'loose',
+            flowchart: { useMaxWidth: true, htmlLabels: true }
+        });
+    </script>
+</head>
+<body>
+
+    <!-- Left Sidebar Navigation -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h1>🔋 Lab 4 AIoT</h1>
+            <div class="badge">Energy Forecasting</div>
+        </div>
+        <div class="sidebar-nav">
+                    <a href="index.html" class="sidebar-nav-item ">🏡 Trang chủ / Tổng mục lục</a>
+        <a href="00_project_overview.html" class="sidebar-nav-item active">00. Tổng quan dự án</a>
+        <a href="01_architecture.html" class="sidebar-nav-item ">01. Kiến trúc hệ thống AIoT</a>
+        <a href="02_data_flow.html" class="sidebar-nav-item ">02. Luồng dữ liệu tuần tự</a>
+        <a href="03_runtime_and_dependencies.html" class="sidebar-nav-item ">03. Luồng thực thi & Phụ thuộc</a>
+        <a href="04_dataset_and_schema.html" class="sidebar-nav-item ">04. Tập dữ liệu & Điền khuyết</a>
+        <a href="05_feature_engineering.html" class="sidebar-nav-item ">05. Kỹ nghệ đặc trưng thời gian</a>
+        <a href="06_model_training_and_metrics.html" class="sidebar-nav-item ">06. Mô hình hóa & Đo lường sai số</a>
+        <a href="07_decision_layer.html" class="sidebar-nav-item ">07. Tầng ra quyết định & Cảnh báo</a>
+        <a href="08_api_forecast_workflow.html" class="sidebar-nav-item ">08. Triển khai API FastAPI</a>
+        <a href="09_code_review.html" class="sidebar-nav-item ">09. Đánh giá chất lượng mã nguồn</a>
+        <a href="10_safety_fail_safe.html" class="sidebar-nav-item ">10. An toàn & Cơ chế Fail-safe</a>
+        <a href="11_development_roadmap.html" class="sidebar-nav-item ">11. Lộ trình phát triển & Học tập</a>
+        <a href="HANDBOOK.html" class="sidebar-nav-item ">📖 Sách hướng dẫn kỹ thuật (Handbook)</a>
+        </div>
+        <div class="sidebar-footer">
+            Designed by DeepMind Team & Antigravity AI
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="main-wrapper">
+        <div class="top-bar">
+            <div class="top-bar-title">Tài liệu Kỹ thuật Hệ thống Dự báo Phụ tải Điện năng BEMS</div>
+            <div class="top-bar-links">
+                <a href="index.html">🏡 Quay lại Trang chủ</a>
+            </div>
+        </div>
+
+        <div style="padding: 0 40px; flex: 1;">
+            <div class="content-container markdown-body">
+                <h1 id="tong-quan-du-an-lab-4-forecasting-predictive-analytics">TỔNG QUAN DỰ ÁN LAB 4: FORECASTING &amp; PREDICTIVE ANALYTICS</h1>
+<h2 id="1-gioi-thieu-bai-toan-va-muc-tieu-hoc-tap">1. Giới thiệu Bài toán và Mục tiêu học tập</h2>
+<p>Trong kỷ nguyên của <strong>Internet vạn vật kết hợp Trí tuệ nhân tạo (AIoT)</strong>, dữ liệu cảm biến được thu thập liên tục từ môi trường xung quanh. Tuy nhiên, nếu chỉ dừng lại ở việc xem xét trạng thái hiện tại (giám sát thời gian thực), hệ thống sẽ ở thế bị động. Để tối ưu hóa chi phí vận hành, tiết kiệm năng lượng và đưa ra các quyết định chủ động, hệ thống AIoT cần có khả năng <strong>"nhìn trước tương lai"</strong>.</p>
+<p><strong>Lab 4: Forecasting &amp; Predictive Analytics</strong> tập trung vào bài toán dự báo chuỗi thời gian (time-series forecasting). Cụ thể, hệ thống sẽ sử dụng dữ liệu tiêu thụ điện của các thiết bị gia dụng trong quá khứ cùng với thông số thời tiết và cảm biến nhiệt độ/độ ẩm trong nhà để <strong>dự báo lượng điện tiêu thụ trong 10 phút tiếp theo (<code>Appliances</code> Wh)</strong>. </p>
+<h3 id="muc-tieu-hoc-tap-cot-loi-cua-sinh-vien">Mục tiêu học tập cốt lõi của sinh viên:</h3>
+<ol>
+<li><strong>Hiểu phương pháp mô hình hóa chuỗi thời gian</strong>: Cách biến dữ liệu chuỗi thời gian thô thành dữ liệu học có giám sát (supervised learning table).</li>
+<li><strong>Làm chủ kỹ nghệ đặc trưng (Feature Engineering) cho IoT</strong>: Biết cách tính toán đặc trưng độ trễ (Lag), cửa sổ trượt (Rolling), sai phân (Delta), và biến đổi tuần hoàn thời gian (Cyclic Time).</li>
+<li><strong>Kỹ năng đánh giá mô hình hồi quy (Regression)</strong>: Phân biệt và tính toán các chỉ số sai số vật lý như MAE, RMSE, MAPE và xu hướng lệch dự báo (Forecast Bias).</li>
+<li><strong>Tư duy phản biện về mô hình Baseline</strong>: Hiểu rõ tại sao một mô hình AI phức tạp chỉ có giá trị khi nó vượt qua được các quy tắc suy diễn cơ bản (Last Value, Moving Average).</li>
+<li><strong>Triển khai kiến trúc API &amp; Lớp quyết định an toàn</strong>: Hiểu cơ chế đóng gói model bundle và triển khai thành API FastAPI phục vụ dự báo động, đồng thời tích hợp lớp cảnh báo rủi ro an toàn trước khi gửi lệnh điều khiển phần cứng.</li>
+</ol>
+<hr />
+<h2 id="2-su-khac-biet-ban-chat-lab-4-forecasting-vs-lab-3-anomaly-detection">2. Sự khác biệt bản chất: Lab 4 (Forecasting) vs Lab 3 (Anomaly Detection)</h2>
+<p>Một trong những sai lầm phổ biến nhất của sinh viên là đánh đồng bài toán <strong>Dự báo (Forecasting)</strong> với <strong>Phát hiện bất thường (Anomaly Detection)</strong>. Mặc dù cả hai đều phục vụ mục đích quản lý vận hành, chúng khác nhau hoàn toàn về triết lý thiết kế hệ thống, thuật toán, dữ liệu mục tiêu và cách đánh giá.</p>
+<p>Dưới đây là bảng so sánh chi tiết giữa hai dự án Lab:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Tiêu chí</th>
+<th style="text-align: left;">Lab 3: Anomaly Detection (Phát hiện bất thường)</th>
+<th style="text-align: left;">Lab 4: Forecasting &amp; Predictive Analytics (Dự báo)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Câu hỏi cốt lõi</strong></td>
+<td style="text-align: left;"><em>"Hệ thống có đang xảy ra sự cố hay bất thường tại thời điểm hiện tại không?"</em></td>
+<td style="text-align: left;"><em>"Giá trị của thông số đo đạc trong tương lai gần (t+1, t+n) sẽ là bao nhiêu?"</em></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Dòng chảy sự kiện</strong></td>
+<td style="text-align: left;"><strong>Event Pipeline</strong>: Phân tích tức thời từng mẫu dữ liệu đơn lẻ (point-in-time) để phân loại.</td>
+<td style="text-align: left;"><strong>Forecasting Pipeline</strong>: Tích lũy dữ liệu lịch sử liên tục để ngoại suy xu hướng tương lai.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Dữ liệu mục tiêu (Target)</strong></td>
+<td style="text-align: left;">Không có target tự nhiên (Unsupervised) hoặc nhãn nhị phân: <code>0</code> (Bình thường), <code>1</code> (Bất thường).</td>
+<td style="text-align: left;">Có target tự nhiên liên tục trong tương lai: Công suất điện tiêu thụ thực tế <code>Appliances</code> Wh tại thời điểm $t + 1$.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Kỹ nghệ đặc trưng</strong></td>
+<td style="text-align: left;">Tập trung vào phân phối dữ liệu hiện tại, khoảng cách đa chiều (ví dụ: Isolation Forest, Elliptic Envelope).</td>
+<td style="text-align: left;">Tập trung vào cấu trúc tự tương quan (autocorrelation), độ trễ (lag), cửa sổ trượt (rolling), tính tuần hoàn (cyclic time).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Độ chia dữ liệu (Data Split)</strong></td>
+<td style="text-align: left;">Thường dùng Random Split hoặc huấn luyện trên dữ liệu bình thường (semi-supervised).</td>
+<td style="text-align: left;">Bắt buộc phải dùng <strong>Chronological Split</strong> (phân chia theo dòng thời gian) để tránh rò rỉ dữ liệu tương lai.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Chỉ số đánh giá (Metrics)</strong></td>
+<td style="text-align: left;">Chỉ số phân loại (Classification Metrics): <strong>Precision, Recall, F1-Score, AUC-ROC</strong>.</td>
+<td style="text-align: left;">Chỉ số sai số hồi quy (Regression Errors): <strong>MAE, RMSE, MAPE, Forecast Bias</strong>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Đầu ra API (Output)</strong></td>
+<td style="text-align: left;"><code>anomaly_score</code> (độ bất thường), <code>severity</code> (mức nghiêm trọng), cảnh báo nhị phân.</td>
+<td style="text-align: left;"><code>predicted_value</code> (giá trị dự báo), <code>risk_level</code> (mức rủi ro), <code>recommendation</code> (hành động khuyến nghị).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Hành động hệ thống</strong></td>
+<td style="text-align: left;">Kích hoạt chuông báo động, gửi thông báo khẩn cấp, cô lập thiết bị lỗi ngay lập tức.</td>
+<td style="text-align: left;">Hoạch định kế hoạch dịch chuyển phụ tải, tối ưu hóa năng lượng, chuẩn bị kịch bản dự phòng bảo trì.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="3-tai-sao-hai-bai-toan-nay-lai-bo-tro-cho-nhau-trong-aiot">3. Tại sao hai bài toán này lại bổ trợ cho nhau trong AIoT?</h2>
+<p>Trong một hệ thống quản lý năng lượng tòa nhà (BEMS - Building Energy Management System) thực tế, Lab 3 và Lab 4 được tích hợp song song tạo thành một vòng lặp quản lý thông minh khép kín:</p>
+<pre class="mermaid">graph TD
+    A[Cảm biến IoT thu thập Telemetry] --> B(Mô hình Lab 4: Dự báo nhu cầu năng lượng)
+    A --> C(Mô hình Lab 3: Phát hiện rò rỉ/sự cố điện)
+
+    B -->|Dự báo tải tăng cao| D[Decision Layer: Lập kế hoạch tiết kiệm điện]
+    C -->|Phát hiện dòng điện rò rỉ| E[Safety Layer: Ngắt aptomat khẩn cấp]
+
+    D --> F[Vận hành chủ động tiết kiệm chi phí]
+    E --> G[Ngăn ngừa cháy nổ tức thời]
+</pre>
+<ul>
+<li><strong>Tính chủ động (Proactive - Lab 4)</strong>: Giúp người quản lý biết trước phụ tải điện sẽ tăng vọt vào lúc 18:00 tối nay để chủ động sạc đầy pin lưu trữ điện mặt trời từ lúc 14:00 chiều (khi trời nắng to và giá điện rẻ).</li>
+<li><strong>Tính phản ứng (Reactive - Lab 3)</strong>: Giúp ngắt dòng điện ngay lập tức khi phát hiện dòng rò hoặc thiết bị chập cháy đột ngột ngoài kịch bản dự báo thông thường.</li>
+</ul>
+<p>Sự kết hợp này đảm bảo hệ thống AIoT vừa <strong>đạt hiệu quả kinh tế tối đa</strong>, vừa <strong>đảm bảo an toàn kỹ thuật tuyệt đối</strong>.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            © 2026 - Lab 4 AIoT Forecasting & Predictive Analytics - Tài liệu Đào tạo Chuyên sâu
+        </div>
+    </div>
+
+</body>
+</html>

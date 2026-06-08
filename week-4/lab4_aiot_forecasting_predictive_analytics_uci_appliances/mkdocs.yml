@@ -1,0 +1,82 @@
+site_name: "Lab 4: AIoT Energy Forecasting & Predictive Analytics"
+site_description: "Tài liệu kỹ thuật chuyên sâu về dự báo phụ tải điện năng và phân tích dự đoán trong hệ thống AIoT"
+site_author: "DeepMind team & Antigravity AI"
+
+theme:
+  name: material
+  language: vi
+  palette:
+    # Dark/Light Mode Switcher
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-sunny
+        name: Chuyển sang chế độ Dark Mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-night
+        name: Chuyển sang chế độ Light Mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+
+markdown_extensions:
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_style: default
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+  - toc:
+      permalink: true
+  - admonition
+  - pymdownx.details
+  - attr_list
+  - pymdownx.arithmatex:
+      generic: true
+
+extra_javascript:
+  - javascripts/mathjax.js
+  - https://polyfill.io/v3/polyfill.min.js?features=es6
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+
+nav:
+  - Trang chủ: index.md
+  - "Học phần I: Tổng quan & Kiến trúc":
+    - 00. Tổng quan bài toán: 00_project_overview.md
+    - 01. Kiến trúc hệ thống: 01_architecture.md
+    - 02. Luồng dữ liệu tuần tự: 02_data_flow.md
+    - 03. Luồng thực thi & Phụ thuộc: 03_runtime_and_dependencies.md
+  - "Học phần II: Dữ liệu & Đặc trưng":
+    - 04. Tập dữ liệu & Điền khuyết: 04_dataset_and_schema.md
+    - 05. Kỹ nghệ đặc trưng chuỗi thời gian: 05_feature_engineering.md
+  - "Học phần III: Mô hình & API Serving":
+    - 06. Mô hình hóa & Đo lường sai số: 06_model_training_and_metrics.md
+    - 07. Tầng ra quyết định & Cảnh báo: 07_decision_layer.md
+    - 08. Triển khai FastAPI Serving: 08_api_forecast_workflow.md
+  - "Học phần IV: Chất lượng mã & An toàn":
+    - 09. Đánh giá chất lượng mã nguồn: 09_code_review.md
+    - 10. An toàn & Cơ chế Fail-safe: 10_safety_fail_safe.md
+  - "Học phần V: Lộ trình & Handbook":
+    - 11. Lộ trình phát triển: 11_development_roadmap.md
+    - "📖 Sách hướng dẫn kỹ thuật (Handbook)": HANDBOOK.md
+  - Hướng dẫn xuất bản HTML: README_HTML_EXPORT.md
+  - Hướng dẫn cấu hình MkDocs: README_MKDOCS.md

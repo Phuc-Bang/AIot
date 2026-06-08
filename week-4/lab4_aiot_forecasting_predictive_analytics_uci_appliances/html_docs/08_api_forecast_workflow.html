@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>08. Triển khai API FastAPI - Lab 4 AIoT Energy Forecasting</title>
+    <style>
+        
+:root {
+    --primary: #4f46e5;
+    --primary-light: #e0e7ff;
+    --primary-hover: #4338ca;
+    --text-dark: #0f172a;
+    --text-muted: #64748b;
+    --bg-slate: #f8fafc;
+    --bg-sidebar: #0f172a;
+    --border-slate: #e2e8f0;
+    --code-bg: #1e293b;
+    --inline-code-bg: #f1f5f9;
+    --inline-code-color: #e11d48;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: var(--text-dark);
+    background-color: var(--bg-slate);
+    line-height: 1.6;
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Sidebar Navigation */
+.sidebar {
+    width: 320px;
+    background-color: var(--bg-sidebar);
+    color: #f8fafc;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 100;
+    box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+}
+
+.sidebar-header {
+    padding: 24px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.sidebar-header h1 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sidebar-header .badge {
+    background-color: var(--primary);
+    color: white;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 9999px;
+    font-weight: 600;
+    margin-top: 4px;
+    display: inline-block;
+}
+
+.sidebar-nav {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 0;
+}
+
+.sidebar-nav-item {
+    display: block;
+    padding: 12px 24px;
+    color: #cbd5e1;
+    text-decoration: none;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    border-left: 4px solid transparent;
+}
+
+.sidebar-nav-item:hover {
+    background-color: rgba(255,255,255,0.05);
+    color: #ffffff;
+    padding-left: 28px;
+}
+
+.sidebar-nav-item.active {
+    background-color: rgba(79, 70, 229, 0.15);
+    color: #ffffff;
+    border-left-color: var(--primary);
+    font-weight: 600;
+}
+
+.sidebar-footer {
+    padding: 16px 24px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    font-size: 11px;
+    color: #94a3b8;
+    text-align: center;
+}
+
+/* Main Content Area */
+.main-wrapper {
+    margin-left: 320px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.top-bar {
+    background-color: #ffffff;
+    border-bottom: 1px solid var(--border-slate);
+    padding: 16px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 90;
+}
+
+.top-bar-title {
+    font-size: 14px;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.top-bar-links a {
+    color: var(--primary);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.top-bar-links a:hover {
+    color: var(--primary-hover);
+    text-decoration: underline;
+}
+
+.content-container {
+    flex: 1;
+    padding: 48px 64px 80px 64px;
+    max-width: 1012px;
+    width: 100%;
+    margin: 0 auto;
+    background-color: #ffffff;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    border-radius: 8px;
+    margin-top: 24px;
+    margin-bottom: 24px;
+}
+
+/* Markdown Styling */
+.markdown-body h1 {
+    font-size: 32px;
+    font-weight: 800;
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--border-slate);
+    color: #0f172a;
+}
+
+.markdown-body h2 {
+    font-size: 22px;
+    font-weight: 700;
+    margin-top: 36px;
+    margin-bottom: 16px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border-slate);
+    color: #1e293b;
+}
+
+.markdown-body h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-top: 28px;
+    margin-bottom: 12px;
+    color: #334155;
+}
+
+.markdown-body h4 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-top: 20px;
+    margin-bottom: 8px;
+    color: #475569;
+}
+
+.markdown-body p {
+    margin-bottom: 16px;
+    color: #334155;
+    text-align: justify;
+}
+
+.markdown-body ul, .markdown-body ol {
+    margin-bottom: 16px;
+    padding-left: 24px;
+}
+
+.markdown-body li {
+    margin-bottom: 8px;
+    color: #334155;
+}
+
+.markdown-body a {
+    color: var(--primary);
+    text-decoration: none;
+    transition: color 0.15s;
+    font-weight: 500;
+}
+
+.markdown-body a:hover {
+    color: var(--primary-hover);
+    text-decoration: underline;
+}
+
+/* Blockquotes */
+.markdown-body blockquote {
+    padding: 12px 24px;
+    border-left: 4px solid var(--border-slate);
+    background-color: var(--bg-slate);
+    margin-bottom: 20px;
+    font-style: italic;
+    color: var(--text-muted);
+}
+
+/* Code block styling */
+.markdown-body pre {
+    background-color: var(--code-bg);
+    padding: 16px;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin-bottom: 20px;
+}
+
+.markdown-body pre code {
+    background-color: transparent;
+    color: #f8fafc;
+    padding: 0;
+    border-radius: 0;
+    font-size: 13.5px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+.markdown-body code {
+    background-color: var(--inline-code-bg);
+    color: var(--inline-code-color);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 85%;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+/* Table styling */
+.markdown-body table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 24px;
+    font-size: 14.5px;
+}
+
+.markdown-body th, .markdown-body td {
+    padding: 12px 16px;
+    border: 1px solid var(--border-slate);
+}
+
+.markdown-body th {
+    background-color: var(--bg-slate);
+    font-weight: 600;
+    text-align: left;
+    color: #1e293b;
+}
+
+.markdown-body tr:nth-child(even) {
+    background-color: #fafbfd;
+}
+
+/* Custom Alert Boxes (GitHub Alerts mapping) */
+.alert {
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    border-radius: 8px;
+    border-left-width: 4px;
+    border-left-style: solid;
+}
+
+.alert-title {
+    font-weight: 700;
+    margin-bottom: 8px;
+    font-size: 14.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.alert-content p {
+    margin-bottom: 0 !important;
+    font-size: 14px;
+    text-align: justify;
+}
+
+.alert-note {
+    background-color: #eff6ff;
+    border-left-color: #3b82f6;
+    color: #1e40af;
+}
+.alert-note .alert-title { color: #1d4ed8; }
+
+.alert-tip {
+    background-color: #f0fdf4;
+    border-left-color: #22c55e;
+    color: #166534;
+}
+.alert-tip .alert-title { color: #15803d; }
+
+.alert-important {
+    background-color: #faf5ff;
+    border-left-color: #a855f7;
+    color: #6b21a8;
+}
+.alert-important .alert-title { color: #7e22ce; }
+
+.alert-warning {
+    background-color: #fffbeb;
+    border-left-color: #f59e0b;
+    color: #92400e;
+}
+.alert-warning .alert-title { color: #b45309; }
+
+.alert-caution {
+    background-color: #fef2f2;
+    border-left-color: #ef4444;
+    color: #991b1b;
+}
+.alert-caution .alert-title { color: #b91c1c; }
+
+/* Mermaid Styling */
+.mermaid {
+    background-color: white !important;
+    border: 1px solid var(--border-slate);
+    border-radius: 8px;
+    padding: 24px;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 24px;
+    overflow-x: auto;
+}
+
+.footer {
+    background-color: #ffffff;
+    border-top: 1px solid var(--border-slate);
+    padding: 24px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: auto;
+}
+
+/* Landing Page Grid */
+.landing-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    margin-top: 24px;
+}
+
+.landing-card {
+    background-color: #ffffff;
+    border: 1px solid var(--border-slate);
+    border-radius: 8px;
+    padding: 20px;
+    text-decoration: none;
+    color: var(--text-dark);
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.landing-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);
+    border-color: var(--primary);
+}
+
+.landing-card h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.landing-card p {
+    font-size: 13.5px;
+    color: var(--text-muted);
+    margin-bottom: 0;
+    text-align: left;
+}
+
+@media (max-width: 1024px) {
+    .sidebar {
+        display: none; /* simple hides sidebar for tablet/mobile to keep script clean */
+    }
+    .main-wrapper {
+        margin-left: 0;
+    }
+    .content-container {
+        padding: 24px;
+        margin-top: 0;
+        margin-bottom: 0;
+        border-radius: 0;
+    }
+}
+
+    </style>
+    <!-- Mermaid.js for drawing diagrams directly in the browser -->
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            securityLevel: 'loose',
+            flowchart: { useMaxWidth: true, htmlLabels: true }
+        });
+    </script>
+</head>
+<body>
+
+    <!-- Left Sidebar Navigation -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h1>🔋 Lab 4 AIoT</h1>
+            <div class="badge">Energy Forecasting</div>
+        </div>
+        <div class="sidebar-nav">
+                    <a href="index.html" class="sidebar-nav-item ">🏡 Trang chủ / Tổng mục lục</a>
+        <a href="00_project_overview.html" class="sidebar-nav-item ">00. Tổng quan dự án</a>
+        <a href="01_architecture.html" class="sidebar-nav-item ">01. Kiến trúc hệ thống AIoT</a>
+        <a href="02_data_flow.html" class="sidebar-nav-item ">02. Luồng dữ liệu tuần tự</a>
+        <a href="03_runtime_and_dependencies.html" class="sidebar-nav-item ">03. Luồng thực thi & Phụ thuộc</a>
+        <a href="04_dataset_and_schema.html" class="sidebar-nav-item ">04. Tập dữ liệu & Điền khuyết</a>
+        <a href="05_feature_engineering.html" class="sidebar-nav-item ">05. Kỹ nghệ đặc trưng thời gian</a>
+        <a href="06_model_training_and_metrics.html" class="sidebar-nav-item ">06. Mô hình hóa & Đo lường sai số</a>
+        <a href="07_decision_layer.html" class="sidebar-nav-item ">07. Tầng ra quyết định & Cảnh báo</a>
+        <a href="08_api_forecast_workflow.html" class="sidebar-nav-item active">08. Triển khai API FastAPI</a>
+        <a href="09_code_review.html" class="sidebar-nav-item ">09. Đánh giá chất lượng mã nguồn</a>
+        <a href="10_safety_fail_safe.html" class="sidebar-nav-item ">10. An toàn & Cơ chế Fail-safe</a>
+        <a href="11_development_roadmap.html" class="sidebar-nav-item ">11. Lộ trình phát triển & Học tập</a>
+        <a href="HANDBOOK.html" class="sidebar-nav-item ">📖 Sách hướng dẫn kỹ thuật (Handbook)</a>
+        </div>
+        <div class="sidebar-footer">
+            Designed by DeepMind Team & Antigravity AI
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="main-wrapper">
+        <div class="top-bar">
+            <div class="top-bar-title">Tài liệu Kỹ thuật Hệ thống Dự báo Phụ tải Điện năng BEMS</div>
+            <div class="top-bar-links">
+                <a href="index.html">🏡 Quay lại Trang chủ</a>
+            </div>
+        </div>
+
+        <div style="padding: 0 40px; flex: 1;">
+            <div class="content-container markdown-body">
+                <h1 id="trien-khai-va-van-hanh-endpoint-du-bao-tren-fastapi-api">TRIỂN KHAI VÀ VẬN HÀNH ENDPOINT DỰ BÁO TRÊN FASTAPI API</h1>
+<p>Khi đưa mô hình học máy vào vận hành thực tế trong hệ sinh thái AIoT, ta cần đóng gói mô hình dưới dạng một <strong>Dịch vụ Web (Web Service API)</strong> gọn nhẹ nhưng mạnh mẽ. API đóng vai trò là cầu nối tiếp nhận dữ liệu đo đạc trực tuyến từ các Gateway ở biên, thực hiện tính toán đặc trưng động, suy diễn mô hình và trả về các chỉ đạo vận hành tức thời.</p>
+<p>Tài liệu này giải thích chi tiết quy trình đóng gói mô hình, cách FastAPI nạp và phục vụ suy diễn thời gian thực, chi tiết các endpoint, cấu trúc các gói tin JSON mẫu, sự khác biệt giữa pha thử nghiệm và triển khai, cùng phương pháp kết nối API vào các hệ thống bên thứ ba.</p>
+<hr />
+<h2 id="1-co-che-ong-goi-mo-hinh-thanh-file-joblib">1. Cơ chế đóng gói Mô hình thành file <code>.joblib</code></h2>
+<p>Trong học máy chuỗi thời gian, mô hình dự báo không thể chạy đơn độc. Nó luôn cần đi kèm với các siêu tham số phụ trợ được tính toán trong pha huấn luyện offline.</p>
+<p>Trong file <code>train_forecast.py</code>, hệ thống không chỉ lưu một mô hình học máy duy nhất, mà đóng gói toàn bộ các cấu phần liên quan thành một <strong>Model Bundle</strong> (dạng Dictionary của Python) và xuất ra file nhị phân nén bằng thư viện <code>joblib</code>:</p>
+<pre><code class="language-python">model_bundle = {
+    &quot;model&quot;: trained_models[best_model_name],               # Mô hình học máy tốt nhất (Gradient Boosting...)
+    &quot;trained_models&quot;: trained_models,                       # Lưu tất cả các mô hình để phục vụ so sánh A/B
+    &quot;feature_columns&quot;: FEATURE_COLUMNS,                     # Danh sách các đặc trưng đầu vào chuẩn tắc
+    &quot;feature_medians&quot;: {k: float(v) for k, v in feature_medians.items()}, # Trung vị đặc trưng để điền khuyết thế
+    &quot;raw_medians&quot;: {k: float(v) for k, v in raw_medians.items()},         # Trung vị dữ liệu cảm biến thô
+    &quot;risk_thresholds&quot;: risk_thresholds,                     # Các ngưỡng phân vị cảnh báo rủi ro động
+    &quot;target&quot;: TARGET_COL,                                   # Tên cột biến mục tiêu (Appliances)
+    &quot;forecast_horizon_steps&quot;: HORIZON_STEPS,                # Số bước chân trời dự báo (1 bước)
+    &quot;forecast_horizon_minutes&quot;: HORIZON_MINUTES,            # Số phút chân trời dự báo (10 phút)
+    &quot;model_version&quot;: best_model_name,                       # Phiên bản mô hình được chọn
+    &quot;lab_version&quot;: MODEL_VERSION,                           # Phiên bản Lab
+    &quot;metrics_by_model&quot;: metrics,                            # Sai số chi tiết của từng mô hình
+}
+joblib.dump(model_bundle, MODEL_BUNDLE_PATH)
+</code></pre>
+<h3 id="tai-sao-lai-ong-goi-dang-bundle">Tại sao lại đóng gói dạng Bundle?</h3>
+<ul>
+<li><strong>Tránh Training-Serving Skew (Lệch dữ liệu)</strong>: Giúp đảm bảo rằng các tham số điền khuyết thiếu (<code>raw_medians</code>) dùng ở thời điểm chạy trực tuyến hoàn toàn trùng khớp với các tham số đã tính toán trong pha huấn luyện ngoại tuyến.</li>
+<li><strong>Dễ dàng bảo trì &amp; xuất bản</strong>: Khi muốn nâng cấp mô hình mới (ví dụ thay đổi ngưỡng rủi ro hoặc đặc trưng đầu vào), ta chỉ cần ghi đè file <code>.joblib</code> mới mà không cần phải thay đổi một dòng code logic nào của Server API.</li>
+</ul>
+<hr />
+<h2 id="2-cach-fastapi-nap-va-quan-ly-mo-hinh-bundle">2. Cách FastAPI nạp và quản lý Mô hình Bundle</h2>
+<p>Trong file <code>src/app.py</code>, việc nạp mô hình được thực hiện ở mức độ phạm vi toàn cục (Global Scope) của tiến trình ngay khi khởi động Server (<strong>Cold Start</strong>):</p>
+<pre><code class="language-python">MODEL_BUNDLE_PATH = MODEL_DIR / &quot;forecast_model_bundle_v1.joblib&quot;
+
+model_bundle = None
+if MODEL_BUNDLE_PATH.exists():
+    model_bundle = joblib.load(MODEL_BUNDLE_PATH)
+</code></pre>
+<h3 id="uu-iem-ky-thuat-van-hanh">Ưu điểm kỹ thuật vận hành:</h3>
+<ol>
+<li><strong>Độ trễ phản hồi siêu thấp (Low Latency Serving)</strong>: Việc nạp tệp nhị phân từ ổ đĩa cứng vào bộ nhớ RAM mất khoảng vài trăm mili-giây. Bằng cách nạp mô hình một lần duy nhất khi khởi động, các yêu cầu suy diễn API sau đó chỉ cần truy xuất trực tiếp mô hình trên RAM, giúp thời gian xử lý cực kỳ nhanh (&lt; 50ms).</li>
+<li><strong>Quản lý luồng an toàn (Thread Safe)</strong>: Đối với các mô hình của <code>scikit-learn</code>, phương thức <code>.predict()</code> hoàn toàn an toàn khi xử lý đồng thời nhiều luồng request gọi đến (multi-threading), giúp Server chịu tải tốt khi scale.</li>
+</ol>
+<hr />
+<h2 id="3-chi-tiet-3-endpoints-cua-he-thong-api">3. Chi tiết 3 Endpoints của Hệ thống API</h2>
+<p>FastAPI cung cấp 3 endpoint chuẩn phục vụ cho các mục đích quản lý và vận hành:</p>
+<h3 id="1-endpoint-health-kiem-tra-suc-khoe">1. Endpoint <code>/health</code> (Kiểm tra sức khỏe)</h3>
+<ul>
+<li><strong>Phương thức</strong>: <code>GET</code></li>
+<li><strong>Mục đích</strong>: Dùng cho các bộ giám sát tự động (Load Balancer, Kubernetes Probe) để kiểm tra xem microservice có đang sống và mô hình đã được nạp thành công vào bộ nhớ hay chưa.</li>
+<li><strong>Phản hồi mẫu</strong>:
+    <code>json
+    {
+      "status": "ok",
+      "model_loaded": true,
+      "model_bundle_path": "E:\\AIoT\\Day-4\\lab4_aiot_forecasting_predictive_analytics_uci_appliances_code\\lab4_aiot_forecasting_predictive_analytics_uci_appliances\\models\\forecast_model_bundle_v1.joblib"
+    }</code></li>
+</ul>
+<h3 id="2-endpoint-model-info-thong-tin-chi-tiet-mo-hinh">2. Endpoint <code>/model-info</code> (Thông tin chi tiết mô hình)</h3>
+<ul>
+<li><strong>Phương thức</strong>: <code>GET</code></li>
+<li><strong>Mục đích</strong>: Cung cấp tri thức cho kỹ sư vận hành về cấu hình chi tiết của mô hình đang chạy trực tuyến, các ngưỡng rủi ro hiện tại và bảng sai số đối chứng thu được lúc kiểm thử ngoại tuyến.</li>
+<li><strong>Nội dung phản hồi</strong>: Tên thuật toán, phiên bản, chân trời dự báo (10 phút), số lượng đặc trưng đầu vào, các ngưỡng rủi ro thống kê và toàn bộ ma trận sai số MAE/RMSE/MAPE của tất cả các mô hình.</li>
+</ul>
+<h3 id="3-endpoint-forecast-suy-dien-thoi-gian-thuc">3. Endpoint <code>/forecast</code> (Suy diễn thời gian thực)</h3>
+<ul>
+<li><strong>Phương thức</strong>: <code>POST</code></li>
+<li><strong>Mục đích</strong>: Điểm tiếp nhận dữ liệu lịch sử thô từ Gateway gửi lên để tính toán và trả về kết quả dự báo an toàn.</li>
+<li><strong>Logic xử lý</strong>:<ol>
+<li>Nhận gói tin JSON lịch sử telemetry gần nhất.</li>
+<li>Chuyển thành DataFrame, sắp xếp thời gian.</li>
+<li>Làm sạch và điền khuyết thiếu dữ liệu thô bằng <code>raw_medians</code>.</li>
+<li>Tính toán các đặc trưng chuỗi thời gian (Lag, Rolling, Delta, Cyclic).</li>
+<li>Rút trích bản ghi cuối cùng tại thời điểm $t$ và điền khuyết đặc trưng bằng <code>feature_medians</code>.</li>
+<li>Gọi <code>model.predict(X)</code> để suy diễn công suất.</li>
+<li>Ánh xạ sang rủi ro, khuyến nghị và phản hồi.</li>
+</ol>
+</li>
+</ul>
+<hr />
+<h2 id="4-goi-tin-yeu-cau-mau-example-input-json-payload">4. Gói tin Yêu cầu mẫu (Example Input JSON Payload)</h2>
+<p>Client (Edge Gateway) cần gửi HTTP POST lên <code>/forecast</code> kèm body chứa chuỗi lịch sử đo đạc gần nhất (khuyến nghị $\ge 24$ điểm dữ liệu thô để đảm bảo tính toán đầy đủ các đặc trưng trễ/trượt 4 tiếng).</p>
+<h3 id="json-request-payload-gui-len-api">JSON Request Payload gửi lên API:</h3>
+<pre><code class="language-json">{
+  &quot;history&quot;: [
+    {
+      &quot;date&quot;: &quot;2016-01-21 11:00:00&quot;,
+      &quot;Appliances&quot;: 80.0,
+      &quot;lights&quot;: 10.0,
+      &quot;T1&quot;: 21.5,
+      &quot;RH_1&quot;: 45.2,
+      &quot;T_out&quot;: 6.2
+    },
+    {
+      &quot;date&quot;: &quot;2016-01-21 11:10:00&quot;,
+      &quot;Appliances&quot;: 90.0,
+      &quot;lights&quot;: 10.0,
+      &quot;T1&quot;: 21.6,
+      &quot;RH_1&quot;: 45.3,
+      &quot;T_out&quot;: 6.5
+    },
+    &quot;...[Gửi tiếp 21 điểm trung gian từ 11:20 đến 14:40 để đủ cửa sổ lịch sử]...&quot;,
+    {
+      &quot;date&quot;: &quot;2016-01-21 14:50:00&quot;,
+      &quot;Appliances&quot;: 120.0,
+      &quot;lights&quot;: 20.0,
+      &quot;T1&quot;: 22.1,
+      &quot;RH_1&quot;: 46.1,
+      &quot;T_out&quot;: 7.8
+    }
+  ]
+}
+</code></pre>
+<hr />
+<h2 id="5-goi-tin-phan-hoi-mau-example-output-json-response">5. Gói tin Phản hồi mẫu (Example Output JSON Response)</h2>
+<p>Sau khi xử lý, API trả về gói tin JSON cấu trúc cực kỳ trực quan chứa đầy đủ thông tin mô hình và chỉ dẫn an toàn vận hành:</p>
+<h3 id="json-response-tra-ve-tu-api">JSON Response trả về từ API:</h3>
+<pre><code class="language-json">{
+  &quot;model_output&quot;: {
+    &quot;target&quot;: &quot;Appliances&quot;,
+    &quot;forecast_horizon_minutes&quot;: 10,
+    &quot;predicted_value&quot;: 135.4215,
+    &quot;unit&quot;: &quot;Wh per 10-minute interval&quot;,
+    &quot;model_version&quot;: &quot;gradient_boosting_advanced_v1&quot;
+  },
+  &quot;evaluation_hint&quot;: {
+    &quot;metrics_file&quot;: &quot;outputs/forecast_metrics.json&quot;,
+    &quot;best_model_mae&quot;: 32.4512,
+    &quot;best_model_rmse&quot;: 52.1245
+  },
+  &quot;decision&quot;: {
+    &quot;risk_level&quot;: &quot;WARNING&quot;,
+    &quot;recommendation&quot;: &quot;MONITOR_AND_PREPARE_ENERGY_SAVING_ACTION&quot;,
+    &quot;reason&quot;: &quot;Predicted appliance energy is 135.42 Wh; warning/high/critical thresholds are 80.25/142.10/225.40 Wh.&quot;,
+    &quot;safety_note&quot;: &quot;Forecast output is a recommendation signal, not an automatic actuator command. Apply safety rules and human confirmation before control.&quot;
+  },
+  &quot;api_check&quot;: {
+    &quot;latency_ms&quot;: 14.25,
+    &quot;input_points&quot;: 24,
+    &quot;warnings&quot;: []
+  }
+}
+</code></pre>
+<hr />
+<h2 id="6-giai-thich-y-nghia-cac-truong-thong-tin-quyet-inh">6. Giải thích Ý nghĩa các Trường thông tin Quyết định</h2>
+<ol>
+<li><strong><code>predicted_value</code></strong>: Lượng điện tiêu thụ dự báo của các thiết bị gia dụng trong 10 phút tiếp theo, đo bằng đơn vị Watt-giờ (Wh). Đây là đầu ra số thực liên tục của mô hình học máy.</li>
+<li><strong><code>forecast_horizon_minutes</code></strong>: Chân trời dự báo (đặt là $10$ phút). Cho biết mô hình đang nhìn xa bao lâu vào tương lai.</li>
+<li><strong><code>risk_level</code></strong>: Cấp độ rủi ro tương ứng với công suất dự báo (<code>NORMAL</code>, <code>WARNING</code>, <code>HIGH</code>, <code>CRITICAL</code>), tính toán bằng cách so sánh <code>predicted_value</code> với các phân vị xác suất thống kê của tập huấn luyện.</li>
+<li><strong><code>recommendation</code></strong>: Hành động khuyến nghị vận hành chi tiết tương ứng với cấp rủi ro (ví dụ: ngắt bớt tải phụ để tránh quá tải điện năng).</li>
+<li><strong><code>safety_note</code></strong>: Dòng lưu ý pháp lý bắt buộc kỹ sư vận hành phải tuân thủ: Tuyệt đối không được thiết lập cho mô hình AI trực tiếp ngắt điện phần cứng tự động mà không qua con người xác nhận hoặc qua các quy tắc khóa cứng (HITL).</li>
+</ol>
+<hr />
+<h2 id="7-khac-biet-cot-loi-thu-nghiem-trong-notebook-vs-trien-khai-qua-api">7. Khác biệt cốt lõi: Thử nghiệm trong Notebook vs Triển khai qua API</h2>
+<p>Sự khác biệt giữa việc huấn luyện trong Notebook và chạy API thời gian thực phản ánh khoảng cách giữa môi trường nghiên cứu (R&amp;D) và môi trường vận hành thực tế (Production):</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Tiêu chí</th>
+<th style="text-align: left;">Pha Thử nghiệm (Jupyter Notebook)</th>
+<th style="text-align: left;">Giai đoạn Triển khai (FastAPI Web Service)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Bản chất luồng</strong></td>
+<td style="text-align: left;"><strong>Batch Processing (Xử lý theo lô)</strong>: Mô hình thực hiện nạp toàn bộ một file lớn chứa hàng vạn dòng dữ liệu thô cùng lúc.</td>
+<td style="text-align: left;"><strong>Stream/Point Processing (Xử lý đơn điểm)</strong>: API chỉ tiếp nhận một chuỗi lịch sử cực ngắn chứa 24 dòng của một ngôi nhà duy nhất tại thời điểm hiện tại $t$.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Tính năng động</strong></td>
+<td style="text-align: left;">Các đặc trưng Lag, Rolling được tính toán tĩnh một lần trên toàn bộ tập dữ liệu (nhìn được cả tương lai nếu dùng shift ngẫu nhiên).</td>
+<td style="text-align: left;">Các đặc trưng phải tính toán hoàn toàn động trên RAM tại điểm biên chuỗi thời gian của mốc hiện tại $t$ mà không biết trước tương lai $t+1$.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Yêu cầu làm sạch</strong></td>
+<td style="text-align: left;">Loại bỏ dễ dàng các dòng NaN bằng cách xóa nguyên cột hoặc xóa nguyên dòng của file CSV lớn.</td>
+<td style="text-align: left;">Không thể xóa dòng khuyết thiếu biên. Bắt buộc phải dùng chiến lược <strong>imputation</strong> (điền khuyết thông minh) để đảm bảo mô hình luôn có đủ đầu vào.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Độ trễ (Latency)</strong></td>
+<td style="text-align: left;">Không yêu cầu (huấn luyện và kiểm thử có thể chạy mất vài phút đến vài tiếng).</td>
+<td style="text-align: left;">Yêu cầu nghiêm ngặt về thời gian thực: Thời gian phản hồi API bắt buộc phải <strong>&lt; 50 mili-giây</strong> để đảm bảo không bị nghẽn mạng.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Mục đích sử dụng</strong></td>
+<td style="text-align: left;">Phân tích hồi quy, so sánh thuật toán, vẽ biểu đồ nghiên cứu khoa học.</td>
+<td style="text-align: left;">Ra quyết định điều khiển thiết bị, cảnh báo rủi ro an toàn cho người dùng cuối thời gian thực.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="8-phuong-phap-ket-noi-api-vao-cac-he-thong-ben-thu-ba">8. Phương pháp Kết nối API vào các Hệ thống bên thứ ba</h2>
+<p>FastAPI API có thể dễ dàng tích hợp vào hệ thống AIoT Smart Building quy mô lớn thông qua 3 kênh kết nối chuẩn:</p>
+<pre class="mermaid">graph LR
+    subgraph "Hệ thống Edge & Gateway"
+        A[Smart Meter ESP32] -->|1. MQTT raw telemetry| B[MQTT Gateway Listener]
+    end
+
+    subgraph "Hạ tầng AI Server (Lab 4 API)"
+        B -->|2. HTTP POST /forecast| C[FastAPI Server - app.py]
+    end
+
+    subgraph "Tầng Ứng dụng & Người dùng"
+        C -->|3. HTTP response JSON| D[Smart Home Mobile App]
+        C -->|4. Push predictions| E[Database - InfluxDB]
+        E -->|5. Query & Display| F[Grafana Dashboard]
+    end
+</pre>
+<h3 id="1-ket-noi-en-giao-dien-giam-sat-dashboard-grafana">1. Kết nối đến Giao diện Giám sát (Dashboard / Grafana)</h3>
+<ul>
+<li><strong>Cách thức</strong>: Sau khi nhận kết quả JSON từ API, một script phụ trợ sẽ tự động ghi cả giá trị thực tế lẫn giá trị dự báo vào cơ sở dữ liệu chuỗi thời gian như <strong>InfluxDB</strong> hoặc <strong>TimescaleDB</strong>.</li>
+<li><strong>Hiển thị</strong>: <strong>Grafana Dashboard</strong> được cấu hình để truy vấn hai Database này và hiển thị hai đường đồ thị đè lên nhau (Actual vs Forecasted). Kỹ sư trực ca có thể nhìn trực quan thấy sai số mô hình tức thời trên màn hình điều khiển trung tâm.</li>
+</ul>
+<h3 id="2-ket-noi-en-bo-thu-nhan-mqtt-mqtt-gateway-listener-bridge">2. Kết nối đến Bộ thu nhận MQTT (MQTT Gateway Listener Bridge)</h3>
+<ul>
+<li><strong>Cách thức</strong>: Viết một script listener chạy nền (ví dụ bằng thư viện <code>paho-mqtt</code> của Python) đóng vai trò là cầu nối (Bridge):<ol>
+<li>Listener đăng ký nhận dữ liệu từ cảm biến gửi lên MQTT broker.</li>
+<li>Khi nhận được bản tin thô, Listener tích lũy 24 điểm vào một cache cục bộ (hoặc bộ nhớ Redis).</li>
+<li>Listener thực hiện một cú gọi REST API (HTTP POST JSON) lên endpoint <code>/forecast</code> của FastAPI.</li>
+<li>Nhận phản hồi JSON, kiểm tra nếu <code>risk_level</code> là <code>CRITICAL</code> $\rightarrow$ Gửi thông báo đẩy khẩn cấp lên điện thoại của chủ nhà và xuất bản một lệnh MQTT xuống rơ-le để ngắt tải an toàn.</li>
+</ol>
+</li>
+</ul>
+<h3 id="3-ket-noi-en-he-thong-quan-tri-trung-tam-backend-db-audit">3. Kết nối đến Hệ thống Quản trị trung tâm (Backend DB Audit)</h3>
+<ul>
+<li><strong>Cách thức</strong>: Kết quả dự báo của FastAPI được ghi đè liên tục vào một hàng đợi tin nhắn (Message Queue như Apache Kafka hoặc RabbitMQ).</li>
+<li><strong>Tác dụng</strong>: Lớp Backend trung tâm tiêu thụ tin nhắn này và lưu vào hệ thống kho dữ liệu lớn (Elasticsearch / ClickHouse) để phục vụ cho các thuật toán hậu kiểm tự động (Audit checking) và phát hiện lệch mô hình (Model Drift Tracking).</li>
+</ul>
+            </div>
+        </div>
+
+        <div class="footer">
+            © 2026 - Lab 4 AIoT Forecasting & Predictive Analytics - Tài liệu Đào tạo Chuyên sâu
+        </div>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,15 @@
+graph TD
+    %% API Inference Workflow
+    A[Client gửi HTTP POST /forecast] --> B{Kiểm tra Payload JSON}
+    B -->|Hợp lệ| C[Chuyển sang DataFrame]
+    B -->|Không hợp lệ| D[Trả lỗi 422 Pydantic Validation]
+    
+    C --> E[Điền khuyết cảm biến bằng raw_medians]
+    E --> F[Tính đặc trưng động make_supervised_frame]
+    F --> G[Lấy duy nhất hàng cuối cùng latest_row]
+    G --> H[Điền khuyết đặc trưng bằng feature_medians]
+    H --> I[Gọi model.predict X_latest]
+    I --> J[predicted_value Wh]
+    J --> K[Ánh xạ Risk Level & Recommendation]
+    K --> L[Ghi outputs/forecast_log.csv]
+    L --> M[Trả về HTTP Response JSON]

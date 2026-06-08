@@ -1,0 +1,5 @@
+timestamp_utc,endpoint,target,status,summary
+2026-06-08T13:27:18.246927+00:00,/detect-anomaly,temperature,ok,HIGH
+2026-06-08T13:27:18.252292+00:00,/forecast,co2,ok,874.0
+2026-06-08T13:27:32.505118+00:00,/forecast,co2,ok,3.0
+2026-06-08T13:27:40.653591+00:00,/forecast,co2,ok,3.0

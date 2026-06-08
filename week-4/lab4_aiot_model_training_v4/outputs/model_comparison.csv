@@ -1,0 +1,3 @@
+dataset,best_model_by_val_mae,best_model_test_mae,last_value_test_mae,mae_improvement_vs_last_value_percent,best_model_test_rmse,best_model_test_mape,best_model_test_r2
+appliances,GradientBoosting_advanced,23.46637319246207,27.434782608695652,14.464883767570907,37.71906739037009,26.284303375508856,0.3519341281683499
+co2,Ridge_alpha_1,35.07594063496176,36.12990802348337,2.9171604528762116,45.5183269022176,5.466503195052838,0.9006178722639886

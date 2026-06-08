@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>06. Mô hình hóa & Đo lường sai số - Lab 4 AIoT Energy Forecasting</title>
+    <style>
+        
+:root {
+    --primary: #4f46e5;
+    --primary-light: #e0e7ff;
+    --primary-hover: #4338ca;
+    --text-dark: #0f172a;
+    --text-muted: #64748b;
+    --bg-slate: #f8fafc;
+    --bg-sidebar: #0f172a;
+    --border-slate: #e2e8f0;
+    --code-bg: #1e293b;
+    --inline-code-bg: #f1f5f9;
+    --inline-code-color: #e11d48;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: var(--text-dark);
+    background-color: var(--bg-slate);
+    line-height: 1.6;
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Sidebar Navigation */
+.sidebar {
+    width: 320px;
+    background-color: var(--bg-sidebar);
+    color: #f8fafc;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 100;
+    box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+}
+
+.sidebar-header {
+    padding: 24px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.sidebar-header h1 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sidebar-header .badge {
+    background-color: var(--primary);
+    color: white;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 9999px;
+    font-weight: 600;
+    margin-top: 4px;
+    display: inline-block;
+}
+
+.sidebar-nav {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 0;
+}
+
+.sidebar-nav-item {
+    display: block;
+    padding: 12px 24px;
+    color: #cbd5e1;
+    text-decoration: none;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    border-left: 4px solid transparent;
+}
+
+.sidebar-nav-item:hover {
+    background-color: rgba(255,255,255,0.05);
+    color: #ffffff;
+    padding-left: 28px;
+}
+
+.sidebar-nav-item.active {
+    background-color: rgba(79, 70, 229, 0.15);
+    color: #ffffff;
+    border-left-color: var(--primary);
+    font-weight: 600;
+}
+
+.sidebar-footer {
+    padding: 16px 24px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    font-size: 11px;
+    color: #94a3b8;
+    text-align: center;
+}
+
+/* Main Content Area */
+.main-wrapper {
+    margin-left: 320px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.top-bar {
+    background-color: #ffffff;
+    border-bottom: 1px solid var(--border-slate);
+    padding: 16px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 90;
+}
+
+.top-bar-title {
+    font-size: 14px;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.top-bar-links a {
+    color: var(--primary);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.top-bar-links a:hover {
+    color: var(--primary-hover);
+    text-decoration: underline;
+}
+
+.content-container {
+    flex: 1;
+    padding: 48px 64px 80px 64px;
+    max-width: 1012px;
+    width: 100%;
+    margin: 0 auto;
+    background-color: #ffffff;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    border-radius: 8px;
+    margin-top: 24px;
+    margin-bottom: 24px;
+}
+
+/* Markdown Styling */
+.markdown-body h1 {
+    font-size: 32px;
+    font-weight: 800;
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--border-slate);
+    color: #0f172a;
+}
+
+.markdown-body h2 {
+    font-size: 22px;
+    font-weight: 700;
+    margin-top: 36px;
+    margin-bottom: 16px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border-slate);
+    color: #1e293b;
+}
+
+.markdown-body h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-top: 28px;
+    margin-bottom: 12px;
+    color: #334155;
+}
+
+.markdown-body h4 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-top: 20px;
+    margin-bottom: 8px;
+    color: #475569;
+}
+
+.markdown-body p {
+    margin-bottom: 16px;
+    color: #334155;
+    text-align: justify;
+}
+
+.markdown-body ul, .markdown-body ol {
+    margin-bottom: 16px;
+    padding-left: 24px;
+}
+
+.markdown-body li {
+    margin-bottom: 8px;
+    color: #334155;
+}
+
+.markdown-body a {
+    color: var(--primary);
+    text-decoration: none;
+    transition: color 0.15s;
+    font-weight: 500;
+}
+
+.markdown-body a:hover {
+    color: var(--primary-hover);
+    text-decoration: underline;
+}
+
+/* Blockquotes */
+.markdown-body blockquote {
+    padding: 12px 24px;
+    border-left: 4px solid var(--border-slate);
+    background-color: var(--bg-slate);
+    margin-bottom: 20px;
+    font-style: italic;
+    color: var(--text-muted);
+}
+
+/* Code block styling */
+.markdown-body pre {
+    background-color: var(--code-bg);
+    padding: 16px;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin-bottom: 20px;
+}
+
+.markdown-body pre code {
+    background-color: transparent;
+    color: #f8fafc;
+    padding: 0;
+    border-radius: 0;
+    font-size: 13.5px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+.markdown-body code {
+    background-color: var(--inline-code-bg);
+    color: var(--inline-code-color);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 85%;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+/* Table styling */
+.markdown-body table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 24px;
+    font-size: 14.5px;
+}
+
+.markdown-body th, .markdown-body td {
+    padding: 12px 16px;
+    border: 1px solid var(--border-slate);
+}
+
+.markdown-body th {
+    background-color: var(--bg-slate);
+    font-weight: 600;
+    text-align: left;
+    color: #1e293b;
+}
+
+.markdown-body tr:nth-child(even) {
+    background-color: #fafbfd;
+}
+
+/* Custom Alert Boxes (GitHub Alerts mapping) */
+.alert {
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    border-radius: 8px;
+    border-left-width: 4px;
+    border-left-style: solid;
+}
+
+.alert-title {
+    font-weight: 700;
+    margin-bottom: 8px;
+    font-size: 14.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.alert-content p {
+    margin-bottom: 0 !important;
+    font-size: 14px;
+    text-align: justify;
+}
+
+.alert-note {
+    background-color: #eff6ff;
+    border-left-color: #3b82f6;
+    color: #1e40af;
+}
+.alert-note .alert-title { color: #1d4ed8; }
+
+.alert-tip {
+    background-color: #f0fdf4;
+    border-left-color: #22c55e;
+    color: #166534;
+}
+.alert-tip .alert-title { color: #15803d; }
+
+.alert-important {
+    background-color: #faf5ff;
+    border-left-color: #a855f7;
+    color: #6b21a8;
+}
+.alert-important .alert-title { color: #7e22ce; }
+
+.alert-warning {
+    background-color: #fffbeb;
+    border-left-color: #f59e0b;
+    color: #92400e;
+}
+.alert-warning .alert-title { color: #b45309; }
+
+.alert-caution {
+    background-color: #fef2f2;
+    border-left-color: #ef4444;
+    color: #991b1b;
+}
+.alert-caution .alert-title { color: #b91c1c; }
+
+/* Mermaid Styling */
+.mermaid {
+    background-color: white !important;
+    border: 1px solid var(--border-slate);
+    border-radius: 8px;
+    padding: 24px;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 24px;
+    overflow-x: auto;
+}
+
+.footer {
+    background-color: #ffffff;
+    border-top: 1px solid var(--border-slate);
+    padding: 24px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: auto;
+}
+
+/* Landing Page Grid */
+.landing-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    margin-top: 24px;
+}
+
+.landing-card {
+    background-color: #ffffff;
+    border: 1px solid var(--border-slate);
+    border-radius: 8px;
+    padding: 20px;
+    text-decoration: none;
+    color: var(--text-dark);
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.landing-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);
+    border-color: var(--primary);
+}
+
+.landing-card h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.landing-card p {
+    font-size: 13.5px;
+    color: var(--text-muted);
+    margin-bottom: 0;
+    text-align: left;
+}
+
+@media (max-width: 1024px) {
+    .sidebar {
+        display: none; /* simple hides sidebar for tablet/mobile to keep script clean */
+    }
+    .main-wrapper {
+        margin-left: 0;
+    }
+    .content-container {
+        padding: 24px;
+        margin-top: 0;
+        margin-bottom: 0;
+        border-radius: 0;
+    }
+}
+
+    </style>
+    <!-- Mermaid.js for drawing diagrams directly in the browser -->
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            securityLevel: 'loose',
+            flowchart: { useMaxWidth: true, htmlLabels: true }
+        });
+    </script>
+</head>
+<body>
+
+    <!-- Left Sidebar Navigation -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h1>🔋 Lab 4 AIoT</h1>
+            <div class="badge">Energy Forecasting</div>
+        </div>
+        <div class="sidebar-nav">
+                    <a href="index.html" class="sidebar-nav-item ">🏡 Trang chủ / Tổng mục lục</a>
+        <a href="00_project_overview.html" class="sidebar-nav-item ">00. Tổng quan dự án</a>
+        <a href="01_architecture.html" class="sidebar-nav-item ">01. Kiến trúc hệ thống AIoT</a>
+        <a href="02_data_flow.html" class="sidebar-nav-item ">02. Luồng dữ liệu tuần tự</a>
+        <a href="03_runtime_and_dependencies.html" class="sidebar-nav-item ">03. Luồng thực thi & Phụ thuộc</a>
+        <a href="04_dataset_and_schema.html" class="sidebar-nav-item ">04. Tập dữ liệu & Điền khuyết</a>
+        <a href="05_feature_engineering.html" class="sidebar-nav-item ">05. Kỹ nghệ đặc trưng thời gian</a>
+        <a href="06_model_training_and_metrics.html" class="sidebar-nav-item active">06. Mô hình hóa & Đo lường sai số</a>
+        <a href="07_decision_layer.html" class="sidebar-nav-item ">07. Tầng ra quyết định & Cảnh báo</a>
+        <a href="08_api_forecast_workflow.html" class="sidebar-nav-item ">08. Triển khai API FastAPI</a>
+        <a href="09_code_review.html" class="sidebar-nav-item ">09. Đánh giá chất lượng mã nguồn</a>
+        <a href="10_safety_fail_safe.html" class="sidebar-nav-item ">10. An toàn & Cơ chế Fail-safe</a>
+        <a href="11_development_roadmap.html" class="sidebar-nav-item ">11. Lộ trình phát triển & Học tập</a>
+        <a href="HANDBOOK.html" class="sidebar-nav-item ">📖 Sách hướng dẫn kỹ thuật (Handbook)</a>
+        </div>
+        <div class="sidebar-footer">
+            Designed by DeepMind Team & Antigravity AI
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="main-wrapper">
+        <div class="top-bar">
+            <div class="top-bar-title">Tài liệu Kỹ thuật Hệ thống Dự báo Phụ tải Điện năng BEMS</div>
+            <div class="top-bar-links">
+                <a href="index.html">🏡 Quay lại Trang chủ</a>
+            </div>
+        </div>
+
+        <div style="padding: 0 40px; flex: 1;">
+            <div class="content-container markdown-body">
+                <h1 id="mo-hinh-hoc-may-cac-chi-so-anh-gia-sai-so-toan-hoc">MÔ HÌNH HỌC MÁY &amp; CÁC CHỈ SỐ ĐÁNH GIÁ SAI SỐ TOÁN HỌC</h1>
+<p>Trong bài toán dự báo phụ tải điện năng (Load Forecasting), việc lựa chọn mô hình phù hợp và thiết lập hệ thống đánh giá sai số chính xác là điều kiện tiên quyết để xây dựng một hệ thống AIoT đáng tin cậy. </p>
+<p>Tài liệu này trình bày chi tiết cơ chế hoạt động của 5 mô hình được sử dụng trong <strong>Lab 4</strong>, lý do tối mật bắt buộc phải chia dữ liệu theo dòng thời gian (Time-series Split), và ý nghĩa toán học - vật lý của các chỉ số đánh giá sai số hồi quy.</p>
+<hr />
+<h2 id="1-chi-tiet-5-mo-hinh-du-bao-trong-lab-4">1. Chi tiết 5 Mô hình dự báo trong Lab 4</h2>
+<p>Một mô hình Học máy phức tạp chỉ thực sự có giá trị khi và chỉ khi nó chứng minh được sự vượt trội vượt bậc so với các quy tắc dự báo cơ bản (Baseline). Lab 4 cài đặt đồng thời 2 mô hình Baseline đơn giản và 3 mô hình học máy tăng dần từ đơn giản đến phức tạp:</p>
+<h3 id="mo-hinh-1-last-value-baseline-du-bao-gia-tri-lien-ke">Mô hình 1: Last Value Baseline (Dự báo giá trị liền kề)</h3>
+<ul>
+<li><strong>Cơ chế</strong>: Đây là quy tắc đơn giản nhất trong chuỗi thời gian. Dự báo cho thời điểm tiếp theo chính là giá trị thực tế đo được tại thời điểm hiện tại:
+    $$\hat{y}_{t+1} = y_t$$</li>
+<li><strong>Ý nghĩa</strong>: Đóng vai trò là "mốc đối chứng tối thiểu". Nếu một mô hình AI phức tạp không đạt được sai số thấp hơn Last Value Baseline, mô hình AI đó hoàn toàn vô dụng.</li>
+<li>Trong code <code>train_forecast.py</code>:
+    <code>python
+    "last_value_baseline": test_df[TARGET_COL].to_numpy(dtype=float)</code></li>
+</ul>
+<h3 id="mo-hinh-2-moving-average-baseline-du-bao-bang-trung-binh-truot">Mô hình 2: Moving Average Baseline (Dự báo bằng trung bình trượt)</h3>
+<ul>
+<li><strong>Cơ chế</strong>: Dự báo cho thời điểm tiếp theo là trung bình cộng của $K$ bước đo đạc gần nhất trong quá khứ (bản lab chọn $K=6$, tương ứng trung bình trượt 1 tiếng gần nhất):
+    $$\hat{y}<em i="0">{t+1} = \frac{1}{6} \sum</em>$$}^{5} y_{t-i</li>
+<li><strong>Ý nghĩa</strong>: Phản ánh xu hướng trung bình gần đây, giúp lọc bỏ các đỉnh nhọn bất thường mang tính tức thời.</li>
+<li>Trong code <code>train_forecast.py</code>:
+    <code>python
+    "moving_average_6_baseline": test_df["appliances_rolling_mean_6"].to_numpy(dtype=float)</code></li>
+</ul>
+<h3 id="mo-hinh-3-linear-regression-hoi-quy-tuyen-tinh">Mô hình 3: Linear Regression (Hồi quy tuyến tính)</h3>
+<ul>
+<li><strong>Cơ chế</strong>: Giả định có mối liên hệ tuyến tính giữa các đặc trưng đầu vào $X$ và nhãn tương lai $y$. Mô hình tìm kiếm một véc-tơ trọng số $W$ và hệ số chặn $b$ sao cho tổng bình phương sai số là nhỏ nhất:
+    $$\hat{y}_{t+1} = W^T X_t + b$$</li>
+<li><strong>Đặc điểm</strong>: Cực kỳ tường minh, dễ giải thích ý nghĩa các hệ số ảnh hưởng (feature coefficients) và tính toán siêu nhanh. Để mô hình hoạt động ổn định, các đặc trưng được đưa qua bộ chuẩn hóa <code>StandardScaler</code> để đưa về cùng phân phối chuẩn (trung bình bằng 0, phương sai bằng 1).</li>
+<li>Trong code <code>train_forecast.py</code>:
+    <code>python
+    Pipeline([
+        ("scaler", StandardScaler()),
+        ("model", LinearRegression())
+    ])</code></li>
+</ul>
+<h3 id="mo-hinh-4-random-forest-regressor-rung-ngau-nhien">Mô hình 4: Random Forest Regressor (Rừng ngẫu nhiên)</h3>
+<ul>
+<li><strong>Cơ chế</strong>: Phương pháp học quần thể (Ensemble Learning) sử dụng kỹ thuật Bagging. Nó xây dựng rất nhiều cây quyết định (Decision Trees) độc lập trên các mẫu dữ liệu khác nhau. Kết quả dự báo cuối cùng là trung bình cộng kết quả của tất cả các cây:
+    $$\hat{y}<em m="1">{t+1} = \frac{1}{M} \sum</em> Tree_m(X_t)$$}^{M</li>
+<li><strong>Đặc điểm</strong>: Rất mạnh mẽ trong việc bắt bài các mối quan hệ phi tuyến phức tạp giữa nhiệt độ phòng, độ ẩm và điện năng tiêu thụ mà không cần dữ liệu phải chuẩn hóa. Khả năng chống quá khớp (overfitting) tốt nhờ cơ chế ngẫu nhiên hóa đặc trưng tại mỗi nút chia của cây.</li>
+<li>Trong code <code>train_forecast.py</code>:
+    <code>python
+    RandomForestRegressor(n_estimators=120, max_depth=12, min_samples_leaf=3, random_state=42)</code></li>
+</ul>
+<h3 id="mo-hinh-5-gradient-boosting-regressor-mo-hinh-tang-cuong-gradient">Mô hình 5: Gradient Boosting Regressor (Mô hình tăng cường gradient)</h3>
+<ul>
+<li><strong>Cơ chế</strong>: Phương pháp học quần thể sử dụng kỹ thuật Boosting. Khác với Random Forest huấn luyện các cây song song độc lập, Gradient Boosting xây dựng các cây quyết định tuần tự. Cây sau được huấn luyện để <strong>sửa sai (dự báo phần dư sai số - residual)</strong> của các cây phía trước:
+    $$\hat{y}<em t_1="t+1">{t+1}^{(k)} = \hat{y}</em> + \eta \cdot h_k(X_t)$$
+    }^{(k-1)<em>(Trong đó $h_k$ là cây quyết định sửa sai cho bước thứ $k$, và $\eta$ là learning rate).</em></li>
+<li><strong>Đặc điểm</strong>: Đạt độ chính xác dự báo cao nhất trong hầu hết các bài toán chuỗi thời gian dạng bảng. Bản lab sử dụng cài đặt mặc định của <code>scikit-learn</code> nhằm tối giản thư viện cài đặt nhưng vẫn đem lại hiệu năng tiệm cận các mô hình nâng cao như XGBoost hay LightGBM.</li>
+<li>Trong code <code>train_forecast.py</code>:
+    <code>python
+    GradientBoostingRegressor(n_estimators=160, learning_rate=0.05, max_depth=3, min_samples_leaf=3, random_state=42)</code></li>
+</ul>
+<hr />
+<h2 id="2-tai-sao-tuyet-oi-khong-uoc-dung-random-split-cho-chuoi-thoi-gian">2. Tại sao tuyệt đối không được dùng Random Split cho Chuỗi thời gian?</h2>
+<p>Trong học máy thông thường, ta thường dùng hàm <code>train_test_split(..., random_state=42)</code> để chia ngẫu nhiên dữ liệu thành 2 tập Train và Test. Tuy nhiên, đối với dữ liệu chuỗi thời gian, <strong>đây là một sai lầm chết người</strong>.</p>
+<h3 id="ban-chat-cua-loi-ro-ri-du-lieu-tuong-lai-data-leakage">Bản chất của lỗi Rò rỉ Dữ liệu tương lai (Data Leakage)</h3>
+<p>Nếu ta chia dữ liệu ngẫu nhiên:
+*   Tập huấn luyện (Train) có thể chứa dữ liệu đo đạc của lúc <strong>12:10</strong> và <strong>12:30</strong>.
+*   Tập kiểm thử (Test) chứa dữ liệu đo đạc của lúc <strong>12:20</strong>.</p>
+<p>Khi đó, khi mô hình muốn dự báo cho thời điểm 12:20 (thuộc tập Test), nó đã biết trước xu hướng tiêu thụ điện của cả thời điểm trước đó 10 phút (12:10) và ngay sau đó 10 phút (12:30) vốn đã nằm trong tập Train. Bản chất của mô hình lúc này không còn là <strong>dự báo tương lai (forecasting)</strong> nữa, mà chuyển thành bài toán <strong>nội suy điền khuyết (interpolation)</strong>. 
+*   <strong>Kết quả</strong>: Sai số trên tập kiểm thử siêu nhỏ (gần như bằng 0). Nhưng khi triển khai thực tế, mô hình hoàn toàn bất lực vì trong đời thực, ta không bao giờ biết trước thông tin của thời điểm tương lai $t+1$ để đi đoán thời điểm $t$.</p>
+<h3 id="giai-phap-chronological-time-series-split-chia-theo-thoi-gian">Giải pháp: Chronological Time-series Split (Chia theo thời gian)</h3>
+<p>Ta bắt buộc phải sử dụng đường cắt theo trục thời gian tuyến tính để phân chia dữ liệu:
+*   <strong>Tập Train</strong>: Lấy $75\%$ dữ liệu đầu tiên trong quá khứ.
+*   <strong>Tập Test</strong>: Lấy $25\%$ dữ liệu hoàn toàn mới nằm ở tương lai phía sau.</p>
+<pre class="mermaid">gantt
+    title Phân chia dữ liệu chuỗi thời gian (Chronological Split)
+    dateFormat  YYYY-MM-DD
+    section Trục thời gian thực tế
+    Dữ liệu Huấn luyện (Train set - 75% quá khứ) :active, p1, 2016-01-11, 2016-04-11
+    Dữ liệu Kiểm thử (Test set - 25% tương lai) :crit, p2, 2016-04-12, 2016-05-27
+</pre>
+<p>Trong code <code>utils.py</code>:</p>
+<pre><code class="language-python">def time_split(df: pd.DataFrame, train_ratio: float = 0.75) -&gt; tuple[pd.DataFrame, pd.DataFrame]:
+    split_idx = int(len(df) * train_ratio)
+    return df.iloc[:split_idx].copy(), df.iloc[split_idx:].copy()
+</code></pre>
+<hr />
+<h2 id="3-y-nghia-toan-hoc-vat-ly-cua-4-chi-so-anh-gia-sai-so">3. Ý nghĩa Toán học &amp; Vật lý của 4 chỉ số Đánh giá Sai số</h2>
+<p>Khác với bài toán phát hiện bất thường (Lab 3) sử dụng các chỉ số phân loại (Precision, Recall, F1), bài toán dự báo phụ tải điện là bài toán hồi quy (Regression) dự đoán giá trị số thực liên tục. Do đó, ta sử dụng các chỉ số đo đạc khoảng cách sai lệch thực tế vật lý:</p>
+<h3 id="chi-so-1-mae-mean-absolute-error-sai-so-tuyet-oi-trung-binh">Chỉ số 1: MAE (Mean Absolute Error - Sai số tuyệt đối trung bình)</h3>
+<ul>
+<li><strong>Công thức</strong>:
+    $$\text{MAE} = \frac{1}{N} \sum_{i=1}^{N} |y_i - \hat{y}_i|$$</li>
+<li><strong>Ý nghĩa vật lý</strong>: Đo lường độ lệch trung bình giữa giá trị dự báo và giá trị thực tế theo đúng đơn vị gốc vật lý (Wh). Ví dụ, $\text{MAE} = 30$ Wh nghĩa là trung bình mỗi lần dự báo, mô hình đoán lệch cao hoặc lệch thấp khoảng $30$ Wh điện. Chỉ số này rất trực quan, dễ giải thích trực tiếp cho khách hàng hoặc sinh viên.</li>
+</ul>
+<h3 id="chi-so-2-rmse-root-mean-squared-error-can-bac-hai-sai-so-binh-phuong-trung-binh">Chỉ số 2: RMSE (Root Mean Squared Error - Căn bậc hai sai số bình phương trung bình)</h3>
+<ul>
+<li><strong>Công thức</strong>:
+    $$\text{RMSE} = \sqrt{\frac{1}{N} \sum_{i=1}^{N} (y_i - \hat{y}_i)^2}$$</li>
+<li><strong>Ý nghĩa vật lý</strong>: RMSE phạt rất nặng những <strong>sai số lớn (outliers)</strong> do có phép bình phương trước khi lấy căn. </li>
+<li><strong>Ứng dụng AIoT</strong>: Trong hệ thống lưới điện thông minh, việc dự báo lệch nhỏ liên tục (ví dụ lệch 5 Wh trong nhiều giờ) ít gây nguy hiểm cho hệ thống. Nhưng nếu mô hình dự báo sai lệch một cú cực lớn (ví dụ thực tế tải tăng vọt 500 Wh nhưng mô hình đoán tải thấp và hệ thống ngắt nguồn phụ trợ), điều này có thể gây nhảy aptomat tổng hoặc chập cháy nổ lưới điện do quá tải đột ngột. RMSE cao là chỉ báo cho thấy mô hình đang gặp các cú dự báo sai lệch cực kỳ nghiêm trọng. Kỹ sư AIoT luôn muốn tối thiểu hóa RMSE.</li>
+</ul>
+<h3 id="chi-so-3-mape-mean-absolute-percentage-error-sai-so-phan-tram-tuyet-oi-trung-binh">Chỉ số 3: MAPE (Mean Absolute Percentage Error - Sai số phần trăm tuyệt đối trung bình)</h3>
+<ul>
+<li><strong>Công thức</strong>:
+    $$\text{MAPE (\%)} = \frac{100\%}{N} \sum_{i=1}^{N} \frac{|y_i - \hat{y}_i|}{\max(|y_i|, \epsilon)}$$</li>
+<li><strong>Ý nghĩa vật lý</strong>: Thể hiện tỷ lệ phần trăm sai lệch so với giá trị thực tế, giúp đánh giá hiệu năng mô hình độc lập với quy mô của hệ thống. Ví dụ: Sai lệch $10$ Wh khi thiết bị chỉ tiêu thụ $20$ Wh là cực kỳ lớn ($\text{MAPE} = 50\%$). Nhưng sai lệch $10$ Wh khi tổng phụ tải tòa nhà đang là $1000$ Wh lại là vô cùng nhỏ ($\text{MAPE} = 1\%$). MAPE giúp người quản lý có cái nhìn tổng quan về tương quan độ lệch.</li>
+</ul>
+<h3 id="chi-so-4-forecast-bias-xu-huong-lech-du-bao">Chỉ số 4: Forecast Bias (Xu hướng lệch dự báo)</h3>
+<ul>
+<li><strong>Công thức</strong>:
+    $$\text{Forecast Bias} = \frac{1}{N} \sum_{i=1}^{N} (\hat{y}_i - y_i)$$</li>
+<li><strong>Ý nghĩa vật lý</strong>: Không lấy trị tuyệt đối như MAE, Forecast Bias giữ nguyên dấu âm/dương của sai số để chỉ ra xu hướng hệ thống:<ul>
+<li><strong>$\text{Bias} &gt; 0$ (Overestimation)</strong>: Mô hình đang có xu hướng <strong>dự báo cao hơn</strong> thực tế. Trong AIoT, việc này khiến hệ thống đưa ra cảnh báo rủi ro thừa (báo động giả), có thể dẫn đến việc tiết giảm phụ tải không đáng có gây bất tiện sinh hoạt.</li>
+<li><strong>$\text{Bias} &lt; 0$ (Underestimation)</strong>: Mô hình đang có xu hướng <strong>dự báo thấp hơn</strong> thực tế. Đây là trạng thái <strong>cực kỳ nguy hiểm</strong> trong vận hành điện, vì mô hình đánh giá thấp nhu cầu phụ tải sắp tới, dẫn đến việc không chuẩn bị kịp nguồn cấp dự phòng hoặc ngắt tải bảo vệ, gây quá tải hệ thống.</li>
+</ul>
+</li>
+</ul>
+            </div>
+        </div>
+
+        <div class="footer">
+            © 2026 - Lab 4 AIoT Forecasting & Predictive Analytics - Tài liệu Đào tạo Chuyên sâu
+        </div>
+    </div>
+
+</body>
+</html>

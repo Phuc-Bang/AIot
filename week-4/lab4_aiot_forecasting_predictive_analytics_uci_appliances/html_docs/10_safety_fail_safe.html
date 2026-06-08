@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>10. An toàn & Cơ chế Fail-safe - Lab 4 AIoT Energy Forecasting</title>
+    <style>
+        
+:root {
+    --primary: #4f46e5;
+    --primary-light: #e0e7ff;
+    --primary-hover: #4338ca;
+    --text-dark: #0f172a;
+    --text-muted: #64748b;
+    --bg-slate: #f8fafc;
+    --bg-sidebar: #0f172a;
+    --border-slate: #e2e8f0;
+    --code-bg: #1e293b;
+    --inline-code-bg: #f1f5f9;
+    --inline-code-color: #e11d48;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: var(--text-dark);
+    background-color: var(--bg-slate);
+    line-height: 1.6;
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Sidebar Navigation */
+.sidebar {
+    width: 320px;
+    background-color: var(--bg-sidebar);
+    color: #f8fafc;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 100;
+    box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+}
+
+.sidebar-header {
+    padding: 24px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.sidebar-header h1 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sidebar-header .badge {
+    background-color: var(--primary);
+    color: white;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 9999px;
+    font-weight: 600;
+    margin-top: 4px;
+    display: inline-block;
+}
+
+.sidebar-nav {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 0;
+}
+
+.sidebar-nav-item {
+    display: block;
+    padding: 12px 24px;
+    color: #cbd5e1;
+    text-decoration: none;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    border-left: 4px solid transparent;
+}
+
+.sidebar-nav-item:hover {
+    background-color: rgba(255,255,255,0.05);
+    color: #ffffff;
+    padding-left: 28px;
+}
+
+.sidebar-nav-item.active {
+    background-color: rgba(79, 70, 229, 0.15);
+    color: #ffffff;
+    border-left-color: var(--primary);
+    font-weight: 600;
+}
+
+.sidebar-footer {
+    padding: 16px 24px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    font-size: 11px;
+    color: #94a3b8;
+    text-align: center;
+}
+
+/* Main Content Area */
+.main-wrapper {
+    margin-left: 320px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.top-bar {
+    background-color: #ffffff;
+    border-bottom: 1px solid var(--border-slate);
+    padding: 16px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 90;
+}
+
+.top-bar-title {
+    font-size: 14px;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.top-bar-links a {
+    color: var(--primary);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.top-bar-links a:hover {
+    color: var(--primary-hover);
+    text-decoration: underline;
+}
+
+.content-container {
+    flex: 1;
+    padding: 48px 64px 80px 64px;
+    max-width: 1012px;
+    width: 100%;
+    margin: 0 auto;
+    background-color: #ffffff;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    border-radius: 8px;
+    margin-top: 24px;
+    margin-bottom: 24px;
+}
+
+/* Markdown Styling */
+.markdown-body h1 {
+    font-size: 32px;
+    font-weight: 800;
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--border-slate);
+    color: #0f172a;
+}
+
+.markdown-body h2 {
+    font-size: 22px;
+    font-weight: 700;
+    margin-top: 36px;
+    margin-bottom: 16px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border-slate);
+    color: #1e293b;
+}
+
+.markdown-body h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-top: 28px;
+    margin-bottom: 12px;
+    color: #334155;
+}
+
+.markdown-body h4 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-top: 20px;
+    margin-bottom: 8px;
+    color: #475569;
+}
+
+.markdown-body p {
+    margin-bottom: 16px;
+    color: #334155;
+    text-align: justify;
+}
+
+.markdown-body ul, .markdown-body ol {
+    margin-bottom: 16px;
+    padding-left: 24px;
+}
+
+.markdown-body li {
+    margin-bottom: 8px;
+    color: #334155;
+}
+
+.markdown-body a {
+    color: var(--primary);
+    text-decoration: none;
+    transition: color 0.15s;
+    font-weight: 500;
+}
+
+.markdown-body a:hover {
+    color: var(--primary-hover);
+    text-decoration: underline;
+}
+
+/* Blockquotes */
+.markdown-body blockquote {
+    padding: 12px 24px;
+    border-left: 4px solid var(--border-slate);
+    background-color: var(--bg-slate);
+    margin-bottom: 20px;
+    font-style: italic;
+    color: var(--text-muted);
+}
+
+/* Code block styling */
+.markdown-body pre {
+    background-color: var(--code-bg);
+    padding: 16px;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin-bottom: 20px;
+}
+
+.markdown-body pre code {
+    background-color: transparent;
+    color: #f8fafc;
+    padding: 0;
+    border-radius: 0;
+    font-size: 13.5px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+.markdown-body code {
+    background-color: var(--inline-code-bg);
+    color: var(--inline-code-color);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 85%;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+/* Table styling */
+.markdown-body table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 24px;
+    font-size: 14.5px;
+}
+
+.markdown-body th, .markdown-body td {
+    padding: 12px 16px;
+    border: 1px solid var(--border-slate);
+}
+
+.markdown-body th {
+    background-color: var(--bg-slate);
+    font-weight: 600;
+    text-align: left;
+    color: #1e293b;
+}
+
+.markdown-body tr:nth-child(even) {
+    background-color: #fafbfd;
+}
+
+/* Custom Alert Boxes (GitHub Alerts mapping) */
+.alert {
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    border-radius: 8px;
+    border-left-width: 4px;
+    border-left-style: solid;
+}
+
+.alert-title {
+    font-weight: 700;
+    margin-bottom: 8px;
+    font-size: 14.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.alert-content p {
+    margin-bottom: 0 !important;
+    font-size: 14px;
+    text-align: justify;
+}
+
+.alert-note {
+    background-color: #eff6ff;
+    border-left-color: #3b82f6;
+    color: #1e40af;
+}
+.alert-note .alert-title { color: #1d4ed8; }
+
+.alert-tip {
+    background-color: #f0fdf4;
+    border-left-color: #22c55e;
+    color: #166534;
+}
+.alert-tip .alert-title { color: #15803d; }
+
+.alert-important {
+    background-color: #faf5ff;
+    border-left-color: #a855f7;
+    color: #6b21a8;
+}
+.alert-important .alert-title { color: #7e22ce; }
+
+.alert-warning {
+    background-color: #fffbeb;
+    border-left-color: #f59e0b;
+    color: #92400e;
+}
+.alert-warning .alert-title { color: #b45309; }
+
+.alert-caution {
+    background-color: #fef2f2;
+    border-left-color: #ef4444;
+    color: #991b1b;
+}
+.alert-caution .alert-title { color: #b91c1c; }
+
+/* Mermaid Styling */
+.mermaid {
+    background-color: white !important;
+    border: 1px solid var(--border-slate);
+    border-radius: 8px;
+    padding: 24px;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 24px;
+    overflow-x: auto;
+}
+
+.footer {
+    background-color: #ffffff;
+    border-top: 1px solid var(--border-slate);
+    padding: 24px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: auto;
+}
+
+/* Landing Page Grid */
+.landing-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    margin-top: 24px;
+}
+
+.landing-card {
+    background-color: #ffffff;
+    border: 1px solid var(--border-slate);
+    border-radius: 8px;
+    padding: 20px;
+    text-decoration: none;
+    color: var(--text-dark);
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.landing-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);
+    border-color: var(--primary);
+}
+
+.landing-card h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.landing-card p {
+    font-size: 13.5px;
+    color: var(--text-muted);
+    margin-bottom: 0;
+    text-align: left;
+}
+
+@media (max-width: 1024px) {
+    .sidebar {
+        display: none; /* simple hides sidebar for tablet/mobile to keep script clean */
+    }
+    .main-wrapper {
+        margin-left: 0;
+    }
+    .content-container {
+        padding: 24px;
+        margin-top: 0;
+        margin-bottom: 0;
+        border-radius: 0;
+    }
+}
+
+    </style>
+    <!-- Mermaid.js for drawing diagrams directly in the browser -->
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            securityLevel: 'loose',
+            flowchart: { useMaxWidth: true, htmlLabels: true }
+        });
+    </script>
+</head>
+<body>
+
+    <!-- Left Sidebar Navigation -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h1>🔋 Lab 4 AIoT</h1>
+            <div class="badge">Energy Forecasting</div>
+        </div>
+        <div class="sidebar-nav">
+                    <a href="index.html" class="sidebar-nav-item ">🏡 Trang chủ / Tổng mục lục</a>
+        <a href="00_project_overview.html" class="sidebar-nav-item ">00. Tổng quan dự án</a>
+        <a href="01_architecture.html" class="sidebar-nav-item ">01. Kiến trúc hệ thống AIoT</a>
+        <a href="02_data_flow.html" class="sidebar-nav-item ">02. Luồng dữ liệu tuần tự</a>
+        <a href="03_runtime_and_dependencies.html" class="sidebar-nav-item ">03. Luồng thực thi & Phụ thuộc</a>
+        <a href="04_dataset_and_schema.html" class="sidebar-nav-item ">04. Tập dữ liệu & Điền khuyết</a>
+        <a href="05_feature_engineering.html" class="sidebar-nav-item ">05. Kỹ nghệ đặc trưng thời gian</a>
+        <a href="06_model_training_and_metrics.html" class="sidebar-nav-item ">06. Mô hình hóa & Đo lường sai số</a>
+        <a href="07_decision_layer.html" class="sidebar-nav-item ">07. Tầng ra quyết định & Cảnh báo</a>
+        <a href="08_api_forecast_workflow.html" class="sidebar-nav-item ">08. Triển khai API FastAPI</a>
+        <a href="09_code_review.html" class="sidebar-nav-item ">09. Đánh giá chất lượng mã nguồn</a>
+        <a href="10_safety_fail_safe.html" class="sidebar-nav-item active">10. An toàn & Cơ chế Fail-safe</a>
+        <a href="11_development_roadmap.html" class="sidebar-nav-item ">11. Lộ trình phát triển & Học tập</a>
+        <a href="HANDBOOK.html" class="sidebar-nav-item ">📖 Sách hướng dẫn kỹ thuật (Handbook)</a>
+        </div>
+        <div class="sidebar-footer">
+            Designed by DeepMind Team & Antigravity AI
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="main-wrapper">
+        <div class="top-bar">
+            <div class="top-bar-title">Tài liệu Kỹ thuật Hệ thống Dự báo Phụ tải Điện năng BEMS</div>
+            <div class="top-bar-links">
+                <a href="index.html">🏡 Quay lại Trang chủ</a>
+            </div>
+        </div>
+
+        <div style="padding: 0 40px; flex: 1;">
+            <div class="content-container markdown-body">
+                <h1 id="thiet-ke-co-che-phong-ve-an-toan-va-fail-safe-trong-he-thong-aiot">THIẾT KẾ CƠ CHẾ PHÒNG VỆ AN TOÀN VÀ FAIL-SAFE TRONG HỆ THỐNG AIoT</h1>
+<p>Trong các hệ thống học máy thông thường (như hệ thống gợi ý phim hay nhận diện khuôn mặt), lỗi dự báo chỉ mang lại trải nghiệm không tốt cho người dùng. Tuy nhiên, trong các hệ thống <strong>AIoT điều khiển cơ điện vật lý (Cyber-Physical Systems)</strong> như quản lý năng lượng thông minh, một lỗi hệ thống hoặc sai số dự báo có thể dẫn đến quá tải lưới điện, sập nguồn toàn bộ tòa nhà, phá hủy thiết bị phần cứng đắt tiền, hoặc thậm chí gây chập điện cháy nổ.</p>
+<p>Tài liệu này phân tích chi tiết 8 nhóm rủi ro an toàn lớn trong hệ thống dự báo của <strong>Lab 4</strong>, và thiết kế một kiến trúc bảo vệ đa lớp <strong>Fail-Safe &amp; Safety Gateway</strong> sử dụng các ví dụ AIoT thực tế.</p>
+<hr />
+<h2 id="1-so-o-kien-truc-phong-ve-an-toan-3-lop-3-tier-fail-safe-architecture">1. Sơ đồ Kiến trúc Phòng vệ An toàn 3 Lớp (3-Tier Fail-Safe Architecture)</h2>
+<p>Để đảm bảo an toàn tuyệt đối, hệ thống được thiết kế theo nguyên lý <strong>Phòng thủ chiều sâu (Defense in Depth)</strong> chia làm 3 lớp phòng vệ độc lập:</p>
+<pre class="mermaid">graph TD
+    classDef cloud fill:#bbf,stroke:#333,stroke-width:1px;
+    classDef edge fill:#f9f,stroke:#333,stroke-width:2px;
+    classDef human fill:#fbb,stroke:#333,stroke-width:1px;
+
+    subgraph "LỚP 1: Tầng Phân tích Đám mây (Cloud AI Layer)"
+        A[Mô hình AI dự báo công suất] -->|predicted_value| B[Quantile Interval & Confidence Check]
+        B -->|Đánh giá rủi ro Wh| C[Tạo tín hiệu khuyến nghị Recommendation]
+    end
+
+    subgraph "LỚP 2: Tầng Con người phê duyệt (Human Confirmation Layer)"
+        C -->|Tín hiệu CRITICAL/HIGH| D{Xác nhận của Con người - HITL}
+        D -->|Đồng ý Approve| E[Ký số lệnh điều khiển]
+        D -->|Từ chối hoặc Timeout| F[Hủy lệnh, giữ nguyên trạng thái an toàn]
+    end
+
+    subgraph "LỚP 3: Tầng Chốt Biên cứng (Edge Safety Gateway - ESP32)"
+        E -->|Lệnh qua MQTT| G{Safety Interlock Rules - Quy tắc khóa cứng vật lý}
+        G -->|Thỏa mãn điều kiện an toàn| H[Thực thi Rơ-le Smart Plug]
+        G -->|Vi phạm quy tắc an toàn vật lý| I[Khóa lệnh, tự động chuyển chế độ Safe Mode]
+
+        %% API sập fallback
+        J[API Server Ngoại tuyến / Downtime] -->|Kích hoạt tức thời| K[Edge Local Baseline Fallback]
+        K --> G
+    end
+
+    class A,B,C cloud;
+    class D,E,f human;
+    class G,H,I,J,K edge;
+</pre>
+<hr />
+<h2 id="2-phan-tich-8-rui-ro-an-toan-cot-loi-trong-lab-4">2. Phân tích 8 Rủi ro An toàn cốt lõi trong Lab 4</h2>
+<hr />
+<h3 id="rui-ro-1-false-prediction-du-bao-sai-lech-cuc-oan">Rủi ro 1: False Prediction (Dự báo sai lệch cực đoan)</h3>
+<ul>
+<li><strong>Hiện tượng</strong>: Mô hình dự báo phụ tải điện năng Wh trong 10 phút tới là thấp ($80$ Wh), nhưng thực tế công suất tăng vọt lên tới $400$ Wh do chủ nhà đột ngột bật đồng thời bếp từ và bình nóng lạnh ngoài kịch bản lịch sử.</li>
+<li><strong>Hậu quả</strong>: Hệ thống quản lý năng lượng (BEMS) không chuẩn bị trước nguồn điện phụ trợ hoặc không chủ động tiết giảm tải phụ, dẫn đến <strong>quá tải Aptomat (Circuit Breaker) tổng</strong>, gây sập nguồn toàn bộ tòa nhà hoặc chập cháy cáp nguồn.</li>
+<li><strong>Ví dụ thực tế</strong>: Một tòa nhà văn phòng có hệ thống pin lưu trữ điện (ESS) sạc/xả tự động dựa trên dự báo AI. AI dự báo tải thấp nên cho xả pin bán điện lên lưới. Đúng lúc đó, hệ thống thang máy và điều hòa trung tâm khởi động đồng loạt, gây sụt áp nghiêm trọng và nhảy aptomat tổng, làm tê liệt hoạt động của toàn văn phòng.</li>
+</ul>
+<hr />
+<h3 id="rui-ro-2-delayed-prediction-du-bao-bi-tre-han-qua-gio">Rủi ro 2: Delayed Prediction (Dự báo bị trễ hạn / quá giờ)</h3>
+<ul>
+<li><strong>Hiện tượng</strong>: API <code>/forecast</code> bị nghẽn mạng hoặc tài nguyên CPU quá tải, dẫn đến thời gian phản hồi (latency) kéo dài hơn 1 phút, vượt quá chu kỳ ra quyết định tức thời.</li>
+<li><strong>Hậu quả</strong>: Lớp chấp hành (Actuator) không nhận được chỉ thị điều khiển đúng lúc, tiếp tục duy trì trạng thái quá tải kéo dài dẫn đến phá hủy thiết bị.</li>
+<li><strong>Ví dụ thực tế</strong>: Lưới điện microgrid thông minh yêu cầu điều chỉnh giảm tải sưởi trong vòng 30 giây khi phát hiện tần số lưới sụt giảm. Dự báo AI bị trễ 2 phút do nghẽn CPU, khiến hệ thống Microgrid không kịp phản ứng và buộc phải ngắt điện toàn bộ khu vực để tránh rã lưới.</li>
+</ul>
+<hr />
+<h3 id="rui-ro-3-unstable-telemetry-tin-hieu-cam-bien-khong-on-inhnhieu">Rủi ro 3: Unstable Telemetry (Tín hiệu cảm biến không ổn định/nhiễu)</h3>
+<ul>
+<li><strong>Hiện tượng</strong>: Cảm biến đo dòng điện bị chập chờn, sinh ra các giá trị gai nhọn cực đoan (ví dụ: dòng điện nhảy vọt lên 500A trong 1 mili-giây do nhiễu cảm ứng điện từ), hoặc cảm biến nhiệt độ bếp nhảy vọt lên 150°C.</li>
+<li><strong>Hậu quả</strong>: Các đặc trưng trễ (<code>lag</code>) và đặc trưng trượt (<code>rolling</code>) bị bóp méo hoàn toàn bởi các giá trị ngoại lai (outliers), khiến mô hình AI đưa ra các cảnh báo rủi ro CRITICAL giả, gây ngắt điện vô cớ cho các thiết bị quan trọng.</li>
+<li><strong>Ví dụ thực tế</strong>: Máy hàn hồ quang trong xưởng cơ khí khởi động tạo ra xung nhiễu điện từ cực lớn lan truyền trong dây điện, làm cảm biến đo điện năng của tủ lạnh thông minh bên cạnh ghi nhận giá trị ảo 2000W. Hệ thống AI tin vào con số này và ngắt nguồn tủ lạnh ngay lập tức, làm hỏng toàn bộ thực phẩm lưu trữ.</li>
+</ul>
+<hr />
+<h3 id="rui-ro-4-missing-data-mat-tin-hieu-truyen-tinkhuyet-thieu-du-lieu">Rủi ro 4: Missing Data (Mất tín hiệu truyền tin/khuyết thiếu dữ liệu)</h3>
+<ul>
+<li><strong>Hiện tượng</strong>: Cảm biến nhiệt độ phòng ngủ hoặc trạm thời tiết ngoài trời bị hết pin hoặc mất kết nối mạng Wi-Fi/Zigbee tạm thời, gửi lên giá trị trống <code>NaN</code> trong payload API.</li>
+<li><strong>Hậu quả</strong>: Mô hình hồi quy hoặc cây quyết định trực tuyến bị lỗi crash hệ thống do không thể tính toán trên giá trị rỗng, làm gián đoạn hoàn toàn dịch vụ dự báo.</li>
+<li><strong>Ví dụ thực tế</strong>: Mất kết nối Wi-Fi tại khu vực tầng hầm khiến cảm biến đo nhiệt độ phòng máy chủ không gửi được dữ liệu. FastAPI bị lỗi crash vì nhận giá trị trống, hệ thống điều hòa dự phòng không được bật lên kịp thời, dẫn đến dàn máy chủ bị quá nhiệt tự tắt.</li>
+</ul>
+<hr />
+<h3 id="rui-ro-5-model-drift-o-lech-mo-hinh-giam-o-chinh-xac">Rủi ro 5: Model Drift (Độ lệch mô hình giảm độ chính xác)</h3>
+<ul>
+<li><strong>Hiện tượng</strong>: Thói quen sinh hoạt của gia đình thay đổi hoàn toàn (ví dụ: mùa đông chuyển sang mùa hè, hoặc nhà có thêm thành viên mới sử dụng thêm nhiều thiết bị điện). Phân phối dữ liệu thực tế lệch hoàn toàn so với lúc huấn luyện offline.</li>
+<li><strong>Hậu quả</strong>: Sai số MAE của mô hình tăng vọt từ $30$ Wh lên $150$ Wh, các cảnh báo rủi ro hoàn toàn sai lệch thực tế.</li>
+<li><strong>Ví dụ thực tế</strong>: Mô hình AI dự báo phụ tải được huấn luyện vào mùa đông (khi không dùng điều hòa). Khi mùa hè đến, mô hình liên tục dự báo phụ tải thấp và coi lượng điện sưởi là bằng 0, dẫn đến việc không tính toán đúng công suất làm lạnh tăng vọt của điều hòa, gây mất an toàn lưới điện.</li>
+</ul>
+<hr />
+<h3 id="rui-ro-6-api-downtime-dich-vu-api-bi-sap-hoan-toan">Rủi ro 6: API Downtime (Dịch vụ API bị sập hoàn toàn)</h3>
+<ul>
+<li><strong>Hiện tượng</strong>: Máy chủ chạy FastAPI bị sập nguồn, cháy linh kiện, mất kết nối internet hoặc bị tấn công DDoS ngoại tuyến.</li>
+<li><strong>Hậu quả</strong>: Gateway biên hoàn toàn mất liên lạc với bộ não AI, không có bất kỳ tín hiệu dự báo hay khuyến nghị nào được đưa ra.</li>
+<li><strong>Ví dụ thực tế</strong>: Một trận bão lớn làm đứt đường truyền cáp quang của tòa nhà lên Cloud Server. API dự báo nằm trên Cloud bị cô lập. Hệ thống quản lý tòa nhà thông minh bị "mù" thông tin hoàn toàn, mất khả năng tự động tối ưu hóa điện năng trong giờ cao điểm.</li>
+</ul>
+<hr />
+<h3 id="rui-ro-7-dangerous-automatic-control-ieu-khien-tu-ong-nguy-hiem">Rủi ro 7: Dangerous Automatic Control (Điều khiển tự động nguy hiểm)</h3>
+<ul>
+<li><strong>Hiện tượng</strong>: Hệ thống AIoT được thiết kế tự động hoàn toàn (Closed-loop automation) mà không có sự kiểm duyệt của con người hay các giới hạn vật lý cứng.</li>
+<li><strong>Hậu quả</strong>: Mô hình AI bị lỗi nhiễu tự ý ra lệnh ngắt nguồn các thiết bị quan trọng đe dọa trực tiếp an sinh xã hội hoặc tính mạng con người (ví dụ: ngắt nguồn thiết bị y tế tại nhà, ngắt nguồn tủ lạnh bảo quản vaccine, tắt camera an ninh).</li>
+<li><strong>Ví dụ thực tế</strong>: AI dự báo tòa nhà sắp quá tải điện nghiêm trọng lúc 19:00 tối, tự động ngắt điện của toàn bộ hệ thống sưởi và thông gió tầng hầm chung cư khi có hàng trăm người đang đỗ xe, gây nguy cơ ngộ độc khí thải CO.</li>
+</ul>
+<hr />
+<h3 id="rui-ro-8-dashboard-misinterpretation-nguoi-dung-hieu-sai-giao-dien">Rủi ro 8: Dashboard Misinterpretation (Người dùng hiểu sai giao diện)</h3>
+<ul>
+<li><strong>Hiện tượng</strong>: Giao diện hiển thị đồ thị dự báo không ghi rõ sai số khoảng bất định, chỉ vẽ một đường dự báo Wh cứng nhắc hoặc sử dụng màu sắc cảnh báo gây hiểu lầm.</li>
+<li><strong>Hậu quả</strong>: Người vận hành tin tưởng tuyệt đối vào con số dự báo Wh chính xác, đưa ra các quyết định đóng ngắt cầu dao tải lớn một cách liều lĩnh mà không biết rằng mô hình đang có độ tin cậy cực thấp tại thời điểm đó.</li>
+<li><strong>Ví dụ thực tế</strong>: Màn hình giám sát vẽ đường dự báo công suất sẽ giảm mạnh lúc 15:00. Người trực ca tin tưởng nên ngắt bớt máy phát điện dự phòng. Thực tế mô hình đang có độ tin cậy thấp và phụ tải vọt lên, gây mất điện đột ngột toàn khu vực do thiếu công suất.</li>
+</ul>
+<hr />
+<h2 id="3-thiet-ke-co-che-phong-ve-fail-safe-safety-gateway">3. Thiết kế Cơ chế Phòng vệ Fail-Safe &amp; Safety Gateway</h2>
+<p>Để triệt tiêu hoàn toàn 8 rủi ro trên, chúng ta thiết kế bộ 5 cơ chế phòng vệ an toàn thực tế sau:</p>
+<hr />
+<h3 id="1-kien-truc-khoa-chot-an-toan-vat-ly-bien-edge-safety-gateway">1. Kiến trúc Khóa chốt an toàn vật lý Biên (Edge Safety Gateway)</h3>
+<p>Chúng ta không tin tưởng tuyệt đối vào lệnh điều khiển gửi từ Cloud/Server API xuống. Tại thiết bị phần cứng Edge Gateway (hoặc chip nhúng <strong>ESP32</strong> trực tiếp điều khiển Smart Plug), chúng ta lập trình sẵn một <strong>lớp quy tắc khóa cứng (Hard-coded safety rules)</strong> độc lập hoàn toàn bằng C++/MicroPython:</p>
+<h4 id="ma-nguon-esp32-nhung-safe-interlock-vi-du-thuc-te">Mã nguồn ESP32 nhúng Safe Interlock (Ví dụ thực tế):</h4>
+<pre><code class="language-cpp">// ESP32 Code - Edge Safety Interlock Rules
+const float MAX_PHYSICAL_CURRENT = 16.0; // Giới hạn dòng điện định mức an toàn 16 Ampe
+const float CRITICAL_TEMPERATURE = 60.0; // Ngưỡng nhiệt độ cháy nổ thiết bị 60°C
+bool refrigerator_power_state = true;    // Trạng thái nguồn tủ lạnh
+
+void execute_actuator_control(String json_command) {
+    // Giải mã JSON lệnh điều khiển nhận từ Cloud API
+    DynamicJsonDocument doc(1024);
+    deserializeJson(doc, json_command);
+    String target_device = doc[&quot;device&quot;];
+    String requested_action = doc[&quot;action&quot;]; // &quot;ON&quot; hoặc &quot;OFF&quot;
+
+    // Đọc cảm biến vật lý trực tiếp tại biên thời gian thực
+    float current_temp = read_dht22_temp();
+    float current_load = read_ct_sensor_current();
+
+    // RÀNG BUỘC KHÓA CỨNG AN TOÀN 1: Bảo vệ quá tải dòng điện vật lý tức thời
+    if (current_load &gt; MAX_PHYSICAL_CURRENT) {
+        emergency_shutdown(&quot;OVERCURRENT_PROTECTION_ACTIVATED&quot;);
+        return; 
+    }
+
+    // RÀNG BUỘC KHÓA CỨNG AN TOÀN 2: Bảo vệ tủ lạnh/thiết bị y tế quan trọng
+    if (target_device == &quot;refrigerator&quot; &amp;&amp; requested_action == &quot;OFF&quot;) {
+        if (current_temp &gt; 6.0) { // Nếu tủ lạnh đang ấm dần lên (&gt;6 độ C), cấm ngắt điện!
+            log_safety_violation(&quot;REJECTED_OFF_COMMAND: Refrigerator temp is too warm.&quot;);
+            return; // Hủy lệnh điều khiển của AI, giữ nguyên trạng thái bật nguồn
+        }
+    }
+
+    // Nếu vượt qua tất cả các ràng buộc, mới cho phép đóng ngắt rơ-le vật lý
+    if (requested_action == &quot;OFF&quot;) {
+        digitalWrite(RELAY_PIN, LOW);
+    } else {
+        digitalWrite(RELAY_PIN, HIGH);
+    }
+}
+</code></pre>
+<hr />
+<h3 id="2-logic-du-phong-khi-api-ngoai-tuyen-edge-baseline-fallback">2. Logic dự phòng khi API ngoại tuyến (Edge Baseline Fallback)</h3>
+<p>Khi mất mạng Internet hoặc Server API FastAPI bị sập (Downtime), Edge Gateway biên phát hiện thông qua cơ chế <strong>ping timeout (3 lần liên tiếp không nhận được phản hồi HTTP 200)</strong>. 
+Gateway lập tức tự động kích hoạt <strong>logic dự phòng nội hạt (Local Fallback)</strong> mà không cần AI:</p>
+<pre class="mermaid">graph TD
+    A[ESP32 Gateway gửi Request dự báo] --> B{Kết nối API thành công?}
+    B -->|Có| C[Thực thi suy diễn AI Cloud bình thường]
+    B -->|Không - Thử lại 3 lần thất bại| D[Kích hoạt Safe Mode Fallback]
+
+    D --> E[Sử dụng Last Value Baseline nội hạt]
+    E --> F["Quy tắc dự phòng: Nếu phụ tải hiện tại > 80% công suất thiết kế,<br>tự động chuyển các Smart Plug phụ sang Eco Mode"]
+    F --> G[Duy trì hoạt động an toàn ổn định cho đến khi API online trở lại]
+</pre>
+<hr />
+<h3 id="3-quy-tac-khoang-tin-cay-nguong-bat-inh-confidence-threshold-rules">3. Quy tắc khoảng tin cậy &amp; Ngưỡng bất định (Confidence Threshold Rules)</h3>
+<p>Thay vì sử dụng kết quả dự báo điểm, mô hình Gradient Boosting được cấu hình để huấn luyện Hồi quy phân vị (<strong>Quantile Regression</strong>) cho ra 3 giá trị dự báo:
+*   <code>pred_low</code> (Phân vị $0.1$): Công suất tối thiểu.
+*   <code>pred_mean</code> (Phân vị $0.5$): Công suất trung bình dự kiến.
+*   <code>pred_high</code> (Phân vị $0.9$): Công suất tối đa dự kiến với độ tin cậy $90\%$ của mẫu.</p>
+<h4 id="quy-tac-quyet-inh-an-toan-confidence-rule">Quy tắc quyết định an toàn (Confidence rule):</h4>
+<ul>
+<li>Nếu khoảng bất định $\Delta_{\text{uncertainty}} = (\text{pred_high} - \text{pred_low})$ quá lớn (ví dụ $&gt; 100$ Wh), chứng tỏ mô hình đang cực kỳ bối rối và có độ tin cậy rất thấp.</li>
+<li><strong>Hành động fail-safe</strong>: Hệ thống tự động <strong>bỏ qua giá trị dự báo trung bình</strong> <code>pred_mean</code> và sử dụng giá trị cận trên an toàn nhất <strong><code>pred_high</code></strong> để tính toán cấp độ rủi ro, bảo đảm luôn chuẩn bị dư công suất phòng ngừa rủi ro quá tải điện năng.</li>
+</ul>
+<hr />
+<h3 id="4-quy-tac-xac-nhan-cua-con-nguoi-human-in-the-loop-workflow">4. Quy tắc xác nhận của Con người (Human-in-the-Loop Workflow)</h3>
+<p>Thiết lập bộ quy tắc bắt buộc phê duyệt thủ công nhằm kiểm soát hiện tượng bão hòa cảnh báo (Alert Fatigue):</p>
+<ul>
+<li><strong>Quy tắc 1: Cảnh báo đa điểm</strong>: Chỉ phát tín hiệu cảnh báo mức <strong>CRITICAL</strong> tới người dùng nếu giá trị dự báo vượt ngưỡng liên tục trong <strong>3 chu kỳ đo liên tiếp (30 phút)</strong>. Loại bỏ hoàn toàn các cảnh báo giả do phụ tải tăng vọt tức thời trong vài giây.</li>
+<li><strong>Quy tắc 2: Phê duyệt hai hướng</strong>: Khi có lệnh ngắt tải lớn (ví dụ tắt hệ thống HVAC sảnh chính tòa nhà), FastAPI gửi thông báo xác nhận kèm mã PIN an toàn lên ứng dụng di động của kỹ sư trưởng:<ul>
+<li>Nếu kỹ sư nhấn <strong>"XÁC NHẬN" (Approve)</strong> trong vòng 120 giây $\rightarrow$ Gửi lệnh MQTT xuống ESP32 đóng rơ-le.</li>
+<li>Nếu kỹ sư nhấn <strong>"HỦY" (Reject)</strong> hoặc <strong>quá 120 giây không phản hồi (Timeout)</strong> $\rightarrow$ Hủy lệnh hoàn toàn, duy trì trạng thái cũ và ghi nhận lỗi vào log file hệ thống.</li>
+</ul>
+</li>
+</ul>
+<hr />
+<h3 id="5-logic-ngat-khan-cap-phong-ve-an-toan-emergency-shutdown-logic">5. Logic Ngắt khẩn cấp Phòng vệ An toàn (Emergency Shutdown Logic)</h3>
+<p>Đây là chốt chặn an toàn cuối cùng (Last Line of Defense) bảo vệ tính mạng con người và phòng chống hỏa hoạn cháy nổ lưới điện:
+*   Mạng lưới ESP32 liên tục lắng nghe tín hiệu từ <strong>Cảm biến khói (Smoke sensor)</strong> và <strong>Cảm biến rò rỉ dòng điện (RCD)</strong> tại tủ điện tổng.
+*   <strong>Quy tắc ngắt khẩn cấp</strong>: Ngay khi phát hiện nồng độ khói vượt ngưỡng an toàn ($&gt;300$ ppm) hoặc phát hiện rò dòng điện vượt quá $30$ mA:
+    1.  ESP32 tự động <strong>cắt nguồn điện rơ-le tổng lập tức</strong> (trong vòng &lt; 10 mili-giây) bằng ngắt cứng phần cứng (Hardware Interrupt), bỏ qua hoàn toàn mọi chỉ dẫn, lệnh điều khiển từ API hay xác nhận của con người.
+    2.  Đồng thời, ESP32 chuyển sang chế độ phát tín hiệu cảnh báo còi hú và gửi bản tin MQTT khẩn cấp <code>topic: smarthome/emergency</code> phát báo động đỏ lên toàn hệ thống đám mây.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            © 2026 - Lab 4 AIoT Forecasting & Predictive Analytics - Tài liệu Đào tạo Chuyên sâu
+        </div>
+    </div>
+
+</body>
+</html>

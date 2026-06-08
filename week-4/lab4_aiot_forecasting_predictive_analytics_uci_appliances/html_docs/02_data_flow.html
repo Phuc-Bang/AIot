@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>02. Luồng dữ liệu tuần tự - Lab 4 AIoT Energy Forecasting</title>
+    <style>
+        
+:root {
+    --primary: #4f46e5;
+    --primary-light: #e0e7ff;
+    --primary-hover: #4338ca;
+    --text-dark: #0f172a;
+    --text-muted: #64748b;
+    --bg-slate: #f8fafc;
+    --bg-sidebar: #0f172a;
+    --border-slate: #e2e8f0;
+    --code-bg: #1e293b;
+    --inline-code-bg: #f1f5f9;
+    --inline-code-color: #e11d48;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: var(--text-dark);
+    background-color: var(--bg-slate);
+    line-height: 1.6;
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Sidebar Navigation */
+.sidebar {
+    width: 320px;
+    background-color: var(--bg-sidebar);
+    color: #f8fafc;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 100;
+    box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+}
+
+.sidebar-header {
+    padding: 24px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.sidebar-header h1 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sidebar-header .badge {
+    background-color: var(--primary);
+    color: white;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 9999px;
+    font-weight: 600;
+    margin-top: 4px;
+    display: inline-block;
+}
+
+.sidebar-nav {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 0;
+}
+
+.sidebar-nav-item {
+    display: block;
+    padding: 12px 24px;
+    color: #cbd5e1;
+    text-decoration: none;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    border-left: 4px solid transparent;
+}
+
+.sidebar-nav-item:hover {
+    background-color: rgba(255,255,255,0.05);
+    color: #ffffff;
+    padding-left: 28px;
+}
+
+.sidebar-nav-item.active {
+    background-color: rgba(79, 70, 229, 0.15);
+    color: #ffffff;
+    border-left-color: var(--primary);
+    font-weight: 600;
+}
+
+.sidebar-footer {
+    padding: 16px 24px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    font-size: 11px;
+    color: #94a3b8;
+    text-align: center;
+}
+
+/* Main Content Area */
+.main-wrapper {
+    margin-left: 320px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.top-bar {
+    background-color: #ffffff;
+    border-bottom: 1px solid var(--border-slate);
+    padding: 16px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 90;
+}
+
+.top-bar-title {
+    font-size: 14px;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.top-bar-links a {
+    color: var(--primary);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.top-bar-links a:hover {
+    color: var(--primary-hover);
+    text-decoration: underline;
+}
+
+.content-container {
+    flex: 1;
+    padding: 48px 64px 80px 64px;
+    max-width: 1012px;
+    width: 100%;
+    margin: 0 auto;
+    background-color: #ffffff;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    border-radius: 8px;
+    margin-top: 24px;
+    margin-bottom: 24px;
+}
+
+/* Markdown Styling */
+.markdown-body h1 {
+    font-size: 32px;
+    font-weight: 800;
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--border-slate);
+    color: #0f172a;
+}
+
+.markdown-body h2 {
+    font-size: 22px;
+    font-weight: 700;
+    margin-top: 36px;
+    margin-bottom: 16px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border-slate);
+    color: #1e293b;
+}
+
+.markdown-body h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-top: 28px;
+    margin-bottom: 12px;
+    color: #334155;
+}
+
+.markdown-body h4 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-top: 20px;
+    margin-bottom: 8px;
+    color: #475569;
+}
+
+.markdown-body p {
+    margin-bottom: 16px;
+    color: #334155;
+    text-align: justify;
+}
+
+.markdown-body ul, .markdown-body ol {
+    margin-bottom: 16px;
+    padding-left: 24px;
+}
+
+.markdown-body li {
+    margin-bottom: 8px;
+    color: #334155;
+}
+
+.markdown-body a {
+    color: var(--primary);
+    text-decoration: none;
+    transition: color 0.15s;
+    font-weight: 500;
+}
+
+.markdown-body a:hover {
+    color: var(--primary-hover);
+    text-decoration: underline;
+}
+
+/* Blockquotes */
+.markdown-body blockquote {
+    padding: 12px 24px;
+    border-left: 4px solid var(--border-slate);
+    background-color: var(--bg-slate);
+    margin-bottom: 20px;
+    font-style: italic;
+    color: var(--text-muted);
+}
+
+/* Code block styling */
+.markdown-body pre {
+    background-color: var(--code-bg);
+    padding: 16px;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin-bottom: 20px;
+}
+
+.markdown-body pre code {
+    background-color: transparent;
+    color: #f8fafc;
+    padding: 0;
+    border-radius: 0;
+    font-size: 13.5px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+.markdown-body code {
+    background-color: var(--inline-code-bg);
+    color: var(--inline-code-color);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 85%;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+/* Table styling */
+.markdown-body table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 24px;
+    font-size: 14.5px;
+}
+
+.markdown-body th, .markdown-body td {
+    padding: 12px 16px;
+    border: 1px solid var(--border-slate);
+}
+
+.markdown-body th {
+    background-color: var(--bg-slate);
+    font-weight: 600;
+    text-align: left;
+    color: #1e293b;
+}
+
+.markdown-body tr:nth-child(even) {
+    background-color: #fafbfd;
+}
+
+/* Custom Alert Boxes (GitHub Alerts mapping) */
+.alert {
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    border-radius: 8px;
+    border-left-width: 4px;
+    border-left-style: solid;
+}
+
+.alert-title {
+    font-weight: 700;
+    margin-bottom: 8px;
+    font-size: 14.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.alert-content p {
+    margin-bottom: 0 !important;
+    font-size: 14px;
+    text-align: justify;
+}
+
+.alert-note {
+    background-color: #eff6ff;
+    border-left-color: #3b82f6;
+    color: #1e40af;
+}
+.alert-note .alert-title { color: #1d4ed8; }
+
+.alert-tip {
+    background-color: #f0fdf4;
+    border-left-color: #22c55e;
+    color: #166534;
+}
+.alert-tip .alert-title { color: #15803d; }
+
+.alert-important {
+    background-color: #faf5ff;
+    border-left-color: #a855f7;
+    color: #6b21a8;
+}
+.alert-important .alert-title { color: #7e22ce; }
+
+.alert-warning {
+    background-color: #fffbeb;
+    border-left-color: #f59e0b;
+    color: #92400e;
+}
+.alert-warning .alert-title { color: #b45309; }
+
+.alert-caution {
+    background-color: #fef2f2;
+    border-left-color: #ef4444;
+    color: #991b1b;
+}
+.alert-caution .alert-title { color: #b91c1c; }
+
+/* Mermaid Styling */
+.mermaid {
+    background-color: white !important;
+    border: 1px solid var(--border-slate);
+    border-radius: 8px;
+    padding: 24px;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 24px;
+    overflow-x: auto;
+}
+
+.footer {
+    background-color: #ffffff;
+    border-top: 1px solid var(--border-slate);
+    padding: 24px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: auto;
+}
+
+/* Landing Page Grid */
+.landing-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    margin-top: 24px;
+}
+
+.landing-card {
+    background-color: #ffffff;
+    border: 1px solid var(--border-slate);
+    border-radius: 8px;
+    padding: 20px;
+    text-decoration: none;
+    color: var(--text-dark);
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.landing-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);
+    border-color: var(--primary);
+}
+
+.landing-card h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.landing-card p {
+    font-size: 13.5px;
+    color: var(--text-muted);
+    margin-bottom: 0;
+    text-align: left;
+}
+
+@media (max-width: 1024px) {
+    .sidebar {
+        display: none; /* simple hides sidebar for tablet/mobile to keep script clean */
+    }
+    .main-wrapper {
+        margin-left: 0;
+    }
+    .content-container {
+        padding: 24px;
+        margin-top: 0;
+        margin-bottom: 0;
+        border-radius: 0;
+    }
+}
+
+    </style>
+    <!-- Mermaid.js for drawing diagrams directly in the browser -->
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            securityLevel: 'loose',
+            flowchart: { useMaxWidth: true, htmlLabels: true }
+        });
+    </script>
+</head>
+<body>
+
+    <!-- Left Sidebar Navigation -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h1>🔋 Lab 4 AIoT</h1>
+            <div class="badge">Energy Forecasting</div>
+        </div>
+        <div class="sidebar-nav">
+                    <a href="index.html" class="sidebar-nav-item ">🏡 Trang chủ / Tổng mục lục</a>
+        <a href="00_project_overview.html" class="sidebar-nav-item ">00. Tổng quan dự án</a>
+        <a href="01_architecture.html" class="sidebar-nav-item ">01. Kiến trúc hệ thống AIoT</a>
+        <a href="02_data_flow.html" class="sidebar-nav-item active">02. Luồng dữ liệu tuần tự</a>
+        <a href="03_runtime_and_dependencies.html" class="sidebar-nav-item ">03. Luồng thực thi & Phụ thuộc</a>
+        <a href="04_dataset_and_schema.html" class="sidebar-nav-item ">04. Tập dữ liệu & Điền khuyết</a>
+        <a href="05_feature_engineering.html" class="sidebar-nav-item ">05. Kỹ nghệ đặc trưng thời gian</a>
+        <a href="06_model_training_and_metrics.html" class="sidebar-nav-item ">06. Mô hình hóa & Đo lường sai số</a>
+        <a href="07_decision_layer.html" class="sidebar-nav-item ">07. Tầng ra quyết định & Cảnh báo</a>
+        <a href="08_api_forecast_workflow.html" class="sidebar-nav-item ">08. Triển khai API FastAPI</a>
+        <a href="09_code_review.html" class="sidebar-nav-item ">09. Đánh giá chất lượng mã nguồn</a>
+        <a href="10_safety_fail_safe.html" class="sidebar-nav-item ">10. An toàn & Cơ chế Fail-safe</a>
+        <a href="11_development_roadmap.html" class="sidebar-nav-item ">11. Lộ trình phát triển & Học tập</a>
+        <a href="HANDBOOK.html" class="sidebar-nav-item ">📖 Sách hướng dẫn kỹ thuật (Handbook)</a>
+        </div>
+        <div class="sidebar-footer">
+            Designed by DeepMind Team & Antigravity AI
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="main-wrapper">
+        <div class="top-bar">
+            <div class="top-bar-title">Tài liệu Kỹ thuật Hệ thống Dự báo Phụ tải Điện năng BEMS</div>
+            <div class="top-bar-links">
+                <a href="index.html">🏡 Quay lại Trang chủ</a>
+            </div>
+        </div>
+
+        <div style="padding: 0 40px; flex: 1;">
+            <div class="content-container markdown-body">
+                <h1 id="phan-tich-chuyen-sau-luong-luan-chuyen-va-bien-oi-du-lieu">PHÂN TÍCH CHUYÊN SÂU LUỒNG LUÂN CHUYỂN VÀ BIẾN ĐỔI DỮ LIỆU</h1>
+<p>Trong một hệ thống AIoT Dự báo chuỗi thời gian, dữ liệu không ở trạng thái tĩnh. Nó là một dòng chảy liên tục, trải qua hàng loạt các bước lọc, làm sạch, tính toán đặc trưng động, phân tách thời gian và suy diễn mô hình để cuối cùng trở thành các quyết định vận hành thời gian thực.</p>
+<p>Tài liệu này phân tích chi tiết quy trình <strong>15 bước biến đổi tuần tự của dòng dữ liệu</strong> trong dự án <strong>Lab 4</strong>, cung cấp sơ đồ luồng dữ liệu chuẩn tắc, bảng theo dõi các sản phẩm trung gian, giải thích chi tiết đầu vào/đầu ra và cẩm nang xử lý lỗi thực tế.</p>
+<hr />
+<h2 id="1-so-o-luong-bien-oi-tuan-tu-sequential-data-flow-chart">1. Sơ đồ Luồng Biến đổi Tuần tự (Sequential Data Flow Chart)</h2>
+<p>Dưới đây là sơ đồ chi tiết biểu diễn hành trình 15 bước của dòng dữ liệu trong hệ thống Lab 4:</p>
+<pre class="mermaid">flowchart TD
+    A[1. Raw CSV on Disk] --> B[2. load_dataset]
+    B --> C[3. clean_supervised_frame]
+    C --> D[4. create time features]
+    D --> E[5. create lag features]
+    E --> F[6. create rolling features]
+    F --> G[7. create delta features]
+    G --> H[8. create target_future]
+    H --> I[9. drop invalid rows]
+    I --> J[10. train/test split by time]
+    J -->|75% Train Data| K[11. train models offline]
+    J -->|25% Test Data| L[12. generate predictions]
+    L --> M[13. calculate forecast_error]
+    M --> N[14. create forecast_log.csv]
+    K -->|Export joblib bundle| O[15. serve through FastAPI /forecast API]
+    N -->|Auditing/Historical Logs| O
+</pre>
+<hr />
+<h2 id="2-bang-theo-doi-san-pham-trung-gian-table-of-intermediate-artifacts">2. Bảng Theo dõi Sản phẩm Trung gian (Table of Intermediate Artifacts)</h2>
+<p>Mỗi bước biến đổi trong pipeline tạo ra các cấu trúc dữ liệu trung gian với số lượng cột và dòng thay đổi rõ rệt. Dưới đây là bảng thống kê chi tiết giúp kỹ sư dễ dàng kiểm soát dòng chảy:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Bước</th>
+<th style="text-align: left;">Cấu phần / Hàm</th>
+<th style="text-align: left;">Loại dữ liệu / Sản phẩm</th>
+<th style="text-align: left;">Định dạng vật lý</th>
+<th style="text-align: left;">Số cột chính</th>
+<th style="text-align: left;">Ghi chú &amp; Trạng thái thay đổi dữ liệu</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>1</strong></td>
+<td style="text-align: left;">Thư mục <code>data/</code></td>
+<td style="text-align: left;">Dữ liệu thô ban đầu</td>
+<td style="text-align: left;">File <code>.csv</code></td>
+<td style="text-align: left;">29 cột</td>
+<td style="text-align: left;">Chứa dữ liệu gốc UCI hoặc fallback sample.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>2</strong></td>
+<td style="text-align: left;"><code>load_dataset()</code></td>
+<td style="text-align: left;">DataFrame gốc chuẩn hóa</td>
+<td style="text-align: left;">Pandas DataFrame</td>
+<td style="text-align: left;">29 cột</td>
+<td style="text-align: left;">Cột <code>date</code> chuyển sang datetime64, sắp xếp, xóa trùng.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>3</strong></td>
+<td style="text-align: left;"><code>clean_supervised_frame</code></td>
+<td style="text-align: left;">DataFrame cơ sở sạch</td>
+<td style="text-align: left;">Pandas DataFrame</td>
+<td style="text-align: left;">29 cột</td>
+<td style="text-align: left;">Đảm bảo đủ cột, điền NaN nếu thiếu, ép kiểu numeric.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>4</strong></td>
+<td style="text-align: left;"><code>add_time_features()</code></td>
+<td style="text-align: left;">DataFrame bổ sung mốc giờ</td>
+<td style="text-align: left;">Pandas DataFrame</td>
+<td style="text-align: left;">37 cột</td>
+<td style="text-align: left;">Thêm 8 cột: <code>hour</code>, <code>dayofweek</code>, <code>month</code>, <code>is_weekend</code>, và 4 cột sin/cos.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>5</strong></td>
+<td style="text-align: left;"><code>add_lag_rolling_features</code></td>
+<td style="text-align: left;">DataFrame đặc trưng trễ</td>
+<td style="text-align: left;">Pandas DataFrame</td>
+<td style="text-align: left;">43 cột</td>
+<td style="text-align: left;">Thêm 6 cột đặc trưng trễ <code>appliances_lag_1</code> đến <code>lag_24</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>6</strong></td>
+<td style="text-align: left;"><code>add_lag_rolling_features</code></td>
+<td style="text-align: left;">DataFrame đặc trưng trượt</td>
+<td style="text-align: left;">Pandas DataFrame</td>
+<td style="text-align: left;">49 cột</td>
+<td style="text-align: left;">Thêm 6 cột đặc trưng cửa sổ trượt (Rolling Mean &amp; Rolling Std).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>7</strong></td>
+<td style="text-align: left;"><code>add_lag_rolling_features</code></td>
+<td style="text-align: left;">DataFrame đặc trưng sai phân</td>
+<td style="text-align: left;">Pandas DataFrame</td>
+<td style="text-align: left;">52 cột</td>
+<td style="text-align: left;">Thêm 3 cột sai phân vi phân <code>appliances_delta_1</code> đến <code>delta_6</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>8</strong></td>
+<td style="text-align: left;"><code>make_supervised_frame</code></td>
+<td style="text-align: left;">DataFrame học có giám sát</td>
+<td style="text-align: left;">Pandas DataFrame</td>
+<td style="text-align: left;">53 cột</td>
+<td style="text-align: left;">Thêm cột nhãn dịch chuyển tương lai <code>target_future</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>9</strong></td>
+<td style="text-align: left;"><code>clean_supervised_frame</code></td>
+<td style="text-align: left;">Ma trận đặc trưng không trống</td>
+<td style="text-align: left;">Pandas DataFrame</td>
+<td style="text-align: left;">53 cột</td>
+<td style="text-align: left;"><strong>[QUAN TRỌNG]</strong> Xóa bỏ các dòng NaN ở đầu chuỗi (thiếu Lag) và cuối chuỗi (thiếu nhãn).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>10</strong></td>
+<td style="text-align: left;"><code>time_split()</code></td>
+<td style="text-align: left;">Tập Train &amp; Test</td>
+<td style="text-align: left;">2x DataFrame</td>
+<td style="text-align: left;">53 cột</td>
+<td style="text-align: left;">Phân cắt theo tỷ lệ tuyến tính 75% quá khứ, 25% tương lai.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>11</strong></td>
+<td style="text-align: left;"><code>train_forecasting_models</code></td>
+<td style="text-align: left;">Trọng số / Cây quyết định học</td>
+<td style="text-align: left;">File <code>.joblib</code></td>
+<td style="text-align: left;">N/A</td>
+<td style="text-align: left;">Đóng gói mô hình tối ưu nhất kèm bộ Medians.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>12</strong></td>
+<td style="text-align: left;"><code>model.predict()</code></td>
+<td style="text-align: left;">Mảng giá trị dự báo</td>
+<td style="text-align: left;">NumPy Array</td>
+<td style="text-align: left;">1 cột</td>
+<td style="text-align: left;">Dự đoán lượng điện tiêu thụ Wh của tập kiểm thử.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>13</strong></td>
+<td style="text-align: left;"><code>regression_metrics()</code></td>
+<td style="text-align: left;">Mảng sai số tuyệt đối</td>
+<td style="text-align: left;">NumPy Array</td>
+<td style="text-align: left;">1 cột</td>
+<td style="text-align: left;">Độ lệch <code>predicted_value - actual_value</code> phục vụ đánh giá.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>14</strong></td>
+<td style="text-align: left;"><code>build_forecast_log()</code></td>
+<td style="text-align: left;">Bảng nhật ký vận hành</td>
+<td style="text-align: left;">File <code>.csv</code></td>
+<td style="text-align: left;">9 cột</td>
+<td style="text-align: left;">Lưu tại <code>outputs/forecast_log.csv</code> gồm timestamp, dự báo, rủi ro, khuyến nghị.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>15</strong></td>
+<td style="text-align: left;"><code>app.py</code></td>
+<td style="text-align: left;">Gói tin phản hồi JSON</td>
+<td style="text-align: left;">JSON Payload</td>
+<td style="text-align: left;">N/A</td>
+<td style="text-align: left;">Trả kết quả dự báo, rủi ro, khuyến nghị và safety note về Client.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="3-mo-ta-chi-tiet-tung-buoc-bien-oi-inputs-outputs-explanation">3. Mô tả Chi tiết Từng Bước Biến đổi (Inputs &amp; Outputs Explanation)</h2>
+<h3 id="buoc-1-raw-csv-on-disk-du-lieu-tho-luu-tren-ia">Bước 1: Raw CSV on Disk (Dữ liệu thô lưu trên đĩa)</h3>
+<ul>
+<li><strong>Đầu vào</strong>: Tệp CSV thô chứa các hàng telemetry thu thập từ cảm biến vật lý.</li>
+<li><strong>Đầu ra</strong>: File lưu trữ vật lý tại <code>data/energydata_complete.csv</code>.</li>
+<li><strong>Mô tả</strong>: Dữ liệu có thể bị thiếu dòng, sai định dạng cột, hoặc các mốc thời gian bị xáo trộn do lỗi mạng khi lưu file.</li>
+</ul>
+<h3 id="buoc-2-load_dataset-nap-va-chuan-hoa-co-ban">Bước 2: load_dataset (Nạp và chuẩn hóa cơ bản)</h3>
+<ul>
+<li><strong>Đầu vào</strong>: Đường dẫn file CSV thô.</li>
+<li><strong>Đầu ra</strong>: Pandas DataFrame đã được định dạng và sắp xếp tuần tự theo thời gian.</li>
+<li><strong>Mô tả</strong>: Ép kiểu cột thời gian, thực hiện sắp xếp <code>sort_values("date")</code> và xóa bản ghi trùng lặp mốc giờ để chuẩn bị trục thời gian sạch.</li>
+</ul>
+<h3 id="buoc-3-clean_supervised_frame-loc-sach-dataframe-tho">Bước 3: clean_supervised_frame (Lọc sạch DataFrame thô)</h3>
+<ul>
+<li><strong>Đầu vào</strong>: DataFrame đã sắp xếp.</li>
+<li><strong>Đầu ra</strong>: DataFrame sạch, bảo đảm đầy đủ cấu trúc cột.</li>
+<li><strong>Mô tả</strong>: Nếu có bất kỳ cột cảm biến tùy chọn nào bị thiếu, hàm tự động tạo cột đó và điền giá trị <code>NaN</code> (tránh lỗi KeyError trong các bước sau).</li>
+</ul>
+<h3 id="buoc-4-create-time-features-ky-nghe-ac-trung-thoi-gian-tuan-hoan">Bước 4: create time features (Kỹ nghệ đặc trưng thời gian tuần hoàn)</h3>
+<ul>
+<li><strong>Đầu vào</strong>: DataFrame thô sạch.</li>
+<li><strong>Đầu ra</strong>: DataFrame bổ sung thêm 8 đặc trưng thời gian lượng giác.</li>
+<li><strong>Mô tả</strong>: Tính toán giờ trong ngày, ngày trong tuần, tháng trong năm và chuyển đổi giờ/ngày sang tọa độ lượng giác sin/cos để bảo toàn khoảng cách thời gian vật lý.</li>
+</ul>
+<h3 id="buoc-5-create-lag-features-tao-ac-trung-tre-lich-su">Bước 5: create lag features (Tạo đặc trưng trễ lịch sử)</h3>
+<ul>
+<li><strong>Đầu vào</strong>: DataFrame mốc giờ.</li>
+<li><strong>Đầu ra</strong>: DataFrame thêm 6 cột đặc trưng trễ <code>appliances_lag_k</code> ($k \in [1, 2, 3, 6, 12, 24]$).</li>
+<li><strong>Mô tả</strong>: Sử dụng hàm dịch chuyển xuôi <code>.shift(k)</code> của Pandas để lấy giá trị phụ tải điện của quá khứ làm đặc trưng đầu vào cho thời điểm hiện tại.</li>
+</ul>
+<h3 id="buoc-6-create-rolling-features-tao-ac-trung-cua-so-truot">Bước 6: create rolling features (Tạo đặc trưng cửa sổ trượt)</h3>
+<ul>
+<li><strong>Đầu vào</strong>: DataFrame đặc trưng trễ.</li>
+<li><strong>Đầu ra</strong>: DataFrame thêm 6 cột trung bình trượt và độ lệch chuẩn trượt.</li>
+<li><strong>Mô tả</strong>: Tính toán thống kê trên cửa sổ thời gian trượt về quá khứ qua hàm <code>.rolling(window=W).mean()</code> và <code>.std()</code>.</li>
+</ul>
+<h3 id="buoc-7-create-delta-features-tao-ac-trung-sai-phan-gia-toc">Bước 7: create delta features (Tạo đặc trưng sai phân gia tốc)</h3>
+<ul>
+<li><strong>Đầu vào</strong>: DataFrame đặc trưng trượt.</li>
+<li><strong>Đầu ra</strong>: DataFrame thêm 3 cột delta thay đổi.</li>
+<li><strong>Mô tả</strong>: Tính toán mức độ chênh lệch phụ tải so với các mốc trước đó qua hàm <code>.diff(lag)</code>.</li>
+</ul>
+<h3 id="buoc-8-create-target_future-thiet-lap-nhan-hoc-co-giam-sat">Bước 8: create target_future (Thiết lập nhãn học có giám sát)</h3>
+<ul>
+<li><strong>Đầu vào</strong>: DataFrame đầy đủ đặc trưng đầu vào.</li>
+<li><strong>Đầu ra</strong>: DataFrame thêm cột nhãn mục tiêu tương lai <code>target_future</code>.</li>
+<li><strong>Mô tả</strong>: Dịch ngược âm cột phụ tải: <code>target_future = Appliances.shift(-horizon_steps)</code> (đặt $h=1$, đoán trước 10 phút).</li>
+</ul>
+<h3 id="buoc-9-drop-invalid-rows-loai-bo-cac-dong-khuyet-thieu-bien">Bước 9: drop invalid rows (Loại bỏ các dòng khuyết thiếu biên)</h3>
+<ul>
+<li><strong>Đầu vào</strong>: DataFrame giám sát thô.</li>
+<li><strong>Đầu ra</strong>: DataFrame sạch hoàn toàn không chứa bất kỳ giá trị <code>NaN</code> nào.</li>
+<li><strong>Mô tả</strong>: <ul>
+<li>24 dòng đầu chuỗi thời gian sẽ bị rỗng (<code>NaN</code>) ở các cột Lag/Rolling lớn do chưa đủ lịch sử quá khứ.</li>
+<li>1 dòng cuối chuỗi sẽ bị rỗng ở cột <code>target_future</code> do chưa có thực tế tương lai của mốc tiếp theo.</li>
+<li>Hàm <code>clean_supervised_frame</code> thực hiện loại bỏ triệt để các dòng khuyết này để chuẩn bị ma trận toán học sạch huấn luyện mô hình.</li>
+</ul>
+</li>
+</ul>
+<h3 id="buoc-10-traintest-split-by-time-phan-tach-du-lieu-khong-ro-ri">Bước 10: train/test split by time (Phân tách dữ liệu không rò rỉ)</h3>
+<ul>
+<li><strong>Đầu vào</strong>: DataFrame sạch hoàn toàn.</li>
+<li><strong>Đầu ra</strong>: Hai DataFrame độc lập: <code>train_df</code> ($75\%$ dòng quá khứ) và <code>test_df</code> ($25\%$ dòng tương lai).</li>
+<li><strong>Mô tả</strong>: Phân chia theo dòng thời gian tuyến tính để ngăn ngừa triệt để hiện tượng rò rỉ thông tin tương lai về quá khứ.</li>
+</ul>
+<h3 id="buoc-11-train-models-offline-huan-luyen-va-ong-goi-mo-hinh">Bước 11: train models offline (Huấn luyện và đóng gói mô hình)</h3>
+<ul>
+<li><strong>Đầu vào</strong>: Ma trận đặc trưng <code>X_train</code> và nhãn <code>y_train</code>.</li>
+<li><strong>Đầu ra</strong>: Tệp bundle nén <code>forecast_model_bundle_v1.joblib</code> lưu trữ mô hình tốt nhất cùng bộ Medians hỗ trợ điền khuyết thiếu trực tuyến.</li>
+<li><strong>Mô tả</strong>: Huấn luyện đồng thời các mô hình, so sánh tìm ra mô hình có MAE nhỏ nhất trên tập kiểm thử để đóng gói phục vụ sản xuất.</li>
+</ul>
+<h3 id="buoc-12-generate-predictions-suy-dien-tren-tap-kiem-thu">Bước 12: generate predictions (Suy diễn trên tập kiểm thử)</h3>
+<ul>
+<li><strong>Đầu vào</strong>: Ma trận kiểm thử <code>X_test</code> và mô hình đã huấn luyện.</li>
+<li><strong>Đầu ra</strong>: Mảng NumPy chứa giá trị công suất dự báo <code>predicted_value</code> cho toàn bộ tập kiểm thử.</li>
+<li><strong>Mô tả</strong>: Chạy phương thức <code>model.predict(X_test)</code> để giả lập hoạt động suy diễn thực tế ngoại tuyến.</li>
+</ul>
+<h3 id="buoc-13-calculate-forecast_error-anh-gia-sai-so-thuc-te">Bước 13: calculate forecast_error (Đánh giá sai số thực tế)</h3>
+<ul>
+<li><strong>Đầu vào</strong>: Mảng dự báo <code>predicted_value</code> và mảng nhãn thực tế <code>target_future</code> của tập kiểm thử.</li>
+<li><strong>Đầu ra</strong>: Mảng sai số tức thời <code>forecast_error</code> và giá trị tuyệt đối sai số <code>abs_error</code>.</li>
+<li><strong>Mô tả</strong>: Phép tính trừ: $\text{Error} = \text{Predicted} - \text{Actual}$.</li>
+</ul>
+<h3 id="buoc-14-create-forecast_logcsv-ghi-nhat-ky-he-thong">Bước 14: create forecast_log.csv (Ghi nhật ký hệ thống)</h3>
+<ul>
+<li><strong>Đầu vào</strong>: DataFrame kiểm thử và mảng giá trị dự báo kèm rủi ro/khuyến nghị đã ánh xạ.</li>
+<li><strong>Đầu ra</strong>: Tệp nhật ký lưu trữ tại <code>outputs/forecast_log.csv</code>.</li>
+<li><strong>Mô tả</strong>: Lưu trữ vĩnh viễn mốc thời gian, giá trị thực tế, giá trị dự báo, sai số, cấp rủi ro, khuyến nghị và phiên bản mô hình để phục vụ giám sát và hậu kiểm.</li>
+</ul>
+<h3 id="buoc-15-serve-prediction-through-forecast-api-quy-trinh-api-thoi-gian-thuc">Bước 15: serve prediction through /forecast API (Quy trình API thời gian thực)</h3>
+<ul>
+<li><strong>Đầu vào</strong>: Client gửi gói tin HTTP POST chứa mảng JSON gồm 24 điểm telemetry gần nhất.</li>
+<li><strong>Đầu ra</strong>: Gói tin JSON trả về chứa kết quả suy diễn của mô hình tốt nhất, phân cấp rủi ro, khuyến nghị vận hành và safety note.</li>
+<li><strong>Mô tả</strong>: FastAPI Server nạp file <code>.joblib</code> vào RAM, tiếp nhận payload từ Client, thực thi tuần tự các bước điền khuyết dữ liệu thô, tính đặc trưng động thời gian thực tại mốc hiện tại $t$, chuyển ma trận qua mô hình suy diễn và trả kết quả phản hồi an toàn trong &lt; 50ms.</li>
+</ul>
+<hr />
+<h2 id="4-cac-loi-pho-bien-cam-nang-go-loi-common-mistakes-debugging">4. Các lỗi Phổ biến &amp; Cẩm nang Gỡ lỗi (Common Mistakes &amp; Debugging)</h2>
+<p>Khi vận hành hoặc phát triển thêm hệ thống, kỹ sư thường gặp phải một số lỗi hệ thống kinh điển dưới đây:</p>
+<h3 id="loi-1-keyerror-khi-goi-api-forecast-do-thieu-cot">Lỗi 1: KeyError khi gọi API <code>/forecast</code> do thiếu cột</h3>
+<ul>
+<li><strong>Hiện tượng</strong>: Khi gọi API dự báo thời gian thực, Server trả về lỗi <code>500 Internal Server Error</code> và terminal log báo lỗi <code>KeyError: 'lights'</code> hoặc <code>KeyError: 'T_out'</code>.</li>
+<li><strong>Nguyên nhân</strong>: Client (Gateway) gửi payload JSON bị thiếu một hoặc nhiều trường dữ liệu tùy chọn (ví dụ: cảm biến đo đèn bị hỏng nên Gateway không gửi trường <code>lights</code> lên API).</li>
+<li><strong>Cách Debug &amp; Khắc phục</strong>:<ol>
+<li><em>Kiểm tra</em>: Xem cấu trúc JSON gửi lên từ Client có khớp với Schema <code>TelemetryPoint</code> định nghĩa trong <code>app.py</code> hay không.</li>
+<li><em>Khắc phục</em>: Bảo đảm đã gọi hàm <code>fill_missing_for_api(df, model_bundle["raw_medians"])</code> ngay khi tiếp nhận DataFrame đầu vào trong <code>app.py</code> (Hàm này tự động tạo cột thiếu và điền trung vị thô lịch sử, ngăn chặn triệt để lỗi KeyError).</li>
+</ol>
+</li>
+</ul>
+<h3 id="loi-2-gia-tri-du-bao-tra-ve-nan-hoac-null-o-thoi-gian-thuc">Lỗi 2: Giá trị Dự báo trả về <code>NaN</code> hoặc <code>Null</code> ở thời gian thực</h3>
+<ul>
+<li><strong>Hiện tượng</strong>: API trả phản hồi JSON thành công nhưng trường <code>predicted_value</code> lại là <code>NaN</code> hoặc <code>Null</code>.</li>
+<li><strong>Nguyên nhân</strong>: Client gửi chuỗi lịch sử quá ngắn (ví dụ chỉ gửi 10 điểm thay vì 24 điểm). Phép toán <code>.rolling(window=24).mean()</code> bị thiếu dữ liệu quá khứ nên trả về <code>NaN</code> cho đặc trưng cửa sổ trượt lớn nhất, dẫn đến mô hình hồi quy suy luận ra giá trị <code>NaN</code>.</li>
+<li><strong>Cách Debug &amp; Khắc phục</strong>:<ol>
+<li><em>Kiểm tra</em>: In ra số lượng bản ghi nhận được trong log FastAPI: <code>print(len(payload.history))</code>.</li>
+<li><em>Khắc phục</em>: Tích hợp lớp phòng vệ thứ hai điền khuyết đặc trưng bằng <code>feature_medians</code> lưu trong file <code>.joblib</code> trước khi đưa ma trận qua phương thức <code>.predict()</code>:
+    <code>python
+    X = latest[feature_columns].fillna(model_bundle["feature_medians"]).fillna(0.0)</code></li>
+</ol>
+</li>
+</ul>
+<h3 id="loi-3-sai-so-maermse-cuc-thap-khi-huan-luyen-nhung-cuc-cao-khi-chay-api-thuc-te">Lỗi 3: Sai số MAE/RMSE cực thấp khi huấn luyện nhưng cực cao khi chạy API thực tế</h3>
+<ul>
+<li><strong>Hiện tượng</strong>: Lúc huấn luyện offline đạt độ chính xác gần như hoàn hảo ($\text{MAE} \approx 2$ Wh), nhưng khi chạy API dự báo thực tế sai số nhảy vọt lên $\text{MAE} \gt 80$ Wh.</li>
+<li><strong>Nguyên nhân</strong>: Bị rò rỉ dữ liệu tương lai (Data Leakage) do phân chia dữ liệu ngẫu nhiên (Random Split) ở pha huấn luyện offline hoặc tính đặc trưng trễ bị dịch chuyển ngược hướng.</li>
+<li><strong>Cách Debug &amp; Khắc phục</strong>:<ol>
+<li><em>Kiểm tra</em>: Xem lại file <code>train_forecast.py</code> xem có vô tình sử dụng <code>train_test_split(..., shuffle=True)</code> hoặc dùng shift âm cho các đặc trưng đầu vào hay không.</li>
+<li><em>Khắc phục</em>: Bắt buộc sử dụng hàm phân tách tuyến tính thời gian <code>time_split()</code> và đảm bảo tất cả các đặc trưng Lag/Rolling đều dùng shift dương hướng về quá khứ.</li>
+</ol>
+</li>
+</ul>
+<h3 id="loi-4-loi-inh-dang-moc-thoi-gian-date-khi-tao-dataframe">Lỗi 4: Lỗi định dạng mốc thời gian <code>date</code> khi tạo DataFrame</h3>
+<ul>
+<li><strong>Hiện tượng</strong>: Hàm <code>make_supervised_frame</code> báo lỗi không thể tính toán đặc trưng tuần hoàn <code>hour</code> hoặc <code>dayofweek</code>.</li>
+<li><strong>Nguyên nhân</strong>: Cột <code>date</code> trong JSON gửi lên ở dạng chuỗi string chưa được định dạng thời gian.</li>
+<li><strong>Cách Debug &amp; Khắc phục</strong>:<ol>
+<li><em>Kiểm tra</em>: In ra kiểu dữ liệu của cột: <code>print(df["date"].dtype)</code>. Nếu ra kiểu <code>object</code> hoặc <code>string</code> là chưa chuyển đổi.</li>
+<li><em>Khắc phục</em>: Ép kiểu rõ ràng trước khi tính đặc trưng:
+    <code>python
+    df["date"] = pd.to_datetime(df["date"])</code></li>
+</ol>
+</li>
+</ul>
+            </div>
+        </div>
+
+        <div class="footer">
+            © 2026 - Lab 4 AIoT Forecasting & Predictive Analytics - Tài liệu Đào tạo Chuyên sâu
+        </div>
+    </div>
+
+</body>
+</html>

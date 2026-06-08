@@ -1,0 +1,1841 @@
+
+<!doctype html>
+<html lang="vi" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Tài liệu kỹ thuật chuyên sâu về dự báo phụ tải điện năng và phân tích dự đoán trong hệ thống AIoT">
+      
+      
+        <meta name="author" content="DeepMind team & Antigravity AI">
+      
+      
+      
+        <link rel="prev" href="../08_api_forecast_workflow/">
+      
+      
+        <link rel="next" href="../10_safety_fail_safe/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>09. Đánh giá chất lượng mã nguồn - Lab 4: AIoT Energy Forecasting & Predictive Analytics</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#bao-cao-anh-gia-ma-nguon-cap-o-senior-engineering-code-review" class="md-skip">
+          Bỏ qua
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Đầu trang">
+    <a href=".." title="Lab 4: AIoT Energy Forecasting &amp; Predictive Analytics" class="md-header__button md-logo" aria-label="Lab 4: AIoT Energy Forecasting & Predictive Analytics" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Lab 4: AIoT Energy Forecasting & Predictive Analytics
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              09. Đánh giá chất lượng mã nguồn
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Chuyển sang chế độ Dark Mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Chuyển sang chế độ Dark Mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Chuyển sang chế độ Light Mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Chuyển sang chế độ Light Mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Tìm kiếm" placeholder="Tìm kiếm" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Tìm kiếm">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Xoá" aria-label="Xoá" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Trang chủ
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../00_project_overview/" class="md-tabs__link">
+          
+  
+  
+  Học phần I: Tổng quan & Kiến trúc
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../04_dataset_and_schema/" class="md-tabs__link">
+          
+  
+  
+  Học phần II: Dữ liệu & Đặc trưng
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../06_model_training_and_metrics/" class="md-tabs__link">
+          
+  
+  
+  Học phần III: Mô hình & API Serving
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="./" class="md-tabs__link">
+          
+  
+  
+  Học phần IV: Chất lượng mã & An toàn
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../11_development_roadmap/" class="md-tabs__link">
+          
+  
+  
+  Học phần V: Lộ trình & Handbook
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../README_HTML_EXPORT/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Hướng dẫn xuất bản HTML
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../README_MKDOCS/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Hướng dẫn cấu hình MkDocs
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Thanh điều hướng" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Lab 4: AIoT Energy Forecasting &amp; Predictive Analytics" class="md-nav__button md-logo" aria-label="Lab 4: AIoT Energy Forecasting & Predictive Analytics" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Lab 4: AIoT Energy Forecasting & Predictive Analytics
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Trang chủ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Học phần I: Tổng quan & Kiến trúc
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Học phần I: Tổng quan & Kiến trúc
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../00_project_overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    00. Tổng quan bài toán
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../01_architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    01. Kiến trúc hệ thống
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02_data_flow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    02. Luồng dữ liệu tuần tự
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03_runtime_and_dependencies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    03. Luồng thực thi & Phụ thuộc
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Học phần II: Dữ liệu & Đặc trưng
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Học phần II: Dữ liệu & Đặc trưng
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04_dataset_and_schema/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    04. Tập dữ liệu & Điền khuyết
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../05_feature_engineering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    05. Kỹ nghệ đặc trưng chuỗi thời gian
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Học phần III: Mô hình & API Serving
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Học phần III: Mô hình & API Serving
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../06_model_training_and_metrics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    06. Mô hình hóa & Đo lường sai số
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../07_decision_layer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    07. Tầng ra quyết định & Cảnh báo
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../08_api_forecast_workflow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    08. Triển khai FastAPI Serving
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Học phần IV: Chất lượng mã & An toàn
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Học phần IV: Chất lượng mã & An toàn
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    09. Đánh giá chất lượng mã nguồn
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    09. Đánh giá chất lượng mã nguồn
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Mục lục">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Mục lục
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-anh-gia-10-chieu-ky-thuat-phan-mem-software-engineering-dimensions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Đánh giá 10 Chiều Kỹ thuật Phần mềm (Software Engineering Dimensions)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Đánh giá 10 Chiều Kỹ thuật Phần mềm (Software Engineering Dimensions)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-to-chuc-ma-nguon-code-organization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Tổ chức mã nguồn (Code Organization)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-tinh-mo-un-hoa-modularity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Tính mô-đun hóa (Modularity)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-cach-at-ten-naming-conventions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Cách đặt tên (Naming Conventions)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-phan-tach-cac-trach-nhiem-separation-of-concerns-soc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Phân tách các Trách nhiệm (Separation of Concerns - SoC)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-rui-ro-ro-ri-du-lieu-data-leakage-risks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Rủi ro rò rỉ dữ liệu (Data Leakage Risks)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-kha-nang-mo-rong-quy-mo-scalability" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Khả năng mở rộng quy mô (Scalability)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#7-kha-nang-bao-tri-maintainability" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Khả năng bảo trì (Maintainability)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#8-tinh-san-sang-trien-khai-deployment-readiness" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Tính sẵn sàng triển khai (Deployment Readiness)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#9-chat-luong-thiet-ke-api-api-design-quality" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Chất lượng Thiết kế API (API Design Quality)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#10-chat-luong-ky-nghe-ac-trung-feature-engineering-quality" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Chất lượng Kỹ nghệ Đặc trưng (Feature Engineering Quality)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-nhan-dien-cac-mau-chong-oi-anti-patterns-logic-de-gay" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Nhận diện các Mẫu chống đối (Anti-Patterns) &amp; Logic dễ gãy
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-chien-luoc-tai-cau-truc-chuan-doanh-nghiep-refactoring-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Chiến lược Tái cấu trúc chuẩn Doanh nghiệp (Refactoring Strategy)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Chiến lược Tái cấu trúc chuẩn Doanh nghiệp (Refactoring Strategy)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#buoc-1-tai-cau-truc-thu-muc-du-an-folder-restructuring" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bước 1: Tái cấu trúc Thư mục dự án (Folder Restructuring)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#buoc-2-tach-biet-logic-nang-cap-ky-thuat-refactoring-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bước 2: Tách biệt Logic &amp; Nâng cấp Kỹ thuật (Refactoring Steps)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#buoc-3-e-xuat-cai-tien-huong-san-xuat-production-improvements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bước 3: Đề xuất Cải tiến hướng Sản xuất (Production Improvements)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../10_safety_fail_safe/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    10. An toàn & Cơ chế Fail-safe
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Học phần V: Lộ trình & Handbook
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Học phần V: Lộ trình & Handbook
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../11_development_roadmap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    11. Lộ trình phát triển
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../HANDBOOK/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    📖 Sách hướng dẫn kỹ thuật (Handbook)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../README_HTML_EXPORT/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hướng dẫn xuất bản HTML
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../README_MKDOCS/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hướng dẫn cấu hình MkDocs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Mục lục">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Mục lục
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-anh-gia-10-chieu-ky-thuat-phan-mem-software-engineering-dimensions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Đánh giá 10 Chiều Kỹ thuật Phần mềm (Software Engineering Dimensions)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Đánh giá 10 Chiều Kỹ thuật Phần mềm (Software Engineering Dimensions)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-to-chuc-ma-nguon-code-organization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Tổ chức mã nguồn (Code Organization)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-tinh-mo-un-hoa-modularity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Tính mô-đun hóa (Modularity)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-cach-at-ten-naming-conventions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Cách đặt tên (Naming Conventions)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-phan-tach-cac-trach-nhiem-separation-of-concerns-soc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Phân tách các Trách nhiệm (Separation of Concerns - SoC)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-rui-ro-ro-ri-du-lieu-data-leakage-risks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Rủi ro rò rỉ dữ liệu (Data Leakage Risks)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-kha-nang-mo-rong-quy-mo-scalability" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Khả năng mở rộng quy mô (Scalability)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#7-kha-nang-bao-tri-maintainability" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Khả năng bảo trì (Maintainability)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#8-tinh-san-sang-trien-khai-deployment-readiness" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Tính sẵn sàng triển khai (Deployment Readiness)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#9-chat-luong-thiet-ke-api-api-design-quality" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Chất lượng Thiết kế API (API Design Quality)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#10-chat-luong-ky-nghe-ac-trung-feature-engineering-quality" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Chất lượng Kỹ nghệ Đặc trưng (Feature Engineering Quality)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-nhan-dien-cac-mau-chong-oi-anti-patterns-logic-de-gay" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Nhận diện các Mẫu chống đối (Anti-Patterns) &amp; Logic dễ gãy
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-chien-luoc-tai-cau-truc-chuan-doanh-nghiep-refactoring-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Chiến lược Tái cấu trúc chuẩn Doanh nghiệp (Refactoring Strategy)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Chiến lược Tái cấu trúc chuẩn Doanh nghiệp (Refactoring Strategy)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#buoc-1-tai-cau-truc-thu-muc-du-an-folder-restructuring" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bước 1: Tái cấu trúc Thư mục dự án (Folder Restructuring)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#buoc-2-tach-biet-logic-nang-cap-ky-thuat-refactoring-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bước 2: Tách biệt Logic &amp; Nâng cấp Kỹ thuật (Refactoring Steps)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#buoc-3-e-xuat-cai-tien-huong-san-xuat-production-improvements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bước 3: Đề xuất Cải tiến hướng Sản xuất (Production Improvements)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="bao-cao-anh-gia-ma-nguon-cap-o-senior-engineering-code-review">BÁO CÁO ĐÁNH GIÁ MÃ NGUỒN CẤP ĐỘ SENIOR (ENGINEERING CODE REVIEW)<a class="headerlink" href="#bao-cao-anh-gia-ma-nguon-cap-o-senior-engineering-code-review" title="Permanent link">&para;</a></h1>
+<p>Khi xây dựng một hệ thống học máy phục vụ thực tế (Production ML), chất lượng của mã nguồn đóng vai trò sống còn đối với sự ổn định, tính an toàn và khả năng bảo trì của hệ thống. Một mã nguồn chắp vá, thiếu phân tách trách nhiệm rõ ràng sẽ nhanh chóng sụp đổ khi lượng người dùng tăng cao hoặc khi phân phối dữ liệu đầu vào biến động.</p>
+<p>Tài liệu này thực hiện đánh giá mã nguồn (Code Review) toàn diện dự án <strong>Lab 4</strong> dưới lăng kính của một Kỹ sư phần mềm &amp; Kiến trúc sư MLOps cấp cao, chỉ rõ các ưu/khuyết điểm, nhận diện các mẫu chống đối (anti-patterns), logic dễ vỡ và vạch ra chiến lược tái cấu trúc (refactoring) chuẩn doanh nghiệp.</p>
+<hr />
+<h2 id="1-anh-gia-10-chieu-ky-thuat-phan-mem-software-engineering-dimensions">1. Đánh giá 10 Chiều Kỹ thuật Phần mềm (Software Engineering Dimensions)<a class="headerlink" href="#1-anh-gia-10-chieu-ky-thuat-phan-mem-software-engineering-dimensions" title="Permanent link">&para;</a></h2>
+<hr />
+<h3 id="1-to-chuc-ma-nguon-code-organization">1. Tổ chức mã nguồn (Code Organization)<a class="headerlink" href="#1-to-chuc-ma-nguon-code-organization" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Đánh giá</strong>: Khá rõ ràng đối với quy mô một bài thực hành (POC). Các file mã nguồn được đặt gọn trong thư mục <code>src/</code>, dữ liệu trong <code>data/</code>, mô hình trong <code>models/</code> và kết quả trong <code>outputs/</code>.</li>
+<li><strong>Điểm yếu</strong>: Chưa phân tách rõ ràng giữa mã nguồn chạy offline (huấn luyện, vẽ biểu đồ) và mã nguồn chạy online (FastAPI). Việc đặt chung toàn bộ trong một thư mục dễ gây nhầm lẫn về môi trường chạy và thư viện phụ thuộc (dependencies).</li>
+</ul>
+<hr />
+<h3 id="2-tinh-mo-un-hoa-modularity">2. Tính mô-đun hóa (Modularity)<a class="headerlink" href="#2-tinh-mo-un-hoa-modularity" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Đánh giá</strong>: Tốt. File <code>utils.py</code> đóng vai trò là lõi chia sẻ (Shared Library) chứa toàn bộ logic tiền xử lý và đặc trưng chuỗi thời gian, giúp cả <code>train_forecast.py</code> và <code>app.py</code> tái sử dụng, tránh lỗi lệch dữ liệu đầu vào.</li>
+<li><strong>Điểm yếu</strong>: File <code>utils.py</code> đang gánh vác quá nhiều trách nhiệm (God Object). Nó vừa chứa cấu hình biến toàn cục, logic tiền xử lý, tính toán đặc trưng lượng giác, logic phân cấp rủi ro an toàn và các hàm ghi lưu file JSON.</li>
+</ul>
+<hr />
+<h3 id="3-cach-at-ten-naming-conventions">3. Cách đặt tên (Naming Conventions)<a class="headerlink" href="#3-cach-at-ten-naming-conventions" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Đánh giá</strong>: Rất trực quan và tường minh. Các biến mục tiêu (<code>Appliances</code>), cột ngày (<code>date</code>), chân trời dự báo (<code>HORIZON_STEPS</code>), và các đặc trưng động (<code>appliances_lag_1</code>, <code>appliances_rolling_mean_6</code>) được đặt tên theo chuẩn snake_case và mang rõ ý nghĩa vật lý gốc.</li>
+<li><strong>Điểm yếu</strong>: Một số biến toàn cục trong <code>utils.py</code> (như <code>UCI_COLUMNS</code>, <code>FEATURE_COLUMNS</code>) được viết hoa cố định, nhưng thực tế các đặc trưng đầu vào có thể thay đổi động tùy theo phiên bản mô hình được nạp từ file <code>.joblib</code>.</li>
+</ul>
+<hr />
+<h3 id="4-phan-tach-cac-trach-nhiem-separation-of-concerns-soc">4. Phân tách các Trách nhiệm (Separation of Concerns - SoC)<a class="headerlink" href="#4-phan-tach-cac-trach-nhiem-separation-of-concerns-soc" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Đánh giá</strong>: Ở mức trung bình. </li>
+<li><strong>Điểm yếu nghiêm trọng</strong>: Có sự đan xen quá sâu giữa <strong>Logic toán học học máy</strong> và <strong>Logic nghiệp vụ web</strong>. Cụ thể, file <code>app.py</code> (vốn chỉ nên chịu trách nhiệm tiếp nhận yêu cầu mạng và validate HTTP) lại trực tiếp thực hiện logic điền khuyết thiếu đặc trưng, ánh xạ rủi ro thống kê và thực hiện ghi đè file log đĩa cứng. Điều này vi phạm nghiêm trọng nguyên lý SoC.</li>
+</ul>
+<hr />
+<h3 id="5-rui-ro-ro-ri-du-lieu-data-leakage-risks">5. Rủi ro rò rỉ dữ liệu (Data Leakage Risks)<a class="headerlink" href="#5-rui-ro-ro-ri-du-lieu-data-leakage-risks" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Đánh giá</strong>: Tuyệt vời. Dự án áp dụng chặt chẽ phép cắt dòng thời gian tuyến tính (<code>time_split</code> chia 75% đầu làm train, 25% sau làm test) và cấm sử dụng xáo trộn shuffle dữ liệu, triệt tiêu hoàn toàn nguy cơ rò rỉ thông tin tương lai về quá khứ.</li>
+<li><strong>Điểm cần lưu ý</strong>: Cần bảo đảm ở môi trường chạy trực tuyến, Client tuyệt đối không gửi nhầm mốc thời gian tương lai lọt vào mảng lịch sử telemetry đầu vào.</li>
+</ul>
+<hr />
+<h3 id="6-kha-nang-mo-rong-quy-mo-scalability">6. Khả năng mở rộng quy mô (Scalability)<a class="headerlink" href="#6-kha-nang-mo-rong-quy-mo-scalability" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Đánh giá</strong>: Kém.</li>
+<li><strong>Nguyên nhân</strong>:<ol>
+<li><em>Ghi log đồng thời</em>: Việc mở rộng file <code>forecast_log.csv</code> cục bộ trực tiếp trên ổ đĩa thông qua Pandas là phép toán đơn luồng (Single-thread blocking IO). Khi có hàng nghìn request gọi API đồng thời, hệ thống sẽ bị thắt nút cổ chai tại ổ đĩa (IO Bottleneck) và crash server do xung đột khóa file.</li>
+<li><em>Tính toán đặc trưng lặp</em>: Server API phải tính toán lại toàn bộ Lag/Rolling bằng Pandas trong RAM cho từng request đơn lẻ, gây tiêu tốn CPU nghiêm trọng.</li>
+</ol>
+</li>
+</ul>
+<hr />
+<h3 id="7-kha-nang-bao-tri-maintainability">7. Khả năng bảo trì (Maintainability)<a class="headerlink" href="#7-kha-nang-bao-tri-maintainability" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Đánh giá</strong>: Dễ bảo trì đối với mã nguồn hiện tại nhờ cấu trúc gọn nhẹ và comment code rất chi tiết.</li>
+<li><strong>Khuyết điểm</strong>: Thiếu hoàn toàn các bài <strong>Unit Tests</strong> cho các hàm lõi trong <code>utils.py</code> (ví dụ không có test kiểm thử xem hàm Sin/Cos có trả về đúng tọa độ lượng giác hay không, điền khuyết thiếu hoạt động đúng không). Khi thay đổi code trong <code>utils.py</code>, không có gì bảo đảm hệ thống không bị lỗi hồi quy (regression bugs).</li>
+</ul>
+<hr />
+<h3 id="8-tinh-san-sang-trien-khai-deployment-readiness">8. Tính sẵn sàng triển khai (Deployment Readiness)<a class="headerlink" href="#8-tinh-san-sang-trien-khai-deployment-readiness" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Đánh giá</strong>: Ở mức cơ bản (POC).</li>
+<li><strong>Điểm yếu</strong>:<ul>
+<li>Thiếu file cấu hình môi trường bảo mật (như <code>.env</code> hoặc cấu hình Consul). Các đường dẫn tệp tin và cổng kết nối đang được viết cứng (hard-coded) trực tiếp trong file.</li>
+<li>Thiếu file cấu hình Docker (<code>Dockerfile</code>) để đóng gói đồng bộ dịch vụ.</li>
+</ul>
+</li>
+</ul>
+<hr />
+<h3 id="9-chat-luong-thiet-ke-api-api-design-quality">9. Chất lượng Thiết kế API (API Design Quality)<a class="headerlink" href="#9-chat-luong-thiet-ke-api-api-design-quality" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Đánh giá</strong>: Rất tốt. Cấu trúc bản tin phản hồi JSON của endpoint <code>/forecast</code> được phân cấp rất mạch lạc: <code>model_output</code> chứa kết quả thô, <code>decision</code> chứa thông tin hành động nghiệp vụ an toàn và <code>api_check</code> phục vụ giám sát độ trễ mạng. Endpoint <code>/health</code> hỗ trợ tốt cho Kubernetes health probes.</li>
+<li><strong>Điểm yếu</strong>: Payload đầu vào bắt buộc gửi mảng lịch sử 24 điểm đo gây lãng phí băng thông mạng di động. Thiết kế REST HTTP truyền thống có độ trễ lớn hơn so với giao thức gọn nhẹ <strong>gRPC</strong> hoặc <strong>WebSockets</strong> trong truyền dữ liệu IoT.</li>
+</ul>
+<hr />
+<h3 id="10-chat-luong-ky-nghe-ac-trung-feature-engineering-quality">10. Chất lượng Kỹ nghệ Đặc trưng (Feature Engineering Quality)<a class="headerlink" href="#10-chat-luong-ky-nghe-ac-trung-feature-engineering-quality" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Đánh giá</strong>: Đạt điểm tối đa về mặt khoa học dữ liệu chuỗi thời gian. Sự kết hợp giữa Lag, Rolling (Mean &amp; Std), Delta (đo gia tốc) và Cyclic Time (Sin/Cos) thể hiện tư duy học máy chuỗi thời gian xuất sắc và bắt bài được toàn bộ các quán tính vật lý của phụ tải điện.</li>
+</ul>
+<hr />
+<h2 id="2-nhan-dien-cac-mau-chong-oi-anti-patterns-logic-de-gay">2. Nhận diện các Mẫu chống đối (Anti-Patterns) &amp; Logic dễ gãy<a class="headerlink" href="#2-nhan-dien-cac-mau-chong-oi-anti-patterns-logic-de-gay" title="Permanent link">&para;</a></h2>
+<ol>
+<li><strong>Anti-Pattern: Concurrent CSV Logging (Ghi file CSV đồng thời)</strong>:<ul>
+<li><em>Mã lỗi</em>: <code>forecast_log.to_csv(OUTPUT_DIR / "forecast_log.csv", mode='a', index=False)</code> trong luồng API trực tuyến.</li>
+<li><em>Rủi ro</em>: Đây là mẫu chống đối kinh điển. File CSV không thể chịu tải đồng thời. Hệ thống chắc chắn crash khi chạy đa luồng trên Kubernetes.</li>
+</ul>
+</li>
+<li><strong>Logic dễ vỡ: Hard-coded training medians</strong>:<ul>
+<li><em>Mã lỗi</em>: Nạp tĩnh <code>raw_medians</code> từ tệp bundle <code>.joblib</code> để điền khuyết thiếu vĩnh viễn.</li>
+<li><em>Rủi ro</em>: Nếu cảm biến hỏng kéo dài nhiều ngày, việc điền mãi một giá trị trung vị tĩnh của quá khứ sẽ làm mô hình liên tục dự báo ra một hằng số phẳng lì, làm mất hoàn toàn độ nhạy của hệ thống cảnh báo.</li>
+</ul>
+</li>
+<li><strong>Thiếu xác thực logic vật lý (Missing Semantic Validation)</strong>:<ul>
+<li><em>Rủi ro</em>: Pydantic chỉ kiểm tra kiểu dữ liệu (<code>float</code>, <code>int</code>). Nếu Gateway bị nhiễu gửi lên giá trị <code>T1: -100.0</code> (Nhiệt độ phòng bếp âm 100 độ C), API vẫn chấp nhận và đưa vào mô hình suy diễn, dẫn đến kết quả dự báo công suất bị bóp méo nghiêm trọng.</li>
+</ul>
+</li>
+<li><strong>Thiếu hệ thống Giám sát &amp; Cảnh báo (Missing Monitoring)</strong>:<ul>
+<li><em>Rủi ro</em>: Hệ thống hoàn toàn "mù" trước hiện tượng trôi lệch dữ liệu (Data Drift) và sụt giảm độ chính xác. Không có cơ chế tự động gửi cảnh báo (Slack, Email) khi mô hình dự báo liên tục lệch quá <span class="arithmatex">\(50\%\)</span> so với thực tế đo đạc.</li>
+</ul>
+</li>
+</ol>
+<hr />
+<h2 id="3-chien-luoc-tai-cau-truc-chuan-doanh-nghiep-refactoring-strategy">3. Chiến lược Tái cấu trúc chuẩn Doanh nghiệp (Refactoring Strategy)<a class="headerlink" href="#3-chien-luoc-tai-cau-truc-chuan-doanh-nghiep-refactoring-strategy" title="Permanent link">&para;</a></h2>
+<p>Để chuyển đổi toàn diện dự án lên quy mô lớn, chúng ta áp dụng 3 bước cải tiến kiến trúc:</p>
+<h3 id="buoc-1-tai-cau-truc-thu-muc-du-an-folder-restructuring">Bước 1: Tái cấu trúc Thư mục dự án (Folder Restructuring)<a class="headerlink" href="#buoc-1-tai-cau-truc-thu-muc-du-an-folder-restructuring" title="Permanent link">&para;</a></h3>
+<p>Chúng ta chuyển đổi từ thư mục bài lab phẳng dẹt sang cấu trúc thư mục phân tầng chuẩn doanh nghiệp (Enterprise Layout):</p>
+<div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>lab4_aiot_forecasting_predictive_analytics_uci_appliances/
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>├─ config/                                  # Chứa các file cấu hình môi trường (.env, settings.yaml)
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>├─ data/                                    # Fallback offline data
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>├─ deploy/                                  # Dockerfile, docker-compose, Kubernetes manifests
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>├─ docs/                                    # Hệ thống tài liệu kỹ thuật
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>├─ models/                                  # Joblib model bundle registry
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>├─ src/                                     # Toàn bộ mã nguồn chia phân cấp rõ ràng
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>│  ├─ core/                                 # Lõi toán học độc lập
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>│  │  ├─ __init__.py
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>│  │  ├─ features.py                        # Tách riêng logic tính Lag, Rolling, Sin/Cos
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>│  │  └─ preprocessing.py                 # Tách logic làm sạch, điền khuyết raw_medians
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>│  ├─ training/                             # Pipeline huấn luyện offline
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>│  │  ├─ __init__.py
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>│  │  └─ pipeline.py                        # Grid search, cross validation, MLflow tracking
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>│  ├─ api/                                   # Lớp phục vụ API thời gian thực
+</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>│  │  ├─ endpoints/                         # REST controllers (/health, /forecast)
+</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>│  │  ├─ schemas/                           # Pydantic models với semantic validation
+</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>│  │  ├─ services/                          # Business logic: gọi model serving, mapping rủi ro
+</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>│  │  ├─ middleware/                        # Rate limiting, Prometheus metrics collector
+</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>│  │  └─ app.py                             # Khởi tạo FastAPI Server chính
+</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>│  ├─ edge/                                 # Nhúng ESP32 C++ Code
+</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>│  │  └─ safety_gateway/
+</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a>│  └─ utils/                                # Tiện ích ghi log đĩa, định dạng ngày tháng dùng chung
+</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>├─ tests/                                   # Thư mục kiểm thử Unit test &amp; Integration test
+</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a>│  ├─ unit/                                 # Test các hàm toán học trong core/features.py
+</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a>│  └─ integration/                          # Test endpoint API giả lập
+</span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a>├─ requirements.txt
+</span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a>└─ requirements-dev.txt                     # Thư viện kiểm thử (pytest, httpx) và MLOps (mlflow)
+</span></code></pre></div>
+<hr />
+<h3 id="buoc-2-tach-biet-logic-nang-cap-ky-thuat-refactoring-steps">Bước 2: Tách biệt Logic &amp; Nâng cấp Kỹ thuật (Refactoring Steps)<a class="headerlink" href="#buoc-2-tach-biet-logic-nang-cap-ky-thuat-refactoring-steps" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Tách <code>utils.py</code> thành các Module chuyên biệt</strong>:<ul>
+<li>Tách toàn bộ logic tạo đặc trưng sang <code>src/core/features.py</code>. File này hoàn toàn thuần khiết (Pure functions), chỉ nhận vào dữ liệu số và trả về đặc trưng, không chứa đường dẫn tệp hay logic nghiệp vụ API, giúp viết Unit Test bằng <strong>PyTest</strong> cực kỳ dễ dàng.</li>
+</ul>
+</li>
+<li><strong>Nâng cấp xác thực dữ liệu đầu vào (Semantic Validation)</strong>:<ul>
+<li>Sử dụng Pydantic <code>Field(..., ge=10.0, le=45.0)</code> cho các cột nhiệt độ phòng để từ chối ngay lập tức các giá trị nhiễu ảo từ biên gửi lên.</li>
+</ul>
+</li>
+<li><strong>Tách logic ghi log ra khỏi luồng API đồng bộ</strong>:<ul>
+<li>Thay thế việc ghi đè file CSV bằng cơ chế đẩy log sự kiện sang một hàng đợi chạy nền không chặn (Asynchronous background task) sử dụng tính năng <code>BackgroundTasks</code> của FastAPI, ghi trực tiếp vào Database thông qua Connection Pool để tối ưu hóa hiệu năng chịu tải.</li>
+</ul>
+</li>
+</ol>
+<hr />
+<h3 id="buoc-3-e-xuat-cai-tien-huong-san-xuat-production-improvements">Bước 3: Đề xuất Cải tiến hướng Sản xuất (Production Improvements)<a class="headerlink" href="#buoc-3-e-xuat-cai-tien-huong-san-xuat-production-improvements" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Thay thế cơ chế điền khuyết thiếu tĩnh bằng Imputation động</strong>:<ul>
+<li>Tích hợp giải thuật điền khuyết thiếu chuỗi thời gian thông minh dựa trên giá trị liền kề gần nhất (<strong>Forward Fill</strong>) kết hợp với giá trị trung vị của khung giờ tương ứng trong tuần để đảm bảo dữ liệu điền khuyết phản ánh đúng ngữ cảnh sinh hoạt.</li>
+</ul>
+</li>
+<li><strong>Tích hợp Rate Limiting &amp; API Security</strong>:<ul>
+<li>Sử dụng API Key xác thực (ngăn chặn các Gateway lạ gửi dữ liệu rác tấn công server) và cài đặt <strong>Rate Limiting</strong> (giới hạn mỗi IP Gateway chỉ được phép gửi tối đa 1 request mỗi 10 phút) để bảo vệ API trước nguy cơ bị quá tải DDoS.</li>
+</ul>
+</li>
+<li><strong>Tự động tái huấn luyện khi có cảnh báo Drift</strong>:<ul>
+<li>Cấu hình một tiến trình nền sử dụng <strong>Evidently AI</strong> để tính toán khoảng cách Wasserstein giữa phân phối dữ liệu đầu vào thực tế của tuần này so với tập huấn luyện lịch sử. Nếu chỉ số trôi lệch vượt quá ngưỡng an toàn, kích hoạt lệnh webhook gọi Airflow tự động chạy pipeline huấn luyện lại mô hình và xuất bản phiên bản model mới lên registry.</li>
+</ul>
+</li>
+</ol>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Trở lại mục lục
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u0110\u00e3 sao ch\u00e9p", "clipboard.copy": "Sao ch\u00e9p v\u00e0o b\u1ed9 nh\u1edb t\u1ea1m", "search.result.more.one": "1 t\u1eeb kh\u00e1c trong trang", "search.result.more.other": "# t\u1eeb kh\u00e1c trong trang", "search.result.none": "Kh\u00f4ng t\u00ecm th\u1ea5y t\u00e0i li\u1ec7u li\u00ean quan", "search.result.one": "1 t\u00e0i li\u1ec7u li\u00ean quan", "search.result.other": "# t\u00e0i li\u1ec7u li\u00ean quan", "search.result.placeholder": "Nh\u1eadp \u0111\u1ec3 b\u1eaft \u0111\u1ea7u t\u00ecm ki\u1ebfm", "search.result.term.missing": "Kh\u00f4ng", "select.version": "Ch\u1ecdn phi\u00ean b\u1ea3n"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="../javascripts/mathjax.js"></script>
+      
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>
