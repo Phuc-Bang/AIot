@@ -1,6 +1,6 @@
 # 🚀 AIoT (Artificial Intelligence of Things) - Course Portfolio
 
-Chào mừng bạn đến với kho lưu trữ bài tập và dự án thực hành môn học **AIoT (Trí tuệ nhân tạo kết hợp Vạn vật kết nối)**. Đây là nơi tổng hợp toàn bộ quá trình nghiên cứu, phát triển và đóng gói các mô hình AI phục vụ cho các ứng dụng IoT thực tế từ cơ bản đến nâng cao của **Phúc Băng**.
+Chào mừng bạn đến với kho lưu trữ bài tập và dự án thực hành môn học **AIoT (Trí tuệ nhân tạo kết hợp Vạn vật kết nối)**. Đây là nơi tổng hợp toàn bộ quá trình nghiên cứu, phát triển và đóng gói các mô hình AI phục vụ cho các ứng dụng IoT thực tế từ cơ bản đến nâng cao của **Phuc Bang**.
 
 ---
 
@@ -92,5 +92,5 @@ docker compose up --build -d
 
 ## 📝 Nhật Ký Phát Triển & Bản Quyền
 
-* Dự án được thiết kế và thực hiện hoàn toàn bởi **Phúc Băng**.
+* Dự án được thiết kế và thực hiện hoàn toàn bởi **Phuc Bang**.
 * Vui lòng tôn trọng bản quyền học thuật và cấu trúc thư mục học tập.
