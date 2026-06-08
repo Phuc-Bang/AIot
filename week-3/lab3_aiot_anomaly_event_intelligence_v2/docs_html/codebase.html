@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lab 3 AIoT Docs - Codebase</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <script defer src="assets/app.js"></script>
+</head>
+<body>
+  <button class="mobile-nav-toggle" type="button" data-nav-toggle>Menu</button>
+  <div class="layout">
+    <aside class="sidebar">
+      <a class="brand" href="index.html">Lab 3 AIoT<span>Anomaly Detection Docs</span></a>
+      <nav class="nav" aria-label="Tài liệu Lab 3">
+        <a class="nav-link" href="index.html">Tổng quan</a>
+        <a class="nav-link" href="architecture.html">Architecture</a>
+        <a class="nav-link" href="codebase.html">Codebase</a>
+        <a class="nav-link" href="data_features.html">Data & Features</a>
+        <a class="nav-link" href="model_training.html">Model Training</a>
+        <a class="nav-link" href="event_intelligence.html">Event Intelligence</a>
+        <a class="nav-link" href="api_detect_anomaly.html">API</a>
+        <a class="nav-link" href="run_test_guide.html">Run & Test</a>
+        <a class="nav-link" href="roadmap.html">Roadmap</a>
+        <a class="nav-link" href="qa.html">Q&A</a>
+      </nav>
+    </aside>
+
+    <div class="page">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Codebase review</p>
+          <h1>Lab 3 - Anomaly Detection & Event Intelligence for AIoT</h1>
+        </div>
+        <button class="theme-toggle" type="button" data-theme-toggle>Dark mode</button>
+      </header>
+
+      <main class="content">
+        <section class="hero">
+          <h2>Đọc code theo luồng, không đọc theo tên file.</h2>
+          <p>
+            Project gọn nhưng có đủ vòng đời AIoT: data, feature, model, output, event, API và test. Cách học tốt nhất là đi theo đường dữ liệu.
+          </p>
+          <div class="badge-row">
+            <span class="badge badge-score">Anomaly Score</span>
+            <span class="badge badge-event">Event Type</span>
+            <span class="badge badge-api">FastAPI</span>
+          </div>
+        </section>
+
+        <section class="section">
+          <h2>Thứ tự đọc khuyến nghị</h2>
+          <div class="timeline">
+            <div class="timeline-item"><div><strong><code>README.md</code></strong><br>Hiểu mục tiêu, lệnh chạy và output cần có.</div></div>
+            <div class="timeline-item"><div><strong><code>notebooks/01_anomaly_detection_event_intelligence.ipynb</code></strong><br>Học từng bước có giải thích.</div></div>
+            <div class="timeline-item"><div><strong><code>src/utils.py</code></strong><br>Nắm data contract, feature và event utility.</div></div>
+            <div class="timeline-item"><div><strong><code>src/train_anomaly.py</code></strong><br>Nắm pipeline train, test, metrics và artifact.</div></div>
+            <div class="timeline-item"><div><strong><code>src/app.py</code></strong><br>Nắm cách deploy model thành API.</div></div>
+          </div>
+        </section>
+
+        <section class="section">
+          <h2>Review file chính</h2>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>File / thư mục</th>
+                  <th>Vai trò</th>
+                  <th>Input</th>
+                  <th>Output</th>
+                  <th>Phụ thuộc</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>data/</code></td>
+                  <td>Lưu telemetry và label.</td>
+                  <td>NAB hoặc sample fallback.</td>
+                  <td>CSV có <code>timestamp</code>, <code>value</code>, <code>label</code>.</td>
+                  <td>Training, notebook, API tests.</td>
+                </tr>
+                <tr>
+                  <td><code>notebooks/</code></td>
+                  <td>Hướng dẫn học từng bước.</td>
+                  <td>Data và utility.</td>
+                  <td>Model, metrics, chart, event log.</td>
+                  <td><code>src/utils.py</code>.</td>
+                </tr>
+                <tr>
+                  <td><code>src/download_data.py</code></td>
+                  <td>Tải data NAB và gắn label window.</td>
+                  <td>GitHub raw data, combined_windows.</td>
+                  <td><code>ambient_temperature_system_failure_labeled.csv</code>.</td>
+                  <td>Training pipeline.</td>
+                </tr>
+                <tr>
+                  <td><code>src/utils.py</code></td>
+                  <td>Core utility: load, feature, split, metrics, events.</td>
+                  <td>CSV hoặc DataFrame telemetry.</td>
+                  <td>Feature DataFrame, metrics dict, event DataFrame.</td>
+                  <td>Train script, API, notebook.</td>
+                </tr>
+                <tr>
+                  <td><code>src/train_anomaly.py</code></td>
+                  <td>Train Isolation Forest và autoencoder demo.</td>
+                  <td>Feature DataFrame.</td>
+                  <td>Model joblib, metrics, predictions, event log.</td>
+                  <td><code>utils.py</code>, data.</td>
+                </tr>
+                <tr>
+                  <td><code>src/app.py</code></td>
+                  <td>FastAPI deploy model.</td>
+                  <td>Model joblib, request JSON.</td>
+                  <td>Response JSON có model output và event.</td>
+                  <td>Model đã train, <code>utils.py</code>.</td>
+                </tr>
+                <tr>
+                  <td><code>src/test_api.py</code></td>
+                  <td>Smoke test API qua HTTP.</td>
+                  <td>API đang chạy, 40 dòng cuối dataset.</td>
+                  <td>In response của health, model-info, detect.</td>
+                  <td>Uvicorn.</td>
+                </tr>
+                <tr>
+                  <td><code>src/test_api_local.py</code></td>
+                  <td>Test API bằng FastAPI TestClient.</td>
+                  <td>App Python trực tiếp.</td>
+                  <td>Assert schema response.</td>
+                  <td><code>src/app.py</code>.</td>
+                </tr>
+                <tr>
+                  <td><code>src/plot_results.py</code></td>
+                  <td>Vẽ kết quả anomaly.</td>
+                  <td><code>iforest_test_predictions.csv</code>.</td>
+                  <td>2 hình PNG trong <code>figures/</code>.</td>
+                  <td>Train script đã chạy.</td>
+                </tr>
+                <tr>
+                  <td><code>requirements.txt</code></td>
+                  <td>Khai báo dependency.</td>
+                  <td>Không có.</td>
+                  <td>Môi trường Python chạy được lab.</td>
+                  <td>Tất cả script.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="section grid two">
+          <article class="callout warning">
+            <strong>Nhận xét kỹ thuật</strong>
+            <code>src/utils.py</code> là contract giữa training và API. Nếu sửa feature ở đây, model cũ không còn tương thích.
+          </article>
+          <article class="callout note">
+            <strong>Đề xuất cải tiến</strong>
+            Tách scoring và event rule thành module riêng để training, API và test dùng chung một logic.
+          </article>
+        </section>
+
+        <nav class="footer-nav">
+          <a href="architecture.html">Trước: Architecture</a>
+          <a href="data_features.html">Tiếp theo: Data & Features</a>
+        </nav>
+      </main>
+    </div>
+  </div>
+</body>
+</html>

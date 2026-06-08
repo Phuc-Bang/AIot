@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lab 3 AIoT Docs - Data & Features</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <script defer src="assets/app.js"></script>
+</head>
+<body>
+  <button class="mobile-nav-toggle" type="button" data-nav-toggle>Menu</button>
+  <div class="layout">
+    <aside class="sidebar">
+      <a class="brand" href="index.html">Lab 3 AIoT<span>Anomaly Detection Docs</span></a>
+      <nav class="nav" aria-label="Tài liệu Lab 3">
+        <a class="nav-link" href="index.html">Tổng quan</a>
+        <a class="nav-link" href="architecture.html">Architecture</a>
+        <a class="nav-link" href="codebase.html">Codebase</a>
+        <a class="nav-link" href="data_features.html">Data & Features</a>
+        <a class="nav-link" href="model_training.html">Model Training</a>
+        <a class="nav-link" href="event_intelligence.html">Event Intelligence</a>
+        <a class="nav-link" href="api_detect_anomaly.html">API</a>
+        <a class="nav-link" href="run_test_guide.html">Run & Test</a>
+        <a class="nav-link" href="roadmap.html">Roadmap</a>
+        <a class="nav-link" href="qa.html">Q&A</a>
+      </nav>
+    </aside>
+
+    <div class="page">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Data contract</p>
+          <h1>Lab 3 - Anomaly Detection & Event Intelligence for AIoT</h1>
+        </div>
+        <button class="theme-toggle" type="button" data-theme-toggle>Dark mode</button>
+      </header>
+
+      <main class="content">
+        <section class="hero">
+          <h2>Dữ liệu time-series cần được giữ đúng thứ tự.</h2>
+          <p>
+            Dataset NAB ambient temperature mô phỏng telemetry nhiệt độ. Feature của model phụ thuộc lịch sử gần đây,
+            nên timestamp, sort order và split theo thời gian là phần quan trọng nhất.
+          </p>
+          <div class="badge-row">
+            <span class="badge badge-score">Anomaly Score</span>
+            <span class="badge badge-event">Event Type</span>
+          </div>
+        </section>
+
+        <section class="section grid two">
+          <article class="card">
+            <h2>Schema tối thiểu</h2>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Cột</th><th>Ý nghĩa</th></tr></thead>
+                <tbody>
+                  <tr><td><code>timestamp</code></td><td>Thời điểm ghi nhận telemetry.</td></tr>
+                  <tr><td><code>value</code></td><td>Giá trị nhiệt độ.</td></tr>
+                  <tr><td><code>label</code></td><td>0 là normal, 1 là anomaly.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </article>
+          <article class="card">
+            <h2>Ví dụ dữ liệu</h2>
+            <pre><code>timestamp,value,label
+2013-07-04 00:00:00,22.107,0
+2013-07-04 00:05:00,21.703,0
+2013-07-04 00:10:00,22.397,0</code></pre>
+          </article>
+        </section>
+
+        <section class="section">
+          <h2>Feature engineering</h2>
+          <div class="grid three">
+            <article class="card"><h3><code>hour</code></h3><p>Giúp model học pattern ngày đêm hoặc giờ vận hành.</p></article>
+            <article class="card"><h3><code>dayofweek</code></h3><p>Hữu ích khi thiết bị có hành vi khác giữa ngày làm việc và cuối tuần.</p></article>
+            <article class="card"><h3><code>rolling_mean_12</code></h3><p>Mức nền ngắn hạn, khoảng 1 giờ nếu sampling 5 phút.</p></article>
+            <article class="card"><h3><code>rolling_std_12</code></h3><p>Mức dao động gần đây. Rất thấp có thể gợi ý sensor bị kẹt.</p></article>
+            <article class="card"><h3><code>rolling_mean_36</code></h3><p>Mức nền dài hơn, khoảng 3 giờ với dữ liệu hiện tại.</p></article>
+            <article class="card"><h3><code>delta_1</code> / <code>delta_3</code></h3><p>Bắt thay đổi đột ngột so với điểm trước hoặc vài điểm trước.</p></article>
+            <article class="card"><h3><code>zscore_rolling</code></h3><p>Đo mức lệch khỏi pattern gần đây.</p></article>
+            <article class="card"><h3><code>is_stuck_candidate</code></h3><p>Cờ cảnh báo sensor giữ giá trị gần như không đổi.</p></article>
+            <article class="card"><h3><code>value</code></h3><p>Giá trị hiện tại vẫn là tín hiệu trực tiếp quan trọng.</p></article>
+          </div>
+        </section>
+
+        <section class="section grid two">
+          <article class="callout warning">
+            <strong>Không random split time-series</strong>
+            Random split làm model nhìn thấy pattern tương lai, khiến metric đẹp giả. Lab dùng split theo thời gian để mô phỏng train trên quá khứ và test trên tương lai.
+          </article>
+          <article class="callout success">
+            <strong>Feature phải giống giữa train và API</strong>
+            API gọi lại <code>add_time_features()</code>. Đây là điểm tốt, nhưng phải gửi đủ history để rolling feature đáng tin.
+          </article>
+        </section>
+
+        <section class="section">
+          <h2>Nếu phát triển tiếp</h2>
+          <ul>
+            <li>Thêm <code>device_id</code> để tính feature riêng theo từng sensor.</li>
+            <li>Kiểm tra missing timestamp, duplicate timestamp và gap dữ liệu.</li>
+            <li>Dùng sin/cos cho hour để biểu diễn chu kỳ 24 giờ tốt hơn.</li>
+            <li>Thêm rolling median, quantile và rate-of-change theo phút.</li>
+          </ul>
+        </section>
+
+        <nav class="footer-nav">
+          <a href="codebase.html">Trước: Codebase</a>
+          <a href="model_training.html">Tiếp theo: Model Training</a>
+        </nav>
+      </main>
+    </div>
+  </div>
+</body>
+</html>

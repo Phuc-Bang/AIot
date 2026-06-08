@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lab 3 AIoT Docs - Model Training</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <script defer src="assets/app.js"></script>
+</head>
+<body>
+  <button class="mobile-nav-toggle" type="button" data-nav-toggle>Menu</button>
+  <div class="layout">
+    <aside class="sidebar">
+      <a class="brand" href="index.html">Lab 3 AIoT<span>Anomaly Detection Docs</span></a>
+      <nav class="nav" aria-label="Tài liệu Lab 3">
+        <a class="nav-link" href="index.html">Tổng quan</a>
+        <a class="nav-link" href="architecture.html">Architecture</a>
+        <a class="nav-link" href="codebase.html">Codebase</a>
+        <a class="nav-link" href="data_features.html">Data & Features</a>
+        <a class="nav-link" href="model_training.html">Model Training</a>
+        <a class="nav-link" href="event_intelligence.html">Event Intelligence</a>
+        <a class="nav-link" href="api_detect_anomaly.html">API</a>
+        <a class="nav-link" href="run_test_guide.html">Run & Test</a>
+        <a class="nav-link" href="roadmap.html">Roadmap</a>
+        <a class="nav-link" href="qa.html">Q&A</a>
+      </nav>
+    </aside>
+
+    <div class="page">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">ML review</p>
+          <h1>Lab 3 - Anomaly Detection & Event Intelligence for AIoT</h1>
+        </div>
+        <button class="theme-toggle" type="button" data-theme-toggle>Dark mode</button>
+      </header>
+
+      <main class="content">
+        <section class="hero">
+          <h2>Model học normal behavior, không dự báo tương lai.</h2>
+          <p>
+            Isolation Forest là baseline chính. Nó học phân bố feature của dữ liệu bình thường và gán score cao hơn cho điểm dễ bị cô lập.
+          </p>
+          <div class="badge-row">
+            <span class="badge badge-score">Anomaly Score</span>
+            <span class="badge badge-severity">Severity</span>
+            <span class="badge badge-decision">Decision</span>
+          </div>
+        </section>
+
+        <section class="section grid two">
+          <article class="card">
+            <h2>Training flow</h2>
+            <pre><code>df = load_dataset()
+df = add_time_features(df)
+train_df, test_df = time_split(df, train_ratio=0.65)
+train_normal = train_df[train_df["label"] == 0]
+model = Pipeline([StandardScaler(), IsolationForest()])
+model.fit(train_normal[FEATURE_COLUMNS])</code></pre>
+          </article>
+          <article class="card">
+            <h2>Model output</h2>
+            <p>Scikit-learn trả score càng thấp càng bất thường, nên code đảo dấu để dễ đọc.</p>
+            <pre><code>raw_scores = -detector.score_samples(...)
+anomaly_score = min_max_normalize(raw_scores)
+is_anomaly = anomaly_score >= threshold</code></pre>
+          </article>
+        </section>
+
+        <section class="section">
+          <h2>Cách đọc metric hiện tại</h2>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Metric</th><th>Giá trị hiện có</th><th>Cách hiểu</th><th>Rủi ro nếu kém</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Precision</td><td><code>0.6429</code></td><td>Trong các cảnh báo, khoảng 64.29% đúng.</td><td>False alert nhiều gây mất niềm tin.</td></tr>
+                <tr><td>Recall</td><td><code>0.439</code></td><td>Trong anomaly thật, bắt được khoảng 43.9%.</td><td>Bỏ sót sự cố.</td></tr>
+                <tr><td>F1</td><td><code>0.5217</code></td><td>Cân bằng giữa precision và recall.</td><td>Baseline còn dư địa cải tiến.</td></tr>
+                <tr><td>Confusion Matrix</td><td><code>TN 299, FP 10, FN 23, TP 18</code></td><td>Đếm đúng/sai theo normal và anomaly.</td><td>Cần xem FP/FN theo ngữ cảnh vận hành.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="section grid two">
+          <article class="card">
+            <h2>Threshold</h2>
+            <p>
+              Lab chọn threshold bằng quantile 0.92 trên anomaly score của tập test, nghĩa là nhóm score cao nhất sẽ bị đánh dấu anomaly.
+            </p>
+            <div class="callout warning">
+              <strong>Production note</strong>
+              Không nên dùng test set để chọn threshold. Nên tách validation set hoặc calibration set theo thời gian.
+            </div>
+          </article>
+          <article class="card">
+            <h2>Autoencoder demo</h2>
+            <p>
+              Autoencoder học tái tạo window dữ liệu. MSE cao nghĩa là window hiện tại khác pattern model đã học.
+            </p>
+            <pre><code>window -> autoencoder -> reconstructed window
+reconstruction_mse = mean((x - x_hat)^2)</code></pre>
+          </article>
+        </section>
+
+        <section class="section grid two">
+          <article class="callout success">
+            <strong>Điểm tốt</strong>
+            Training ưu tiên dữ liệu normal khi có label. Đây là cách phù hợp cho anomaly detection.
+          </article>
+          <article class="callout warning">
+            <strong>Cần cải tiến</strong>
+            Model artifact chưa lưu threshold, score min/max và feature version. API vì vậy chưa có cùng scoring contract với training.
+          </article>
+        </section>
+
+        <nav class="footer-nav">
+          <a href="data_features.html">Trước: Data & Features</a>
+          <a href="event_intelligence.html">Tiếp theo: Event Intelligence</a>
+        </nav>
+      </main>
+    </div>
+  </div>
+</body>
+</html>

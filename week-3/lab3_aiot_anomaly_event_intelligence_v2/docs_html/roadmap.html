@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lab 3 AIoT Docs - Roadmap</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <script defer src="assets/app.js"></script>
+</head>
+<body>
+  <button class="mobile-nav-toggle" type="button" data-nav-toggle>Menu</button>
+  <div class="layout">
+    <aside class="sidebar">
+      <a class="brand" href="index.html">Lab 3 AIoT<span>Anomaly Detection Docs</span></a>
+      <nav class="nav" aria-label="Tài liệu Lab 3">
+        <a class="nav-link" href="index.html">Tổng quan</a>
+        <a class="nav-link" href="architecture.html">Architecture</a>
+        <a class="nav-link" href="codebase.html">Codebase</a>
+        <a class="nav-link" href="data_features.html">Data & Features</a>
+        <a class="nav-link" href="model_training.html">Model Training</a>
+        <a class="nav-link" href="event_intelligence.html">Event Intelligence</a>
+        <a class="nav-link" href="api_detect_anomaly.html">API</a>
+        <a class="nav-link" href="run_test_guide.html">Run & Test</a>
+        <a class="nav-link" href="roadmap.html">Roadmap</a>
+        <a class="nav-link" href="qa.html">Q&A</a>
+      </nav>
+    </aside>
+
+    <div class="page">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Development plan</p>
+          <h1>Lab 3 - Anomaly Detection & Event Intelligence for AIoT</h1>
+        </div>
+        <button class="theme-toggle" type="button" data-theme-toggle>Dark mode</button>
+      </header>
+
+      <main class="content">
+        <section class="hero">
+          <h2>Từ lab thành hệ thống AIoT thật.</h2>
+          <p>
+            Không nên bắt đầu bằng model phức tạp. Ưu tiên đầu tiên là data reliability, scoring contract, event policy và khả năng vận hành.
+          </p>
+          <div class="badge-row">
+            <span class="badge badge-score">Anomaly Score</span>
+            <span class="badge badge-severity">Severity</span>
+            <span class="badge badge-decision">Decision</span>
+            <span class="badge badge-api">FastAPI</span>
+          </div>
+        </section>
+
+        <section class="section grid three">
+          <article class="card level-basic">
+            <h2>Basic</h2>
+            <ul>
+              <li>Đồng bộ scoring giữa train và API.</li>
+              <li>Lưu threshold, score min/max và feature list cùng model.</li>
+              <li>Validate history length tối thiểu.</li>
+              <li>Trả HTTP status code đúng khi model chưa load.</li>
+              <li>Viết test schema cho <code>/detect-anomaly</code>.</li>
+            </ul>
+          </article>
+          <article class="card level-good">
+            <h2>Good</h2>
+            <ul>
+              <li>Thêm validation split theo thời gian để tune threshold.</li>
+              <li>Tách event rule và cooldown chống alert fatigue.</li>
+              <li>Ghi event vào SQLite hoặc PostgreSQL.</li>
+              <li>Tạo dashboard quan sát score, event và incident.</li>
+              <li>Hỗ trợ nhiều <code>device_id</code> và feature theo từng sensor.</li>
+            </ul>
+          </article>
+          <article class="card level-advanced">
+            <h2>Advanced</h2>
+            <ul>
+              <li>Event aggregation thành incident lifecycle.</li>
+              <li>Docker hóa API, database và dashboard.</li>
+              <li>Monitoring data drift và model drift.</li>
+              <li>Kết nối MQTT, ESP32 hoặc sensor thật.</li>
+              <li>Model registry, versioning và retraining pipeline.</li>
+            </ul>
+          </article>
+        </section>
+
+        <section class="section">
+          <h2>Artifact nên nâng cấp đầu tiên</h2>
+          <pre><code>{
+  "model": pipeline,
+  "feature_columns": FEATURE_COLUMNS,
+  "threshold": threshold,
+  "score_min": min_s,
+  "score_max": max_s,
+  "model_version": "iforest_v1"
+}</code></pre>
+          <div class="callout success">
+            <strong>Lý do</strong>
+            Khi API dùng cùng threshold và calibration với training, metric offline mới có ý nghĩa với hành vi online.
+          </div>
+        </section>
+
+        <section class="section">
+          <h2>Kiến trúc mở rộng</h2>
+          <div class="pipeline-strip">
+            <div class="pipeline-step">ESP32<span>sensor</span></div>
+            <div class="pipeline-step">MQTT/HTTP<span>ingest</span></div>
+            <div class="pipeline-step">Feature window<span>per device</span></div>
+            <div class="pipeline-step">Anomaly API<span>model service</span></div>
+            <div class="pipeline-step">Event store<span>database</span></div>
+            <div class="pipeline-step">Dashboard<span>operator</span></div>
+            <div class="pipeline-step">Monitoring<span>drift</span></div>
+          </div>
+        </section>
+
+        <section class="section grid two">
+          <article class="callout warning">
+            <strong>Không vội deep learning</strong>
+            Baseline hiện tại còn cần chuẩn hóa threshold, event và API contract trước khi thêm model phức tạp.
+          </article>
+          <article class="callout note">
+            <strong>Ưu tiên thực tế</strong>
+            Event quality, giảm alert fatigue và audit trail thường tạo giá trị vận hành nhanh hơn việc tăng metric nhỏ.
+          </article>
+        </section>
+
+        <nav class="footer-nav">
+          <a href="run_test_guide.html">Trước: Run & Test</a>
+          <a href="qa.html">Tiếp theo: Q&A</a>
+        </nav>
+      </main>
+    </div>
+  </div>
+</body>
+</html>

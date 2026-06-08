@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lab 3 AIoT Docs - Architecture</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <script defer src="assets/app.js"></script>
+</head>
+<body>
+  <button class="mobile-nav-toggle" type="button" data-nav-toggle>Menu</button>
+  <div class="layout">
+    <aside class="sidebar">
+      <a class="brand" href="index.html">Lab 3 AIoT<span>Anomaly Detection Docs</span></a>
+      <nav class="nav" aria-label="Tài liệu Lab 3">
+        <a class="nav-link" href="index.html">Tổng quan</a>
+        <a class="nav-link" href="architecture.html">Architecture</a>
+        <a class="nav-link" href="codebase.html">Codebase</a>
+        <a class="nav-link" href="data_features.html">Data & Features</a>
+        <a class="nav-link" href="model_training.html">Model Training</a>
+        <a class="nav-link" href="event_intelligence.html">Event Intelligence</a>
+        <a class="nav-link" href="api_detect_anomaly.html">API</a>
+        <a class="nav-link" href="run_test_guide.html">Run & Test</a>
+        <a class="nav-link" href="roadmap.html">Roadmap</a>
+        <a class="nav-link" href="qa.html">Q&A</a>
+      </nav>
+    </aside>
+
+    <div class="page">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Pipeline</p>
+          <h1>Lab 3 - Anomaly Detection & Event Intelligence for AIoT</h1>
+        </div>
+        <button class="theme-toggle" type="button" data-theme-toggle>Dark mode</button>
+      </header>
+
+      <main class="content">
+        <section class="hero">
+          <h2>Architecture pipeline</h2>
+          <p>
+            Kiến trúc Lab 3 tách rõ hai lớp: lớp ML tạo anomaly score và lớp backend/event quyết định cách phản ứng.
+            Đây là cách thiết kế thực tế hơn so với việc để model trực tiếp quyết định hành động.
+          </p>
+          <div class="badge-row">
+            <span class="badge badge-score">Anomaly Score</span>
+            <span class="badge badge-event">Event Type</span>
+            <span class="badge badge-decision">Decision</span>
+            <span class="badge badge-api">FastAPI</span>
+          </div>
+        </section>
+
+        <section class="section">
+          <h2>Sơ đồ Mermaid</h2>
+          <div class="mermaid-wrap">
+            <div class="mermaid">
+flowchart LR
+  A["Telemetry"] --> B["Feature engineering"]
+  B --> C["Anomaly model"]
+  C --> D["anomaly_score"]
+  D --> E["Event layer"]
+  E --> F["Decision layer"]
+  F --> G["API"]
+            </div>
+          </div>
+          <div class="callout note">
+            <strong>Ghi chú</strong>
+            Nếu mở file offline và Mermaid không render, nội dung pipeline vẫn là: telemetry -> feature engineering -> anomaly model -> anomaly_score -> event layer -> decision layer -> API.
+          </div>
+        </section>
+
+        <section class="section grid two">
+          <article class="card">
+            <h2>Offline flow</h2>
+            <div class="timeline">
+              <div class="timeline-item"><div><strong>Tải dữ liệu</strong><br><span>Chạy <code>src/download_data.py</code> để tải NAB hoặc dùng sample.</span></div></div>
+              <div class="timeline-item"><div><strong>Tạo feature</strong><br><span><code>src/utils.py</code> tạo rolling mean, rolling std, delta và z-score.</span></div></div>
+              <div class="timeline-item"><div><strong>Train model</strong><br><span><code>src/train_anomaly.py</code> train Isolation Forest và autoencoder demo.</span></div></div>
+              <div class="timeline-item"><div><strong>Đánh giá</strong><br><span>Metrics, prediction CSV và event log được ghi vào <code>outputs/</code>.</span></div></div>
+            </div>
+          </article>
+
+          <article class="card">
+            <h2>Online flow</h2>
+            <div class="timeline">
+              <div class="timeline-item"><div><strong>Client gửi history</strong><br><span>API nhận danh sách telemetry gần nhất.</span></div></div>
+              <div class="timeline-item"><div><strong>API tạo feature</strong><br><span>Dùng lại <code>add_time_features()</code> để giữ logic gần training.</span></div></div>
+              <div class="timeline-item"><div><strong>Score điểm mới nhất</strong><br><span>Model chỉ score dòng cuối cùng trong cửa sổ history.</span></div></div>
+              <div class="timeline-item"><div><strong>Trả event JSON</strong><br><span>Response có <code>model_output</code>, <code>event</code>, <code>api_check</code>.</span></div></div>
+            </div>
+          </article>
+        </section>
+
+        <section class="section">
+          <h2>Input và output chính</h2>
+          <div class="grid two">
+            <article class="card">
+              <h3>Training input</h3>
+              <pre><code>data/ambient_temperature_system_failure_labeled.csv
+
+columns:
+  timestamp
+  value
+  label</code></pre>
+            </article>
+            <article class="card">
+              <h3>API output</h3>
+              <pre><code>{
+  "model_output": { "anomaly_score": 0.61, "is_anomaly": true },
+  "event": { "severity": "MEDIUM", "decision": "CREATE_WARNING_EVENT" },
+  "api_check": { "latency_ms": 12.3 }
+}</code></pre>
+            </article>
+          </div>
+        </section>
+
+        <section class="section grid two">
+          <article class="callout warning">
+            <strong>Nhận xét kỹ thuật</strong>
+            Training đang normalize score bằng min-max trên tập test, còn API dùng sigmoid demo. Đây là điểm cần đồng bộ nếu muốn triển khai thật.
+          </article>
+          <article class="callout success">
+            <strong>Thiết kế đúng hướng</strong>
+            Event layer tách khỏi model giúp hệ thống thêm policy, cooldown, audit và safety rule mà không phải retrain model.
+          </article>
+        </section>
+
+        <nav class="footer-nav">
+          <a href="index.html">Trước: Tổng quan</a>
+          <a href="codebase.html">Tiếp theo: Codebase</a>
+        </nav>
+      </main>
+    </div>
+  </div>
+  <script type="module">
+    import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
+    const isDark = document.documentElement.dataset.theme === "dark";
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: "base",
+      securityLevel: "loose",
+      themeVariables: {
+        fontFamily: "Inter, Segoe UI, sans-serif",
+        background: "transparent",
+        mainBkg: isDark ? "#1b2639" : "#eef3fb",
+        primaryColor: isDark ? "#1b2639" : "#eef3fb",
+        primaryTextColor: isDark ? "#e8edf7" : "#172033",
+        primaryBorderColor: isDark ? "#66a3ff" : "#1d72f3",
+        lineColor: isDark ? "#a8b3c7" : "#5d6b82",
+        arrowheadColor: isDark ? "#a8b3c7" : "#5d6b82"
+      }
+    });
+  </script>
+</body>
+</html>

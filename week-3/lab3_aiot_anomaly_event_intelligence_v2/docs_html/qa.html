@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lab 3 AIoT Docs - Q&A</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <script defer src="assets/app.js"></script>
+</head>
+<body>
+  <button class="mobile-nav-toggle" type="button" data-nav-toggle>Menu</button>
+  <div class="layout">
+    <aside class="sidebar">
+      <a class="brand" href="index.html">Lab 3 AIoT<span>Anomaly Detection Docs</span></a>
+      <nav class="nav" aria-label="Tài liệu Lab 3">
+        <a class="nav-link" href="index.html">Tổng quan</a>
+        <a class="nav-link" href="architecture.html">Architecture</a>
+        <a class="nav-link" href="codebase.html">Codebase</a>
+        <a class="nav-link" href="data_features.html">Data & Features</a>
+        <a class="nav-link" href="model_training.html">Model Training</a>
+        <a class="nav-link" href="event_intelligence.html">Event Intelligence</a>
+        <a class="nav-link" href="api_detect_anomaly.html">API</a>
+        <a class="nav-link" href="run_test_guide.html">Run & Test</a>
+        <a class="nav-link" href="roadmap.html">Roadmap</a>
+        <a class="nav-link" href="qa.html">Q&A</a>
+      </nav>
+    </aside>
+
+    <div class="page">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Study notes</p>
+          <h1>Lab 3 - Anomaly Detection & Event Intelligence for AIoT</h1>
+        </div>
+        <button class="theme-toggle" type="button" data-theme-toggle>Dark mode</button>
+      </header>
+
+      <main class="content">
+        <section class="hero">
+          <h2>Các câu hỏi cần nắm trước khi phát triển tiếp.</h2>
+          <p>
+            Q&A này tập trung vào quyết định kỹ thuật: anomaly detection khác forecast, vì sao không random split, và cách đọc rủi ro false alert hoặc missed alert.
+          </p>
+          <div class="badge-row">
+            <span class="badge badge-score">Anomaly Score</span>
+            <span class="badge badge-severity">Severity</span>
+            <span class="badge badge-event">Event Type</span>
+            <span class="badge badge-decision">Decision</span>
+          </div>
+        </section>
+
+        <section class="section">
+          <details open>
+            <summary>Lab 3 phát hiện bất thường hay dự báo tương lai?</summary>
+            <p>Lab 3 phát hiện bất thường. Model trả lời điểm hiện tại có khác pattern bình thường không, không dự báo nhiệt độ trong tương lai.</p>
+          </details>
+          <details>
+            <summary>Vì sao không random split?</summary>
+            <p>Random split trộn quá khứ và tương lai, gây data leakage. Với time-series, phải train trên quá khứ và test trên tương lai.</p>
+          </details>
+          <details>
+            <summary>If-else threshold có đủ không?</summary>
+            <p>Đủ cho rule vật lý đơn giản, nhưng không đủ khi bất thường phụ thuộc context như rolling mean, delta, giờ trong ngày hoặc sensor stuck.</p>
+          </details>
+          <details>
+            <summary>Anomaly detection hơn if-else ở đâu?</summary>
+            <p>Anomaly detection học pattern bình thường từ dữ liệu và phát hiện tổ hợp tín hiệu bất thường, ví dụ giá trị chưa vượt ngưỡng nhưng tăng quá nhanh so với nền gần đây.</p>
+          </details>
+          <details>
+            <summary>Precision thấp nguy hiểm như nào?</summary>
+            <p>Precision thấp tạo nhiều false alert, làm operator mất niềm tin, dashboard nhiễu và tăng chi phí xử lý.</p>
+          </details>
+          <details>
+            <summary>Recall thấp nguy hiểm như nào?</summary>
+            <p>Recall thấp nghĩa là bỏ sót anomaly thật. Với hệ thống liên quan an toàn, missed alert có thể gây thiệt hại lớn hơn false alert.</p>
+          </details>
+          <details>
+            <summary>False alert và missed alert cái nào nguy hiểm hơn?</summary>
+            <p>Phụ thuộc domain. Kho lạnh vaccine, điện, máy công nghiệp thường ưu tiên giảm missed alert. Hệ thống ít quan trọng có thể ưu tiên giảm false alert để tránh spam.</p>
+          </details>
+          <details>
+            <summary>Test notebook khác deploy API như nào?</summary>
+            <p>Notebook đánh giá model offline trên tập test có label, sinh metric và chart. API phục vụ request mới, thường không có label ngay, và phải giữ response contract ổn định.</p>
+          </details>
+          <details>
+            <summary>Vì sao có anomaly_score nhưng vẫn cần severity?</summary>
+            <p>Score là tín hiệu model. Severity là mức nghiêm trọng vận hành, cần thêm ngữ cảnh như device criticality, duration và rule an toàn.</p>
+          </details>
+          <details>
+            <summary>Tại sao API cần history chứ không chỉ một điểm?</summary>
+            <p>Feature rolling như <code>rolling_mean_36</code>, <code>delta_1</code> và <code>zscore_rolling</code> cần ngữ cảnh gần đây để tính đúng.</p>
+          </details>
+          <details>
+            <summary>Kết quả model có phải xác suất không?</summary>
+            <p>Không. <code>anomaly_score</code> là điểm bất thường đã chuẩn hóa để dễ diễn giải, không phải xác suất thiết bị hỏng.</p>
+          </details>
+          <details>
+            <summary>Khi nào nên retrain model?</summary>
+            <p>Khi đổi feature, đổi dataset, thêm sensor mới, data drift, feedback label thay đổi hoặc alert quá nhiều/bỏ sót quá nhiều.</p>
+          </details>
+        </section>
+
+        <section class="section grid two">
+          <article class="callout warning">
+            <strong>Điểm cần nhớ</strong>
+            Training và API hiện chưa dùng cùng một cách normalize score. Đây là câu hỏi kỹ thuật quan trọng khi review lab.
+          </article>
+          <article class="callout success">
+            <strong>Hướng học tiếp</strong>
+            Đọc <code>src/utils.py</code>, sau đó đọc <code>src/train_anomaly.py</code> và cuối cùng là <code>src/app.py</code>.
+          </article>
+        </section>
+
+        <nav class="footer-nav">
+          <a href="roadmap.html">Trước: Roadmap</a>
+          <a href="index.html">Về trang tổng quan</a>
+        </nav>
+      </main>
+    </div>
+  </div>
+</body>
+</html>

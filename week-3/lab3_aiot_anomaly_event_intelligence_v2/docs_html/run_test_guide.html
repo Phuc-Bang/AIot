@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lab 3 AIoT Docs - Run & Test</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <script defer src="assets/app.js"></script>
+</head>
+<body>
+  <button class="mobile-nav-toggle" type="button" data-nav-toggle>Menu</button>
+  <div class="layout">
+    <aside class="sidebar">
+      <a class="brand" href="index.html">Lab 3 AIoT<span>Anomaly Detection Docs</span></a>
+      <nav class="nav" aria-label="Tài liệu Lab 3">
+        <a class="nav-link" href="index.html">Tổng quan</a>
+        <a class="nav-link" href="architecture.html">Architecture</a>
+        <a class="nav-link" href="codebase.html">Codebase</a>
+        <a class="nav-link" href="data_features.html">Data & Features</a>
+        <a class="nav-link" href="model_training.html">Model Training</a>
+        <a class="nav-link" href="event_intelligence.html">Event Intelligence</a>
+        <a class="nav-link" href="api_detect_anomaly.html">API</a>
+        <a class="nav-link" href="run_test_guide.html">Run & Test</a>
+        <a class="nav-link" href="roadmap.html">Roadmap</a>
+        <a class="nav-link" href="qa.html">Q&A</a>
+      </nav>
+    </aside>
+
+    <div class="page">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Windows PowerShell</p>
+          <h1>Lab 3 - Anomaly Detection & Event Intelligence for AIoT</h1>
+        </div>
+        <button class="theme-toggle" type="button" data-theme-toggle>Dark mode</button>
+      </header>
+
+      <main class="content">
+        <section class="hero">
+          <h2>Chạy project từ đầu đến API.</h2>
+          <p>
+            Thứ tự chạy đúng là data -> train -> plot -> API -> test. API load model lúc start, nên train xong cần restart API nếu trước đó API đã chạy.
+          </p>
+          <div class="badge-row">
+            <span class="badge badge-api">FastAPI</span>
+            <span class="badge badge-score">Anomaly Score</span>
+            <span class="badge badge-event">Event Type</span>
+          </div>
+        </section>
+
+        <section class="section">
+          <h2>Quick start</h2>
+          <pre><code>cd E:\AIoT\Day-3\lab3_aiot_anomaly_event_intelligence_v2
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+python src/download_data.py
+python src/train_anomaly.py
+python src/plot_results.py</code></pre>
+        </section>
+
+        <section class="section">
+          <h2>Các bước kiểm tra</h2>
+          <div class="timeline">
+            <div class="timeline-item"><div><strong>Tạo môi trường</strong><br><code>python -m venv .venv</code> và activate bằng PowerShell.</div></div>
+            <div class="timeline-item"><div><strong>Cài thư viện</strong><br><code>pip install -r requirements.txt</code>.</div></div>
+            <div class="timeline-item"><div><strong>Tải dữ liệu</strong><br><code>python src/download_data.py</code>.</div></div>
+            <div class="timeline-item"><div><strong>Train model</strong><br><code>python src/train_anomaly.py</code>.</div></div>
+            <div class="timeline-item"><div><strong>Vẽ biểu đồ</strong><br><code>python src/plot_results.py</code>.</div></div>
+            <div class="timeline-item"><div><strong>Chạy API</strong><br><code>uvicorn src.app:app --reload</code>.</div></div>
+            <div class="timeline-item"><div><strong>Test API</strong><br><code>python src/test_api.py</code> hoặc <code>python src/test_api_local.py</code>.</div></div>
+          </div>
+        </section>
+
+        <section class="section grid two">
+          <article class="card">
+            <h2>Terminal 1: API</h2>
+            <pre><code>cd E:\AIoT\Day-3\lab3_aiot_anomaly_event_intelligence_v2
+.\.venv\Scripts\Activate.ps1
+uvicorn src.app:app --reload</code></pre>
+            <p>Mở Swagger UI: <code>http://127.0.0.1:8000/docs</code></p>
+          </article>
+          <article class="card">
+            <h2>Terminal 2: test API</h2>
+            <pre><code>cd E:\AIoT\Day-3\lab3_aiot_anomaly_event_intelligence_v2
+.\.venv\Scripts\Activate.ps1
+python src/test_api.py</code></pre>
+            <p>Nếu không mở được port, dùng <code>python src/test_api_local.py</code>.</p>
+          </article>
+        </section>
+
+        <section class="section">
+          <h2>Output cần có</h2>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Nhóm</th><th>File cần thấy</th></tr></thead>
+              <tbody>
+                <tr><td>Data</td><td><code>data/ambient_temperature_system_failure_labeled.csv</code></td></tr>
+                <tr><td>Models</td><td><code>models/isolation_forest_iforest_v1.joblib</code>, <code>models/mlp_autoencoder_demo.joblib</code></td></tr>
+                <tr><td>Outputs</td><td><code>iforest_metrics.json</code>, <code>autoencoder_metrics.json</code>, prediction CSV, <code>anomaly_event_log.csv</code></td></tr>
+                <tr><td>Figures</td><td><code>anomaly_detection_result.png</code>, <code>anomaly_score_over_time.png</code></td></tr>
+                <tr><td>API</td><td><code>/health</code> trả <code>model_loaded: true</code>.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="section grid two">
+          <article class="callout warning">
+            <strong>PowerShell chặn activate</strong>
+            Chạy <code>Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass</code>, sau đó activate lại venv.
+          </article>
+          <article class="callout note">
+            <strong>Port 8000 bận</strong>
+            Dùng <code>uvicorn src.app:app --reload --port 8001</code> và sửa URL test nếu cần.
+          </article>
+        </section>
+
+        <nav class="footer-nav">
+          <a href="api_detect_anomaly.html">Trước: API</a>
+          <a href="roadmap.html">Tiếp theo: Roadmap</a>
+        </nav>
+      </main>
+    </div>
+  </div>
+</body>
+</html>

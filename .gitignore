@@ -1,0 +1,23 @@
+# Ignore all virtual environments in any subdirectory
+**/.venv/
+**/venv/
+**/env/
+**/ENV/
+
+# Ignore all python caches
+**/__pycache__/
+**/*.py[cod]
+**/*$py.class
+
+# Ignore test caches
+**/.pytest_cache/
+**/.cache/
+**/.coverage
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Project-specific logs and outputs
+**/outputs/service_log.csv
+**/outputs/vision_inference_log.csv

@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lab 3 AIoT Docs - Event Intelligence</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <script defer src="assets/app.js"></script>
+</head>
+<body>
+  <button class="mobile-nav-toggle" type="button" data-nav-toggle>Menu</button>
+  <div class="layout">
+    <aside class="sidebar">
+      <a class="brand" href="index.html">Lab 3 AIoT<span>Anomaly Detection Docs</span></a>
+      <nav class="nav" aria-label="Tài liệu Lab 3">
+        <a class="nav-link" href="index.html">Tổng quan</a>
+        <a class="nav-link" href="architecture.html">Architecture</a>
+        <a class="nav-link" href="codebase.html">Codebase</a>
+        <a class="nav-link" href="data_features.html">Data & Features</a>
+        <a class="nav-link" href="model_training.html">Model Training</a>
+        <a class="nav-link" href="event_intelligence.html">Event Intelligence</a>
+        <a class="nav-link" href="api_detect_anomaly.html">API</a>
+        <a class="nav-link" href="run_test_guide.html">Run & Test</a>
+        <a class="nav-link" href="roadmap.html">Roadmap</a>
+        <a class="nav-link" href="qa.html">Q&A</a>
+      </nav>
+    </aside>
+
+    <div class="page">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Event layer</p>
+          <h1>Lab 3 - Anomaly Detection & Event Intelligence for AIoT</h1>
+        </div>
+        <button class="theme-toggle" type="button" data-theme-toggle>Dark mode</button>
+      </header>
+
+      <main class="content">
+        <section class="hero">
+          <h2>Anomaly score chưa phải quyết định vận hành.</h2>
+          <p>
+            Event intelligence là lớp biến tín hiệu model thành thông tin backend có thể xử lý: loại event, mức nghiêm trọng, lý do và hành động tiếp theo.
+          </p>
+          <div class="badge-row">
+            <span class="badge badge-score">Anomaly Score</span>
+            <span class="badge badge-severity">Severity</span>
+            <span class="badge badge-event">Event Type</span>
+            <span class="badge badge-decision">Decision</span>
+          </div>
+        </section>
+
+        <section class="section">
+          <h2>Phân biệt các khái niệm</h2>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Khái niệm</th><th>Nó trả lời câu hỏi gì?</th><th>Ví dụ</th></tr></thead>
+              <tbody>
+                <tr><td><code>is_anomaly</code></td><td>Điểm này có bất thường không?</td><td><code>true</code></td></tr>
+                <tr><td><code>event_type</code></td><td>Đây là loại sự kiện gì?</td><td><code>TEMPERATURE_ANOMALY</code></td></tr>
+                <tr><td><code>anomaly_score</code></td><td>Model thấy điểm này lạ đến mức nào?</td><td><code>0.88</code></td></tr>
+                <tr><td><code>severity</code></td><td>Mức nghiêm trọng vận hành là gì?</td><td><code>HIGH</code></td></tr>
+                <tr><td><code>decision</code></td><td>Hệ thống nên làm gì tiếp?</td><td><code>CREATE_ALERT_AND_REQUIRE_HUMAN_CHECK</code></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="section grid two">
+          <article class="card">
+            <h2>Rule hiện tại</h2>
+            <pre><code>score >= 0.80 -> HIGH
+score >= 0.55 -> MEDIUM
+else          -> LOW
+
+HIGH   -> CREATE_ALERT_AND_REQUIRE_HUMAN_CHECK
+MEDIUM -> CREATE_WARNING_EVENT
+LOW    -> LOG_FOR_MONITORING</code></pre>
+          </article>
+          <article class="card">
+            <h2>Event log dùng để làm gì?</h2>
+            <ul>
+              <li>Audit quyết định của hệ thống.</li>
+              <li>Làm dữ liệu cho dashboard.</li>
+              <li>Phân tích false alert và missed alert.</li>
+              <li>Làm feedback để cải thiện model.</li>
+              <li>Gửi downstream service như ticket, SMS hoặc incident management.</li>
+            </ul>
+          </article>
+        </section>
+
+        <section class="section grid two">
+          <article class="callout danger">
+            <strong>Không tự động điều khiển chỉ vì score cao</strong>
+            Sensor có thể lỗi, dữ liệu có thể thiếu, model có thể drift. Hành động điều khiển cần safety rule độc lập và thường cần xác nhận.
+          </article>
+          <article class="callout note">
+            <strong>Rule tốt hơn</strong>
+            Kết hợp score, z-score, delta, duration, criticality của device và maintenance window thay vì chỉ dựa vào một threshold.
+          </article>
+        </section>
+
+        <section class="section">
+          <h2>Safety rule gợi ý</h2>
+          <div class="grid three">
+            <article class="card"><h3>Cooldown</h3><p>Không tạo alert mới cho cùng device và event trong 10 phút nếu incident đang mở.</p></article>
+            <article class="card"><h3>Confirm signal</h3><p>Yêu cầu nhiều sensor hoặc rule vật lý xác nhận trước khi điều khiển.</p></article>
+            <article class="card"><h3>Maintenance mode</h3><p>Giảm severity hoặc route event sang maintenance log khi thiết bị đang bảo trì.</p></article>
+          </div>
+        </section>
+
+        <nav class="footer-nav">
+          <a href="model_training.html">Trước: Model Training</a>
+          <a href="api_detect_anomaly.html">Tiếp theo: API</a>
+        </nav>
+      </main>
+    </div>
+  </div>
+</body>
+</html>

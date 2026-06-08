@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lab 3 AIoT Docs - API Detect Anomaly</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <script defer src="assets/app.js"></script>
+</head>
+<body>
+  <button class="mobile-nav-toggle" type="button" data-nav-toggle>Menu</button>
+  <div class="layout">
+    <aside class="sidebar">
+      <a class="brand" href="index.html">Lab 3 AIoT<span>Anomaly Detection Docs</span></a>
+      <nav class="nav" aria-label="Tài liệu Lab 3">
+        <a class="nav-link" href="index.html">Tổng quan</a>
+        <a class="nav-link" href="architecture.html">Architecture</a>
+        <a class="nav-link" href="codebase.html">Codebase</a>
+        <a class="nav-link" href="data_features.html">Data & Features</a>
+        <a class="nav-link" href="model_training.html">Model Training</a>
+        <a class="nav-link" href="event_intelligence.html">Event Intelligence</a>
+        <a class="nav-link" href="api_detect_anomaly.html">API</a>
+        <a class="nav-link" href="run_test_guide.html">Run & Test</a>
+        <a class="nav-link" href="roadmap.html">Roadmap</a>
+        <a class="nav-link" href="qa.html">Q&A</a>
+      </nav>
+    </aside>
+
+    <div class="page">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">FastAPI</p>
+          <h1>Lab 3 - Anomaly Detection & Event Intelligence for AIoT</h1>
+        </div>
+        <button class="theme-toggle" type="button" data-theme-toggle>Dark mode</button>
+      </header>
+
+      <main class="content">
+        <section class="hero">
+          <h2>API biến model thành service.</h2>
+          <p>
+            <code>src/app.py</code> load model Isolation Forest và expose ba endpoint: <code>/health</code>, <code>/model-info</code>, <code>/detect-anomaly</code>.
+          </p>
+          <div class="badge-row">
+            <span class="badge badge-api">FastAPI</span>
+            <span class="badge badge-score">Anomaly Score</span>
+            <span class="badge badge-event">Event Type</span>
+            <span class="badge badge-decision">Decision</span>
+          </div>
+        </section>
+
+        <section class="section grid three">
+          <article class="card"><h3><code>GET /health</code></h3><p>Kiểm tra API chạy và model đã load chưa.</p></article>
+          <article class="card"><h3><code>GET /model-info</code></h3><p>Trả model version, input/output contract và metric offline.</p></article>
+          <article class="card"><h3><code>POST /detect-anomaly</code></h3><p>Nhận history telemetry, score điểm mới nhất và trả event JSON.</p></article>
+        </section>
+
+        <section class="section grid two">
+          <article class="card">
+            <h2>Request JSON</h2>
+            <pre><code>{
+  "history": [
+    {
+      "timestamp": "2013-07-05 09:00:00",
+      "value": 27.5,
+      "device_id": "room_temp_01"
+    },
+    {
+      "timestamp": "2013-07-05 09:05:00",
+      "value": 29.1,
+      "device_id": "room_temp_01"
+    }
+  ]
+}</code></pre>
+          </article>
+          <article class="card">
+            <h2>Response JSON</h2>
+            <pre><code>{
+  "model_output": {
+    "anomaly_score": 0.6123,
+    "is_anomaly": true,
+    "model_version": "iforest_v1"
+  },
+  "event": {
+    "event_type": "TEMPERATURE_ANOMALY",
+    "device_id": "room_temp_01",
+    "timestamp": "2013-07-05 09:05:00",
+    "value": 29.1,
+    "severity": "MEDIUM",
+    "decision": "CREATE_WARNING_EVENT",
+    "explanation": "model score indicates unusual pattern",
+    "safety_note": "Không tự động điều khiển thiết bị khi anomaly cao; cần xác nhận hoặc rule an toàn."
+  },
+  "api_check": {
+    "latency_ms": 12.34,
+    "input_points": 40
+  }
+}</code></pre>
+          </article>
+        </section>
+
+        <section class="section">
+          <h2>Flow xử lý trong API</h2>
+          <div class="timeline">
+            <div class="timeline-item"><div>Nhận <code>history</code> từ request và chuyển thành DataFrame.</div></div>
+            <div class="timeline-item"><div>Parse timestamp, sort theo thời gian và tạo feature bằng <code>add_time_features()</code>.</div></div>
+            <div class="timeline-item"><div>Lấy dòng mới nhất để score bằng pipeline scaler + Isolation Forest.</div></div>
+            <div class="timeline-item"><div>Chuyển raw score thành score demo, so sánh threshold <code>0.55</code>.</div></div>
+            <div class="timeline-item"><div>Gọi <code>decision_from_score()</code> để tạo severity, decision và explanation.</div></div>
+          </div>
+        </section>
+
+        <section class="section grid two">
+          <article class="callout warning">
+            <strong>Lỗi thường gặp</strong>
+            <code>model_loaded: false</code> nghĩa là chưa chạy <code>python src/train_anomaly.py</code> hoặc cần restart API sau khi train.
+          </article>
+          <article class="callout note">
+            <strong>Test nhanh</strong>
+            Dùng Swagger UI tại <code>http://127.0.0.1:8000/docs</code> hoặc chạy <code>python src/test_api.py</code>.
+          </article>
+        </section>
+
+        <section class="section">
+          <h2>Lệnh chạy</h2>
+          <pre><code>uvicorn src.app:app --reload
+python src/test_api.py
+python src/test_api_local.py</code></pre>
+        </section>
+
+        <nav class="footer-nav">
+          <a href="event_intelligence.html">Trước: Event Intelligence</a>
+          <a href="run_test_guide.html">Tiếp theo: Run & Test</a>
+        </nav>
+      </main>
+    </div>
+  </div>
+</body>
+</html>

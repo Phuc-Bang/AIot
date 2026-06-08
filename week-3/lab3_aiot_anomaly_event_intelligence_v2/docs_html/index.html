@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lab 3 AIoT Docs - Overview</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <script defer src="assets/app.js"></script>
+</head>
+<body>
+  <button class="mobile-nav-toggle" type="button" data-nav-toggle>Menu</button>
+  <div class="layout">
+    <aside class="sidebar">
+      <a class="brand" href="index.html">Lab 3 AIoT<span>Anomaly Detection Docs</span></a>
+      <nav class="nav" aria-label="Tài liệu Lab 3">
+        <a class="nav-link" href="index.html">Tổng quan</a>
+        <a class="nav-link" href="architecture.html">Architecture</a>
+        <a class="nav-link" href="codebase.html">Codebase</a>
+        <a class="nav-link" href="data_features.html">Data & Features</a>
+        <a class="nav-link" href="model_training.html">Model Training</a>
+        <a class="nav-link" href="event_intelligence.html">Event Intelligence</a>
+        <a class="nav-link" href="api_detect_anomaly.html">API</a>
+        <a class="nav-link" href="run_test_guide.html">Run & Test</a>
+        <a class="nav-link" href="roadmap.html">Roadmap</a>
+        <a class="nav-link" href="qa.html">Q&A</a>
+      </nav>
+    </aside>
+
+    <div class="page">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Static documentation</p>
+          <h1>Lab 3 - Anomaly Detection & Event Intelligence for AIoT</h1>
+        </div>
+        <button class="theme-toggle" type="button" data-theme-toggle>Dark mode</button>
+      </header>
+
+      <main class="content">
+        <section class="hero">
+          <h2>Biến telemetry thành event có thể vận hành.</h2>
+          <p>
+            Bộ tài liệu này tóm tắt Lab 3 theo góc nhìn kỹ thuật: dữ liệu cảm biến đi qua feature engineering,
+            model anomaly detection, lớp event intelligence và API FastAPI để tích hợp vào hệ thống AIoT.
+          </p>
+          <div class="badge-row" aria-label="Key concepts">
+            <span class="badge badge-score">Anomaly Score</span>
+            <span class="badge badge-severity">Severity</span>
+            <span class="badge badge-event">Event Type</span>
+            <span class="badge badge-decision">Decision</span>
+            <span class="badge badge-api">FastAPI</span>
+          </div>
+        </section>
+
+        <section class="section grid three">
+          <article class="card metric">
+            <strong>1000</strong>
+            <span>Dòng telemetry trong dataset labeled hiện có.</span>
+          </article>
+          <article class="card metric">
+            <strong>10</strong>
+            <span>Feature được đưa vào Isolation Forest.</span>
+          </article>
+          <article class="card metric">
+            <strong>3</strong>
+            <span>Endpoint chính: health, model-info, detect-anomaly.</span>
+          </article>
+        </section>
+
+        <section class="section">
+          <h2>Learning Path</h2>
+          <div class="learning-path">
+            <article class="learning-step">
+              <h3>Hiểu bài toán AIoT</h3>
+              <p>Bắt đầu từ tổng quan: vì sao telemetry cần anomaly detection và vì sao score chưa đủ để ra quyết định vận hành.</p>
+            </article>
+            <article class="learning-step">
+              <h3>Đi theo luồng dữ liệu</h3>
+              <p>Đọc architecture, data/features và codebase để thấy dữ liệu đi từ CSV đến model, event log và API.</p>
+            </article>
+            <article class="learning-step">
+              <h3>Đọc model như một backend contract</h3>
+              <p>Nắm input/output của Isolation Forest, threshold, metric và điểm cần đồng bộ giữa training và API.</p>
+            </article>
+            <article class="learning-step">
+              <h3>Thiết kế event intelligence</h3>
+              <p>Học cách biến <code>anomaly_score</code> thành <code>event_type</code>, <code>severity</code> và <code>decision</code>.</p>
+            </article>
+            <article class="learning-step">
+              <h3>Chạy và mở rộng</h3>
+              <p>Chạy toàn bộ lab bằng PowerShell, test FastAPI, rồi theo roadmap để nâng cấp thành hệ thống AIoT thật.</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="section grid two">
+          <article class="card">
+            <h2>Project này làm gì?</h2>
+            <p>
+              Project mô phỏng một pipeline AIoT hoàn chỉnh: tải dữ liệu nhiệt độ, gắn label anomaly,
+              tạo feature theo thời gian, train model, sinh event log và deploy API nhận telemetry mới.
+            </p>
+            <div class="pipeline-strip">
+              <div class="pipeline-step">Telemetry<span>CSV hoặc API</span></div>
+              <div class="pipeline-step">Feature<span>rolling, delta</span></div>
+              <div class="pipeline-step">Model<span>Isolation Forest</span></div>
+              <div class="pipeline-step">Score<span>anomaly_score</span></div>
+              <div class="pipeline-step">Event<span>event_type</span></div>
+              <div class="pipeline-step">Decision<span>action policy</span></div>
+              <div class="pipeline-step">API<span>JSON contract</span></div>
+            </div>
+          </article>
+
+          <article class="card">
+            <h2>Vì sao cần anomaly detection?</h2>
+            <p>
+              Trong AIoT, một giá trị đơn lẻ hiếm khi đủ để kết luận. Cùng là 28 độ C, nó có thể bình thường
+              vào buổi trưa nhưng bất thường nếu vừa tăng đột ngột từ mức nền 20 độ C.
+            </p>
+            <div class="callout note">
+              <strong>Tư duy chính</strong>
+              Model phát hiện tín hiệu bất thường. Backend phải biến tín hiệu đó thành event, severity và decision an toàn.
+            </div>
+          </article>
+        </section>
+
+        <section class="section">
+          <h2>Key Artifacts</h2>
+          <div class="artifact-list">
+            <article class="artifact-item">
+              <code>models/isolation_forest_iforest_v1.joblib</code>
+              <span>Model Isolation Forest chính được FastAPI load để score telemetry mới.</span>
+            </article>
+            <article class="artifact-item">
+              <code>outputs/iforest_metrics.json</code>
+              <span>Metric offline: Precision, Recall, F1, Confusion Matrix và threshold demo.</span>
+            </article>
+            <article class="artifact-item">
+              <code>outputs/anomaly_event_log.csv</code>
+              <span>Event log có <code>event_type</code>, <code>severity</code>, <code>decision</code> và explanation.</span>
+            </article>
+            <article class="artifact-item">
+              <code>figures/anomaly_detection_result.png</code>
+              <span>Biểu đồ giúp demo điểm anomaly trên chuỗi nhiệt độ.</span>
+            </article>
+            <article class="artifact-item">
+              <code>API /detect-anomaly</code>
+              <span>Endpoint nhận history telemetry và trả JSON gồm model output, event và latency.</span>
+            </article>
+          </div>
+        </section>
+
+        <section class="section">
+          <h2>Pipeline Diagram</h2>
+          <div class="mermaid-wrap">
+            <div class="mermaid">
+flowchart LR
+  A["Telemetry"] --> B["Feature engineering"]
+  B --> C["Anomaly model"]
+  C --> D["anomaly_score"]
+  D --> E["Event layer"]
+  E --> F["Decision layer"]
+  F --> G["API /detect-anomaly"]
+            </div>
+          </div>
+        </section>
+
+        <section class="section grid two">
+          <article class="callout success">
+            <strong>Điểm mạnh của lab</strong>
+            Có đủ vòng đời từ data, model, metric, event log đến API. Đây là nền tốt để học cách đưa ML vào backend AIoT.
+          </article>
+          <article class="callout warning">
+            <strong>Điểm cần nhớ</strong>
+            Lab chưa phải production. Cần đồng bộ scoring giữa training và API, lưu threshold trong artifact và bổ sung event store.
+          </article>
+        </section>
+
+        <nav class="footer-nav">
+          <span></span>
+          <a href="architecture.html">Tiếp theo: Architecture</a>
+        </nav>
+      </main>
+    </div>
+  </div>
+  <script type="module">
+    import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
+    const isDark = document.documentElement.dataset.theme === "dark";
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: "base",
+      securityLevel: "loose",
+      themeVariables: {
+        fontFamily: "Inter, Segoe UI, sans-serif",
+        background: "transparent",
+        mainBkg: isDark ? "#1b2639" : "#eef3fb",
+        primaryColor: isDark ? "#1b2639" : "#eef3fb",
+        primaryTextColor: isDark ? "#e8edf7" : "#172033",
+        primaryBorderColor: isDark ? "#66a3ff" : "#1d72f3",
+        lineColor: isDark ? "#a8b3c7" : "#5d6b82",
+        arrowheadColor: isDark ? "#a8b3c7" : "#5d6b82"
+      }
+    });
+  </script>
+</body>
+</html>
