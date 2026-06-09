@@ -8,6 +8,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/style.css">
+  <!-- Highlight.js Theme -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" id="hljs-theme">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
 </head>
 <body>
   <div class="app-layout">
@@ -21,7 +24,7 @@
       </div>
       <div class="top-nav-right">
         <div class="search-container">
-          <input type="text" id="searchInput" placeholder="Tìm kiếm tài liệu...">
+          <input type="text" id="searchInput" placeholder="Tìm kiếm tài liệu... (/)">
           <div class="search-results" id="searchResults"></div>
         </div>
         <button class="theme-toggle" id="themeToggle" title="Đổi giao diện">
@@ -65,8 +68,9 @@
 
       <!-- Main Content Area -->
       <main class="content-area">
-        <article class="markdown-body">
-          <h1 id="07-luong-du-lieu-trong-he-thong-data-flow">07. Luồng Dữ Liệu Trong Hệ Thống (Data Flow)</h1>
+        <div class="content-container">
+          <article class="markdown-body">
+            <h1 id="07-luong-du-lieu-trong-he-thong-data-flow">07. Luồng Dữ Liệu Trong Hệ Thống (Data Flow)</h1>
 <p>Hiểu rõ luồng dữ liệu (Data Flow) giúp bạn dễ dàng theo dõi đường đi của thông tin từ thiết bị IoT gửi lên, qua bộ xử lý AI, đến nơi lưu trữ log và quay ngược về người dùng dưới dạng kết quả hiển thị.</p>
 <hr />
 <h2 id="1-luong-du-lieu-cam-bien-telemetry-data-flow">1. Luồng Dữ Liệu Cảm Biến (Telemetry Data Flow)</h2>
@@ -78,13 +82,13 @@
     participant Engine as Sensor Inference Engine
     participant DB as CSV Log Files (Host Machine)
 
-    IoT-&gt;&gt;API: HTTP POST /detect-anomaly {JSON Payload}
+    IoT->>API: HTTP POST /detect-anomaly {JSON Payload}
     Note over API: Kiểm tra định dạng dữ liệu (Pydantic validation)
-    API-&gt;&gt;Engine: Gửi thông tin (current_value, recent_values)
-    Note over Engine: Tính toán trung bình &amp; z-score
-    Engine--&gt;&gt;API: Trả về kết quả đánh giá rủi ro (NORMAL/WARNING/HIGH)
-    API-&gt;&gt;DB: Ghi log lịch sử request (service_log.csv)
-    API--&gt;&gt;IoT: Phản hồi kết quả đánh giá &amp; ghi chú an toàn (JSON)
+    API->>Engine: Gửi thông tin (current_value, recent_values)
+    Note over Engine: Tính toán trung bình & z-score
+    Engine-->>API: Trả về kết quả đánh giá rủi ro (NORMAL/WARNING/HIGH)
+    API->>DB: Ghi log lịch sử request (service_log.csv)
+    API-->>IoT: Phản hồi kết quả đánh giá & ghi chú an toàn (JSON)
 </pre>
 <ol>
 <li><strong>Sinh dữ liệu</strong>: Thiết bị IoT cảm biến (ví dụ cảm biến đo nhiệt độ) đo được chỉ số hiện tại và gửi gói tin JSON kèm lịch sử đo đạc trước đó lên API qua phương thức POST.</li>
@@ -104,17 +108,17 @@
     participant ONNX as ONNX Runtime Session
     participant DB as CSV Log Files (Host Machine)
 
-    User-&gt;&gt;API: HTTP POST /classify-image (Multipart File)
-    Note over API: Đọc ảnh nhị phân &amp; kiểm tra kích thước file
-    API-&gt;&gt;PIL: Chuyển dữ liệu nhị phân thành đối tượng Image
-    Note over PIL: RGB -&gt; Resize 256 -&gt; Center Crop 224 -&gt; Normalize -&gt; Transpose (NCHW)
-    PIL--&gt;&gt;API: Trả về ma trận Tensor chuẩn hóa [1, 3, 224, 224]
-    API-&gt;&gt;ONNX: Nạp Tensor và chạy suy luận (session.run)
+    User->>API: HTTP POST /classify-image (Multipart File)
+    Note over API: Đọc ảnh nhị phân & kiểm tra kích thước file
+    API->>PIL: Chuyển dữ liệu nhị phân thành đối tượng Image
+    Note over PIL: RGB -> Resize 256 -> Center Crop 224 -> Normalize -> Transpose (NCHW)
+    PIL-->>API: Trả về ma trận Tensor chuẩn hóa [1, 3, 224, 224]
+    API->>ONNX: Nạp Tensor và chạy suy luận (session.run)
     Note over ONNX: SqueezeNet chạy suy luận trên CPU
-    ONNX--&gt;&gt;API: Trả về mảng Logits (1000 giá trị)
+    ONNX-->>API: Trả về mảng Logits (1000 giá trị)
     Note over API: Tính toán Softmax ra % độ tin cậy
-    API-&gt;&gt;DB: Ghi log kết quả Top-1 &amp; thời gian inference (vision_inference_log.csv)
-    API--&gt;&gt;User: Trả về JSON Top-K nhãn dự đoán &amp; Confidence
+    API->>DB: Ghi log kết quả Top-1 & thời gian inference (vision_inference_log.csv)
+    API-->>User: Trả về JSON Top-K nhãn dự đoán & Confidence
 </pre>
 <ol>
 <li><strong>Upload ảnh</strong>: Người dùng chọn ảnh hoặc camera gửi ảnh chụp nhị phân (Multipart Form Data) lên API <code>/classify-image</code>.</li>
@@ -124,11 +128,16 @@
 <li><strong>Ghi nhật ký hệ thống</strong>: Log chi tiết (Tên tệp, Định dạng ảnh, Nhãn dự đoán Top-1, Tỷ lệ %, Thời gian suy luận bằng mili-giây) được ghi ngay vào tệp <code>outputs/vision_inference_log.csv</code>.</li>
 <li><strong>Vẽ kết quả lên ảnh (Tùy chọn)</strong>: Nếu Client gọi endpoint <code>/classify-image-annotated</code>, API sẽ vẽ nhãn Top-1 lên góc ảnh nhờ Pillow và gửi trả về luồng ảnh PNG (StreamingResponse) để người dùng xem trực quan.</li>
 </ol>
-        </article>
+          </article>
+        </div>
       </main>
+
+      <!-- Right Table of Contents Panel -->
+      <aside class="toc-panel" id="tocPanel"></aside>
     </div>
   </div>
 
+  <script src="../js/search_index.js"></script>
   <script src="../js/main.js"></script>
   <!-- Mermaid.js for Diagrams -->
   <script type="module">
@@ -138,17 +147,6 @@
       theme: document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default',
       securityLevel: 'loose'
     });
-    
-    // Handle theme toggle rendering for Mermaid
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.attributeName === 'data-theme') {
-          const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default';
-          location.reload(); // Quickest way to rerender SVG diagrams natively
-        }
-      });
-    });
-    observer.observe(document.documentElement, { attributes: true });
   </script>
 </body>
 </html>

@@ -8,6 +8,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/style.css">
+  <!-- Highlight.js Theme -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" id="hljs-theme">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
 </head>
 <body>
   <div class="app-layout">
@@ -21,7 +24,7 @@
       </div>
       <div class="top-nav-right">
         <div class="search-container">
-          <input type="text" id="searchInput" placeholder="Tìm kiếm tài liệu...">
+          <input type="text" id="searchInput" placeholder="Tìm kiếm tài liệu... (/)">
           <div class="search-results" id="searchResults"></div>
         </div>
         <button class="theme-toggle" id="themeToggle" title="Đổi giao diện">
@@ -65,8 +68,9 @@
 
       <!-- Main Content Area -->
       <main class="content-area">
-        <article class="markdown-body">
-          <h1 id="checklist-nop-bai-lab-5-v4">CHECKLIST NỘP BÀI - LAB 5 V4</h1>
+        <div class="content-container">
+          <article class="markdown-body">
+            <h1 id="checklist-nop-bai-lab-5-v4">CHECKLIST NỘP BÀI - LAB 5 V4</h1>
 <h2 id="1-minh-chung-chay-local">1. Minh chứng chạy local</h2>
 <ul>
 <li>Ảnh chụp <code>/health</code> khi chạy local.</li>
@@ -112,11 +116,16 @@
 <li>Nếu Docker chạy được nhưng trình duyệt không mở API được, cần kiểm tra những điểm nào?</li>
 <li>Trong doanh nghiệp, vì sao cần model version và image tag?</li>
 </ol>
-        </article>
+          </article>
+        </div>
       </main>
+
+      <!-- Right Table of Contents Panel -->
+      <aside class="toc-panel" id="tocPanel"></aside>
     </div>
   </div>
 
+  <script src="../js/search_index.js"></script>
   <script src="../js/main.js"></script>
   <!-- Mermaid.js for Diagrams -->
   <script type="module">
@@ -126,17 +135,6 @@
       theme: document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default',
       securityLevel: 'loose'
     });
-    
-    // Handle theme toggle rendering for Mermaid
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.attributeName === 'data-theme') {
-          const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default';
-          location.reload(); // Quickest way to rerender SVG diagrams natively
-        }
-      });
-    });
-    observer.observe(document.documentElement, { attributes: true });
   </script>
 </body>
 </html>

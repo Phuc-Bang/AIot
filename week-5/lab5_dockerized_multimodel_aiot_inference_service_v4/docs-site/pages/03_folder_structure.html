@@ -8,6 +8,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/style.css">
+  <!-- Highlight.js Theme -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" id="hljs-theme">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
 </head>
 <body>
   <div class="app-layout">
@@ -21,7 +24,7 @@
       </div>
       <div class="top-nav-right">
         <div class="search-container">
-          <input type="text" id="searchInput" placeholder="Tìm kiếm tài liệu...">
+          <input type="text" id="searchInput" placeholder="Tìm kiếm tài liệu... (/)">
           <div class="search-results" id="searchResults"></div>
         </div>
         <button class="theme-toggle" id="themeToggle" title="Đổi giao diện">
@@ -65,8 +68,9 @@
 
       <!-- Main Content Area -->
       <main class="content-area">
-        <article class="markdown-body">
-          <h1 id="03-cau-truc-thu-muc-du-an-folder-structure">03. Cấu Trúc Thư Mục Dự Án (Folder Structure)</h1>
+        <div class="content-container">
+          <article class="markdown-body">
+            <h1 id="03-cau-truc-thu-muc-du-an-folder-structure">03. Cấu Trúc Thư Mục Dự Án (Folder Structure)</h1>
 <p>Một dự án AIoT chuẩn doanh nghiệp cần có cấu trúc thư mục rõ ràng, phân định rạch ròi giữa mã nguồn ứng dụng (app), dữ liệu tĩnh (assets/sample_images), các kịch bản chạy thử (scripts), tệp tin kiểm thử (tests) và tệp tin đóng gói (Docker configurations).</p>
 <hr />
 <h2 id="1-so-o-cay-thu-muc-chi-tiet">1. Sơ Đồ Cây Thư Mục Chi Tiết</h2>
@@ -120,18 +124,23 @@
 <h3 id="a-tach-biet-frontend-va-backend-apptemplates">A. Tách biệt Frontend và Backend (<code>app/templates/</code>)</h3>
 <ul>
 <li><strong>Trước đây</strong>: File HTML giao diện được viết dưới dạng một chuỗi văn bản (String) khổng lồ nằm trực tiếp trong file mã nguồn Python <code>app/main.py</code>. Điều này làm code Python cực kỳ dài, khó đọc, không thể sử dụng tính năng tự động gợi ý code (IntelliSense) của các IDE khi chỉnh sửa HTML/CSS/JS.</li>
-<li><strong>Giải pháp tối ưu</strong>: Tách toàn bộ mã giao diện ra tệp <a href="file:///e:/AIoT/Home-Work/week-5/lab5_dockerized_multimodel_aiot_inference_service_v4/app/templates/classify-image-demo.html">classify-image-demo.html</a>. File <code>main.py</code> chỉ làm nhiệm vụ đọc tệp tin này từ đĩa và trả về qua giao thức HTTP. Giao diện được thiết kế theo chuẩn <code>taste-skill</code> giúp tăng tính thẩm mỹ vượt trội.</li>
+<li><strong>Giải pháp tối ưu</strong>: Tách toàn bộ mã giao diện ra tệp <a href="../../app/templates/classify-image-demo.html">classify-image-demo.html</a>. File <code>main.py</code> chỉ làm nhiệm vụ đọc tệp tin này từ đĩa và trả về qua giao thức HTTP. Giao diện được thiết kế theo chuẩn <code>taste-skill</code> giúp tăng tính thẩm mỹ vượt trội.</li>
 </ul>
 <h3 id="b-module-hoa-cong-viec-modularization">B. Module Hóa Công Việc (Modularization)</h3>
 <ul>
 <li><strong><code>app/schemas.py</code></strong>: Định nghĩa khuôn mẫu dữ liệu (Data contract). Nếu Client gửi sai định dạng (ví dụ thiếu trường dữ liệu hoặc sai kiểu dữ liệu), FastAPI sẽ tự động chặn và trả lỗi về ngay tại cổng kiểm soát đầu tiên, giúp bảo vệ các hàm tính toán xử lý ở phía sau.</li>
 <li><strong><code>app/sensor_inference.py</code></strong> &amp; <strong><code>app/vision_inference.py</code></strong>: Tách biệt hoàn toàn phần xử lý toán học/mô hình AI ra khỏi phần điều phối mạng. Nhờ vậy, khi bạn muốn thay thế mô hình phân loại ảnh mới mạnh hơn, bạn chỉ việc sửa logic trong file <code>vision_inference.py</code> mà không cần đụng vào file định cấu hình API <code>main.py</code>.</li>
 </ul>
-        </article>
+          </article>
+        </div>
       </main>
+
+      <!-- Right Table of Contents Panel -->
+      <aside class="toc-panel" id="tocPanel"></aside>
     </div>
   </div>
 
+  <script src="../js/search_index.js"></script>
   <script src="../js/main.js"></script>
   <!-- Mermaid.js for Diagrams -->
   <script type="module">
@@ -141,17 +150,6 @@
       theme: document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default',
       securityLevel: 'loose'
     });
-    
-    // Handle theme toggle rendering for Mermaid
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.attributeName === 'data-theme') {
-          const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default';
-          location.reload(); // Quickest way to rerender SVG diagrams natively
-        }
-      });
-    });
-    observer.observe(document.documentElement, { attributes: true });
   </script>
 </body>
 </html>

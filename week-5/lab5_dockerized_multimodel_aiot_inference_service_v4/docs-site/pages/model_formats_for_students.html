@@ -8,6 +8,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/style.css">
+  <!-- Highlight.js Theme -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" id="hljs-theme">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
 </head>
 <body>
   <div class="app-layout">
@@ -21,7 +24,7 @@
       </div>
       <div class="top-nav-right">
         <div class="search-container">
-          <input type="text" id="searchInput" placeholder="Tìm kiếm tài liệu...">
+          <input type="text" id="searchInput" placeholder="Tìm kiếm tài liệu... (/)">
           <div class="search-results" id="searchResults"></div>
         </div>
         <button class="theme-toggle" id="themeToggle" title="Đổi giao diện">
@@ -65,8 +68,9 @@
 
       <!-- Main Content Area -->
       <main class="content-area">
-        <article class="markdown-body">
-          <h1 id="inh-dang-model-trong-trien-khai-ai">ĐỊNH DẠNG MODEL TRONG TRIỂN KHAI AI</h1>
+        <div class="content-container">
+          <article class="markdown-body">
+            <h1 id="inh-dang-model-trong-trien-khai-ai">ĐỊNH DẠNG MODEL TRONG TRIỂN KHAI AI</h1>
 <h2 id="1-khong-bat-au-bang-onnx">1. Không bắt đầu bằng ONNX</h2>
 <p>Model thường được train trong một framework cụ thể. Sau khi train xong, model được lưu ở định dạng gốc của framework đó. Khi đưa vào triển khai, định dạng triển khai được lựa chọn dựa trên runtime, phần cứng, tốc độ inference, kích thước model và khả năng bảo trì.</p>
 <h2 id="2-inh-dang-model-thuong-gap">2. Định dạng model thường gặp</h2>
@@ -154,11 +158,16 @@
 <li>Khi nào nên ưu tiên model nhẹ thay vì model có độ chính xác cao hơn?</li>
 <li>Với thiết bị biên, kích thước model và latency ảnh hưởng thế nào đến hệ thống?</li>
 </ol>
-        </article>
+          </article>
+        </div>
       </main>
+
+      <!-- Right Table of Contents Panel -->
+      <aside class="toc-panel" id="tocPanel"></aside>
     </div>
   </div>
 
+  <script src="../js/search_index.js"></script>
   <script src="../js/main.js"></script>
   <!-- Mermaid.js for Diagrams -->
   <script type="module">
@@ -168,17 +177,6 @@
       theme: document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default',
       securityLevel: 'loose'
     });
-    
-    // Handle theme toggle rendering for Mermaid
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.attributeName === 'data-theme') {
-          const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default';
-          location.reload(); // Quickest way to rerender SVG diagrams natively
-        }
-      });
-    });
-    observer.observe(document.documentElement, { attributes: true });
   </script>
 </body>
 </html>

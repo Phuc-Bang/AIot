@@ -8,6 +8,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/style.css">
+  <!-- Highlight.js Theme -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" id="hljs-theme">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
 </head>
 <body>
   <div class="app-layout">
@@ -21,7 +24,7 @@
       </div>
       <div class="top-nav-right">
         <div class="search-container">
-          <input type="text" id="searchInput" placeholder="Tìm kiếm tài liệu...">
+          <input type="text" id="searchInput" placeholder="Tìm kiếm tài liệu... (/)">
           <div class="search-results" id="searchResults"></div>
         </div>
         <button class="theme-toggle" id="themeToggle" title="Đổi giao diện">
@@ -65,8 +68,9 @@
 
       <!-- Main Content Area -->
       <main class="content-area">
-        <article class="markdown-body">
-          <h1 id="06-trien-khai-voi-docker-docker-compose-docker-deployment">06. Triển Khai Với Docker &amp; Docker Compose (Docker Deployment)</h1>
+        <div class="content-container">
+          <article class="markdown-body">
+            <h1 id="06-trien-khai-voi-docker-docker-compose-docker-deployment">06. Triển Khai Với Docker &amp; Docker Compose (Docker Deployment)</h1>
 <p>Triển khai container hóa (Containerization) là bước quan trọng nhất để đưa dịch vụ AIoT lên môi trường doanh nghiệp Cloud/Edge Server ổn định.</p>
 <hr />
 <h2 id="1-giai-ma-dockerfile-cong-thuc-xay-dung-image">1. Giải Mã Dockerfile (Công Thức Xây Dựng Image)</h2>
@@ -131,11 +135,16 @@
   <code>bash
   docker compose ps</code></li>
 </ul>
-        </article>
+          </article>
+        </div>
       </main>
+
+      <!-- Right Table of Contents Panel -->
+      <aside class="toc-panel" id="tocPanel"></aside>
     </div>
   </div>
 
+  <script src="../js/search_index.js"></script>
   <script src="../js/main.js"></script>
   <!-- Mermaid.js for Diagrams -->
   <script type="module">
@@ -145,17 +154,6 @@
       theme: document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default',
       securityLevel: 'loose'
     });
-    
-    // Handle theme toggle rendering for Mermaid
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.attributeName === 'data-theme') {
-          const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default';
-          location.reload(); // Quickest way to rerender SVG diagrams natively
-        }
-      });
-    });
-    observer.observe(document.documentElement, { attributes: true });
   </script>
 </body>
 </html>

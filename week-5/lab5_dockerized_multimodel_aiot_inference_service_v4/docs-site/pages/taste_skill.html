@@ -8,6 +8,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/style.css">
+  <!-- Highlight.js Theme -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" id="hljs-theme">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
 </head>
 <body>
   <div class="app-layout">
@@ -21,7 +24,7 @@
       </div>
       <div class="top-nav-right">
         <div class="search-container">
-          <input type="text" id="searchInput" placeholder="Tìm kiếm tài liệu...">
+          <input type="text" id="searchInput" placeholder="Tìm kiếm tài liệu... (/)">
           <div class="search-results" id="searchResults"></div>
         </div>
         <button class="theme-toggle" id="themeToggle" title="Đổi giao diện">
@@ -65,8 +68,9 @@
 
       <!-- Main Content Area -->
       <main class="content-area">
-        <article class="markdown-body">
-          <h1 id="ai-agent-design-skill-premium-aiot-dashboard-architect-vanilla-htmlcssjs-edition">AI Agent Design Skill: Premium AIoT Dashboard Architect (Vanilla HTML/CSS/JS Edition)</h1>
+        <div class="content-container">
+          <article class="markdown-body">
+            <h1 id="ai-agent-design-skill-premium-aiot-dashboard-architect-vanilla-htmlcssjs-edition">AI Agent Design Skill: Premium AIoT Dashboard Architect (Vanilla HTML/CSS/JS Edition)</h1>
 <p>Tài liệu này chứa các quy tắc thiết kế giao diện (UI/UX) cao cấp, được trích xuất và tối ưu hóa từ kho lưu trữ <code>taste-skill</code> để áp dụng riêng cho các dự án web sử dụng <strong>Vanilla HTML, CSS và JavaScript</strong> (như trang demo phân loại ảnh và bảng điều khiển cảm biến của <strong>Week 5</strong>).</p>
 <hr />
 <h2 id="1-nguyen-tac-cot-loi-core-directives">1. Nguyên Tắc Cốt Lõi (Core Directives)</h2>
@@ -184,11 +188,16 @@ button:active {
 <li>[ ] Bảng kết quả Top-K có các đường hairline mỏng tinh tế thay vì viền dày không?</li>
 <li>[ ] Tất cả hiệu ứng chuyển động có dùng <code>cubic-bezier(0.16, 1, 0.3, 1)</code> (mô phỏng lò xo vật lý) không?</li>
 </ul>
-        </article>
+          </article>
+        </div>
       </main>
+
+      <!-- Right Table of Contents Panel -->
+      <aside class="toc-panel" id="tocPanel"></aside>
     </div>
   </div>
 
+  <script src="../js/search_index.js"></script>
   <script src="../js/main.js"></script>
   <!-- Mermaid.js for Diagrams -->
   <script type="module">
@@ -198,17 +207,6 @@ button:active {
       theme: document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default',
       securityLevel: 'loose'
     });
-    
-    // Handle theme toggle rendering for Mermaid
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.attributeName === 'data-theme') {
-          const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default';
-          location.reload(); // Quickest way to rerender SVG diagrams natively
-        }
-      });
-    });
-    observer.observe(document.documentElement, { attributes: true });
   </script>
 </body>
 </html>

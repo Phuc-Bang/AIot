@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 import os
 import re
+import html
+import json
 from pathlib import Path
 import markdown
 
@@ -33,11 +35,11 @@ GUIDE_DOCS = [
 
 def make_sidebar(current_filename: str, depth=0) -> str:
     prefix = "" if depth == 0 else "../"
-    html = []
+    html_lines = []
     
-    html.append('<div class="sidebar-section">')
-    html.append('  <h4 class="sidebar-title">Core Documentation</h4>')
-    html.append('  <ul class="sidebar-list">')
+    html_lines.append('<div class="sidebar-section">')
+    html_lines.append('  <h4 class="sidebar-title">Core Documentation</h4>')
+    html_lines.append('  <ul class="sidebar-list">')
     for file, title in CORE_DOCS:
         link = f"{prefix}pages/{file.replace('.md', '.html')}"
         if file == "01_project_overview.md" and current_filename == "index.html":
@@ -45,32 +47,74 @@ def make_sidebar(current_filename: str, depth=0) -> str:
         elif current_filename == file:
             link = "#"
         active = 'active' if current_filename == file or (file == "01_project_overview.md" and current_filename == "index.html") else ''
-        html.append(f'    <li><a href="{link}" class="sidebar-link {active}">{title}</a></li>')
-    html.append('  </ul>')
-    html.append('</div>')
+        html_lines.append(f'    <li><a href="{link}" class="sidebar-link {active}">{title}</a></li>')
+    html_lines.append('  </ul>')
+    html_lines.append('</div>')
 
-    html.append('<div class="sidebar-section">')
-    html.append('  <h4 class="sidebar-title">References & Guides</h4>')
-    html.append('  <ul class="sidebar-list">')
+    html_lines.append('<div class="sidebar-section">')
+    html_lines.append('  <h4 class="sidebar-title">References & Guides</h4>')
+    html_lines.append('  <ul class="sidebar-list">')
     for file, title in GUIDE_DOCS:
         link = f"{prefix}pages/{file.replace('.md', '.html')}"
         if current_filename == file:
             link = "#"
         active = 'active' if current_filename == file else ''
-        html.append(f'    <li><a href="{link}" class="sidebar-link {active}">{title}</a></li>')
-    html.append('  </ul>')
-    html.append('</div>')
+        html_lines.append(f'    <li><a href="{link}" class="sidebar-link {active}">{title}</a></li>')
+    html_lines.append('  </ul>')
+    html_lines.append('</div>')
 
-    return "\n".join(html)
+    return "\n".join(html_lines)
 
 def convert_mermaid(html_content: str) -> str:
     # Convert <pre><code class="language-mermaid">...</code></pre> to <pre class="mermaid">...</pre> for Mermaid.js
-    pattern = re.compile(r'<pre><code class class="language-mermaid">(.*?)</code></pre>', re.DOTALL)
-    html_content = pattern.sub(r'<pre class="mermaid">\1</pre>', html_content)
+    pattern = re.compile(r'<pre><code class="language-mermaid">(.*?)</code></pre>', re.DOTALL)
+    def replace_mermaid(match):
+        code_content = match.group(1)
+        decoded = html.unescape(code_content)
+        return f'<pre class="mermaid">{decoded}</pre>'
     
-    pattern2 = re.compile(r'<pre><code class="language-mermaid">(.*?)</code></pre>', re.DOTALL)
-    html_content = pattern2.sub(r'<pre class="mermaid">\1</pre>', html_content)
+    html_content = pattern.sub(replace_mermaid, html_content)
+    
+    pattern2 = re.compile(r'<pre><code class="mermaid">(.*?)</code></pre>', re.DOTALL)
+    html_content = pattern2.sub(replace_mermaid, html_content)
     return html_content
+
+def rewrite_html_links(html_content: str, current_filename: str, depth: int) -> str:
+    # Regex to match href="..."
+    href_pattern = re.compile(r'href="([^"]+)"')
+    
+    def replace_href(match):
+        url = match.group(1)
+        
+        # If it's a file:/// link pointing to our project docs or code
+        project_folder_match = re.search(r'lab5_dockerized_multimodel_aiot_inference_service_v4/(.*)', url)
+        if project_folder_match:
+            subpath = project_folder_match.group(1)
+            # E.g., docs/model_formats_for_students.md or app/templates/classify-image-demo.html
+            if subpath.startswith("docs/"):
+                doc_name = subpath.replace("docs/", "")
+                doc_html = doc_name.replace(".md", ".html")
+                if depth == 0:
+                    return f'href="pages/{doc_html}"'
+                else:
+                    return f'href="{doc_html}"'
+            else:
+                root_relative_prefix = "../" if depth == 0 else "../../"
+                return f'href="{root_relative_prefix}{subpath}"'
+        
+        # If it's a relative link ending with .md (e.g. model_formats_for_students.md or ./model_formats_for_students.md)
+        if url.endswith(".md") and not url.startswith("http") and not url.startswith("file:"):
+            clean_url = url.lstrip("./")
+            doc_name = os.path.basename(clean_url)
+            doc_html = doc_name.replace(".md", ".html")
+            if depth == 0:
+                return f'href="pages/{doc_html}"'
+            else:
+                return f'href="{doc_html}"'
+                
+        return match.group(0)
+    
+    return href_pattern.sub(replace_href, html_content)
 
 def build_template(title: str, content: str, sidebar_html: str, depth=0) -> str:
     prefix = "" if depth == 0 else "../"
@@ -85,6 +129,9 @@ def build_template(title: str, content: str, sidebar_html: str, depth=0) -> str:
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{prefix}css/style.css">
+  <!-- Highlight.js Theme -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" id="hljs-theme">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
 </head>
 <body>
   <div class="app-layout">
@@ -98,7 +145,7 @@ def build_template(title: str, content: str, sidebar_html: str, depth=0) -> str:
       </div>
       <div class="top-nav-right">
         <div class="search-container">
-          <input type="text" id="searchInput" placeholder="Tìm kiếm tài liệu...">
+          <input type="text" id="searchInput" placeholder="Tìm kiếm tài liệu... (/)">
           <div class="search-results" id="searchResults"></div>
         </div>
         <button class="theme-toggle" id="themeToggle" title="Đổi giao diện">
@@ -117,13 +164,19 @@ def build_template(title: str, content: str, sidebar_html: str, depth=0) -> str:
 
       <!-- Main Content Area -->
       <main class="content-area">
-        <article class="markdown-body">
-          {content}
-        </article>
+        <div class="content-container">
+          <article class="markdown-body">
+            {content}
+          </article>
+        </div>
       </main>
+
+      <!-- Right Table of Contents Panel -->
+      <aside class="toc-panel" id="tocPanel"></aside>
     </div>
   </div>
 
+  <script src="{prefix}js/search_index.js"></script>
   <script src="{prefix}js/main.js"></script>
   <!-- Mermaid.js for Diagrams -->
   <script type="module">
@@ -133,17 +186,6 @@ def build_template(title: str, content: str, sidebar_html: str, depth=0) -> str:
       theme: document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default',
       securityLevel: 'loose'
     }});
-    
-    // Handle theme toggle rendering for Mermaid
-    const observer = new MutationObserver((mutations) => {{
-      mutations.forEach((mutation) => {{
-        if (mutation.attributeName === 'data-theme') {{
-          const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default';
-          location.reload(); // Quickest way to rerender SVG diagrams natively
-        }}
-      }});
-    }});
-    observer.observe(document.documentElement, {{ attributes: true }});
   </script>
 </body>
 </html>
@@ -174,23 +216,25 @@ def main():
   --pre-bg: #030712;
   --table-header-bg: rgba(15, 23, 42, 0.6);
   --highlight-bg: rgba(56, 189, 248, 0.1);
+  --scrollbar-thumb: #1e293b;
 }
 
 :root[data-theme="light"] {
-  --bg-base: #f9fafb;
+  --bg-base: #f8fafc;
   --bg-sidebar: #ffffff;
   --bg-nav: rgba(255, 255, 255, 0.8);
   --border-color: rgba(0, 0, 0, 0.08);
-  --text-primary: #1f2937;
-  --text-secondary: #4b5563;
-  --text-muted: #9ca3af;
+  --text-primary: #0f172a;
+  --text-secondary: #334155;
+  --text-muted: #64748b;
   --accent-color: #0284c7;
   --accent-hover: #0369a1;
-  --card-bg: #f3f4f6;
-  --code-bg: #f1f5f9;
+  --card-bg: #f1f5f9;
+  --code-bg: #e2e8f0;
   --pre-bg: #f8fafc;
   --table-header-bg: #e2e8f0;
   --highlight-bg: rgba(2, 132, 199, 0.1);
+  --scrollbar-thumb: #cbd5e1;
 }
 
 * {
@@ -206,6 +250,19 @@ body {
   min-height: 100vh;
   line-height: 1.6;
   transition: background-color 0.3s, color 0.3s;
+}
+
+/* Scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 4px;
 }
 
 /* App Layout */
@@ -273,11 +330,12 @@ body {
   color: var(--text-primary);
   font-size: 0.875rem;
   outline: none;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .search-container input:focus {
   border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px var(--highlight-bg);
 }
 
 .search-results {
@@ -402,12 +460,67 @@ body {
   flex: 1;
   overflow-y: auto;
   padding: 40px 48px;
+  display: flex;
+  justify-content: center;
+}
+
+.content-container {
+  max-width: 860px;
+  width: 100%;
+}
+
+/* Right Table of Contents Panel */
+.toc-panel {
+  width: 240px;
+  flex-shrink: 0;
+  padding: 40px 24px 40px 16px;
+  overflow-y: auto;
+  border-left: 1px solid var(--border-color);
+}
+
+.toc-title {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.toc-list {
+  list-style: none;
+  padding-left: 0;
+}
+
+.toc-item {
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.toc-h2 {
+  padding-left: 0;
+  font-size: 0.85rem;
+}
+
+.toc-h3 {
+  padding-left: 12px;
+  font-size: 0.8rem;
+}
+
+.toc-link {
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color 0.2s;
+  display: inline-block;
+}
+
+.toc-link:hover {
+  color: var(--accent-color);
 }
 
 /* Markdown Styling (Modern documentation-style typography) */
 .markdown-body {
-  max-width: 860px;
-  margin: 0 auto;
+  max-width: 100%;
 }
 
 .markdown-body h1 {
@@ -483,6 +596,51 @@ body {
   background-color: var(--table-header-bg);
 }
 
+/* Code wrapper and copy button */
+.code-wrapper {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.code-wrapper pre {
+  margin-bottom: 0 !important;
+}
+
+.copy-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  color: var(--text-secondary);
+  padding: 4px 8px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.2s, background 0.2s, color 0.2s;
+  font-family: inherit;
+  z-index: 10;
+}
+
+.code-wrapper:hover .copy-button {
+  opacity: 1;
+}
+
+.copy-button:hover {
+  background: rgba(15, 23, 42, 0.9);
+  color: var(--text-primary);
+}
+
+.copy-button.copied {
+  border-color: #22c55e;
+  color: #22c55e;
+  background: rgba(34, 197, 94, 0.1);
+}
+
 /* Code block styling */
 .markdown-body pre {
   background-color: var(--pre-bg);
@@ -490,7 +648,6 @@ body {
   border-radius: 12px;
   padding: 16px;
   overflow-x: auto;
-  margin-bottom: 20px;
 }
 
 .markdown-body code {
@@ -533,6 +690,12 @@ body {
 }
 
 /* Responsive CSS */
+@media (max-width: 1200px) {
+  .toc-panel {
+    display: none;
+  }
+}
+
 @media (max-width: 860px) {
   .mobile-menu-toggle {
     display: block;
@@ -596,15 +759,23 @@ document.addEventListener('DOMContentLoaded', () => {
     document.documentElement.setAttribute('data-theme', newTheme);
     localStorage.setItem('theme', newTheme);
     updateThemeIcons(newTheme);
+    
+    // Reload only if there are mermaid diagrams on the page to redraw them natively
+    if (document.querySelector('.mermaid')) {
+      location.reload();
+    }
   });
 
   function updateThemeIcons(theme) {
+    const hljsTheme = document.getElementById('hljs-theme');
     if (theme === 'dark') {
       sunIcon.style.display = 'block';
       moonIcon.style.display = 'none';
+      if (hljsTheme) hljsTheme.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css';
     } else {
       sunIcon.style.display = 'none';
       moonIcon.style.display = 'block';
+      if (hljsTheme) hljsTheme.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css';
     }
   }
 
@@ -627,21 +798,100 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Simple Search Index Logic
+  // Generate Table of Contents (TOC) dynamically
+  const article = document.querySelector('.markdown-body');
+  const tocPanel = document.getElementById('tocPanel');
+  
+  if (article && tocPanel) {
+    const headings = article.querySelectorAll('h2, h3');
+    if (headings.length > 0) {
+      const tocTitle = document.createElement('div');
+      tocTitle.className = 'toc-title';
+      tocTitle.textContent = 'Mục lục';
+      tocPanel.appendChild(tocTitle);
+      
+      const tocList = document.createElement('ul');
+      tocList.className = 'toc-list';
+      
+      headings.forEach((heading, idx) => {
+        // Ensure heading has an ID
+        if (!heading.id) {
+          heading.id = 'heading-' + idx;
+        }
+        
+        const li = document.createElement('li');
+        li.className = 'toc-item ' + (heading.tagName === 'H3' ? 'toc-h3' : 'toc-h2');
+        
+        const a = document.createElement('a');
+        a.href = '#' + heading.id;
+        a.className = 'toc-link';
+        a.textContent = heading.textContent;
+        
+        li.appendChild(a);
+        tocList.appendChild(li);
+      });
+      
+      tocPanel.appendChild(tocList);
+    } else {
+      tocPanel.style.display = 'none';
+    }
+  }
+
+  // Add Copy to Clipboard Buttons to Code Blocks
+  const codeBlocks = document.querySelectorAll('pre');
+  codeBlocks.forEach((block) => {
+    // If it's a mermaid block, skip copy button
+    if (block.classList.contains('mermaid')) return;
+    
+    // Create wrapper
+    const wrapper = document.createElement('div');
+    wrapper.className = 'code-wrapper';
+    block.parentNode.insertBefore(wrapper, block);
+    wrapper.appendChild(block);
+    
+    // Create copy button
+    const copyBtn = document.createElement('button');
+    copyBtn.className = 'copy-button';
+    copyBtn.innerHTML = `
+      <svg class="copy-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+      <span class="copy-text">Copy</span>
+    `;
+    wrapper.appendChild(copyBtn);
+    
+    copyBtn.addEventListener('click', () => {
+      const codeText = block.innerText;
+      navigator.clipboard.writeText(codeText).then(() => {
+        copyBtn.querySelector('.copy-text').textContent = 'Copied!';
+        copyBtn.classList.add('copied');
+        setTimeout(() => {
+          copyBtn.querySelector('.copy-text').textContent = 'Copy';
+          copyBtn.classList.remove('copied');
+        }, 2000);
+      });
+    });
+  });
+
+  // Run Highlight.js
+  if (typeof hljs !== 'undefined') {
+    hljs.highlightAll();
+  }
+
+  // Local Search Index Logic (uses window.searchIndex loaded from js/search_index.js)
   const searchInput = document.getElementById('searchInput');
   const searchResults = document.getElementById('searchResults');
   
-  // Fetch site pages data dynamically for search
+  const searchIndex = window.searchIndex || [];
   const isSubPage = window.location.pathname.includes('/pages/');
-  const searchIndexPath = isSubPage ? '../search_index.json' : 'search_index.json';
-  
-  let searchIndex = [];
-  fetch(searchIndexPath)
-    .then(res => res.json())
-    .then(data => { searchIndex = data; })
-    .catch(err => console.error('Failed to load search index:', err));
 
   if (searchInput) {
+    // Shortcut '/' to focus search
+    document.addEventListener('keydown', (e) => {
+      if (e.key === '/' && document.activeElement !== searchInput) {
+        e.preventDefault();
+        searchInput.focus();
+      }
+    });
+
     searchInput.addEventListener('input', (e) => {
       const query = e.target.value.toLowerCase().trim();
       if (!query) {
@@ -705,8 +955,11 @@ document.addEventListener('DOMContentLoaded', () => {
         
         # Convert Markdown to HTML
         raw_html = md_parser.convert(content)
-        # Apply Mermaid formatting conversion
+        # Apply Mermaid formatting conversion (decodes HTML entities)
         styled_html = convert_mermaid(raw_html)
+        
+        # Translate links inside the HTML content
+        styled_html = rewrite_html_links(styled_html, filename, depth=1)
         
         sidebar_html = make_sidebar(filename, depth=1)
         html_page = build_template(title, styled_html, sidebar_html, depth=1)
@@ -727,18 +980,24 @@ document.addEventListener('DOMContentLoaded', () => {
         if filename == "01_project_overview.md":
             sidebar_root = make_sidebar("index.html", depth=0)
             styled_html_root = convert_mermaid(raw_html)
+            # Translate links for root file (depth=0)
+            styled_html_root = rewrite_html_links(styled_html_root, "index.html", depth=0)
             
-            # Since index.html is at root, we need to adjust image links if any
-            # (no nested path in index.html, it's at root level)
             index_page = build_template(title, styled_html_root, sidebar_root, depth=0)
             (TARGET_DIR / "index.html").write_text(index_page, encoding="utf-8")
             print("Generated: index.html (homepage)")
 
-    # 4. Save search index json
+    # 4. Save search index json & javascript (for file:/// protocol CORS bypass)
     import json
     search_index_path = TARGET_DIR / "search_index.json"
     search_index_path.write_text(json.dumps(search_data, ensure_ascii=False, indent=2), encoding="utf-8")
+    
+    search_index_js_path = TARGET_DIR / "js" / "search_index.js"
+    js_search_data = "window.searchIndex = " + json.dumps(search_data, ensure_ascii=False, indent=2) + ";"
+    search_index_js_path.write_text(js_search_data, encoding="utf-8")
+    
     print(f"Generated search index at: {search_index_path}")
+    print(f"Generated search index JS at: {search_index_js_path}")
     print("Documentation build completed successfully!")
 
 if __name__ == "__main__":

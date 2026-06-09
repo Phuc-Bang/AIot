@@ -8,6 +8,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/style.css">
+  <!-- Highlight.js Theme -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" id="hljs-theme">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
 </head>
 <body>
   <div class="app-layout">
@@ -21,7 +24,7 @@
       </div>
       <div class="top-nav-right">
         <div class="search-container">
-          <input type="text" id="searchInput" placeholder="Tìm kiếm tài liệu...">
+          <input type="text" id="searchInput" placeholder="Tìm kiếm tài liệu... (/)">
           <div class="search-results" id="searchResults"></div>
         </div>
         <button class="theme-toggle" id="themeToggle" title="Đổi giao diện">
@@ -65,8 +68,9 @@
 
       <!-- Main Content Area -->
       <main class="content-area">
-        <article class="markdown-body">
-          <h1 id="04-tai-lieu-api-tham-chieu-api-reference">04. Tài Liệu API Tham Chiếu (API Reference)</h1>
+        <div class="content-container">
+          <article class="markdown-body">
+            <h1 id="04-tai-lieu-api-tham-chieu-api-reference">04. Tài Liệu API Tham Chiếu (API Reference)</h1>
 <p>Tài liệu này đặc tả chi tiết tất cả các Web API Endpoints được cung cấp bởi dịch vụ suy luận AIoT đa mô hình. Hệ thống sử dụng chuẩn giao thức HTTP RESTful, trao đổi dữ liệu qua định dạng JSON hoặc Multipart Form Data (đối với ảnh).</p>
 <hr />
 <h2 id="1-bang-tong-hop-danh-sach-endpoints">1. Bảng Tổng Hợp Danh Sách Endpoints</h2>
@@ -251,11 +255,16 @@
 <li><strong>Mô tả</strong>: Giống <code>/classify-image</code> nhưng thay vì trả dữ liệu JSON, API vẽ một khung tiêu đề chứa nhãn dự đoán Top-1 và mức độ tự tin trực tiếp lên góc trái trên của ảnh gốc, sau đó trả về luồng dữ liệu ảnh mới để hiển thị ngay trên web.</li>
 <li><strong>Response</strong>: Tệp tin ảnh nhị phân dạng <code>image/png</code>.</li>
 </ul>
-        </article>
+          </article>
+        </div>
       </main>
+
+      <!-- Right Table of Contents Panel -->
+      <aside class="toc-panel" id="tocPanel"></aside>
     </div>
   </div>
 
+  <script src="../js/search_index.js"></script>
   <script src="../js/main.js"></script>
   <!-- Mermaid.js for Diagrams -->
   <script type="module">
@@ -265,17 +274,6 @@
       theme: document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default',
       securityLevel: 'loose'
     });
-    
-    // Handle theme toggle rendering for Mermaid
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.attributeName === 'data-theme') {
-          const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default';
-          location.reload(); // Quickest way to rerender SVG diagrams natively
-        }
-      });
-    });
-    observer.observe(document.documentElement, { attributes: true });
   </script>
 </body>
 </html>

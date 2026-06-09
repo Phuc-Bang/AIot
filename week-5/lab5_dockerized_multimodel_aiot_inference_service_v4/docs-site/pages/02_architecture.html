@@ -8,6 +8,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/style.css">
+  <!-- Highlight.js Theme -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" id="hljs-theme">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
 </head>
 <body>
   <div class="app-layout">
@@ -21,7 +24,7 @@
       </div>
       <div class="top-nav-right">
         <div class="search-container">
-          <input type="text" id="searchInput" placeholder="Tìm kiếm tài liệu...">
+          <input type="text" id="searchInput" placeholder="Tìm kiếm tài liệu... (/)">
           <div class="search-results" id="searchResults"></div>
         </div>
         <button class="theme-toggle" id="themeToggle" title="Đổi giao diện">
@@ -65,8 +68,9 @@
 
       <!-- Main Content Area -->
       <main class="content-area">
-        <article class="markdown-body">
-          <h1 id="02-kien-truc-he-thong-system-architecture">02. Kiến Trúc Hệ Thống (System Architecture)</h1>
+        <div class="content-container">
+          <article class="markdown-body">
+            <h1 id="02-kien-truc-he-thong-system-architecture">02. Kiến Trúc Hệ Thống (System Architecture)</h1>
 <p>Hệ thống được thiết kế theo kiến trúc <strong>API-driven Microservice</strong> khép kín trong môi trường container của Docker. Tất cả các luồng giao tiếp giữa thiết bị IoT hoặc Client bên ngoài với mô hình AI đều được điều phối bởi FastAPI.</p>
 <hr />
 <h2 id="1-so-o-kien-truc-tong-the">1. Sơ Đồ Kiến Trúc Tổng Thể</h2>
@@ -93,16 +97,16 @@
     end
 
     %% Giao tiếp cổng mạng
-    Client --&gt;|Gửi Request cổng 8001| PortMapping
-    PortMapping --&gt;|Định tuyến nội bộ| FastAPIServer
+    Client -->|Gửi Request cổng 8001| PortMapping
+    PortMapping -->|Định tuyến nội bộ| FastAPIServer
 
     %% Luồng xử lý
-    FastAPIServer --&gt;|1. Nhận Telemetry JSON| SensorEngine
-    FastAPIServer --&gt;|2. Nhận file ảnh| VisionEngine
+    FastAPIServer -->|1. Nhận Telemetry JSON| SensorEngine
+    FastAPIServer -->|2. Nhận file ảnh| VisionEngine
 
     %% Gắn ổ đĩa ảo (Volume mounts)
-    FileLogs &lt;==&gt;|Ghi đè thời gian thực| VolumeLogs
-    FileModels &lt;==|Đọc file mô hình .onnx| VolumeModels
+    FileLogs <==>|Ghi đè thời gian thực| VolumeLogs
+    FileModels <==|Đọc file mô hình .onnx| VolumeModels
 </pre>
 <hr />
 <h2 id="2-cac-thanh-phan-chinh-trong-kien-truc">2. Các Thành Phần Chính Trong Kiến Trúc</h2>
@@ -130,11 +134,16 @@
 <li>Thư mục <code>models/</code> giúp đưa file mô hình dung lượng lớn vào container một cách an toàn mà không làm phình kích thước Docker Image.</li>
 <li>Thư mục <code>outputs/</code> làm nhiệm vụ ghi lại toàn bộ nhật ký sự kiện, đảm bảo dữ liệu ghi log được lưu vĩnh viễn trên máy thật của bạn.</li>
 </ul>
-        </article>
+          </article>
+        </div>
       </main>
+
+      <!-- Right Table of Contents Panel -->
+      <aside class="toc-panel" id="tocPanel"></aside>
     </div>
   </div>
 
+  <script src="../js/search_index.js"></script>
   <script src="../js/main.js"></script>
   <!-- Mermaid.js for Diagrams -->
   <script type="module">
@@ -144,17 +153,6 @@
       theme: document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default',
       securityLevel: 'loose'
     });
-    
-    // Handle theme toggle rendering for Mermaid
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.attributeName === 'data-theme') {
-          const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default';
-          location.reload(); // Quickest way to rerender SVG diagrams natively
-        }
-      });
-    });
-    observer.observe(document.documentElement, { attributes: true });
   </script>
 </body>
 </html>

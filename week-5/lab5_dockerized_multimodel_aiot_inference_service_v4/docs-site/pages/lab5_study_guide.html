@@ -8,6 +8,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/style.css">
+  <!-- Highlight.js Theme -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" id="hljs-theme">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
 </head>
 <body>
   <div class="app-layout">
@@ -21,7 +24,7 @@
       </div>
       <div class="top-nav-right">
         <div class="search-container">
-          <input type="text" id="searchInput" placeholder="Tìm kiếm tài liệu...">
+          <input type="text" id="searchInput" placeholder="Tìm kiếm tài liệu... (/)">
           <div class="search-results" id="searchResults"></div>
         </div>
         <button class="theme-toggle" id="themeToggle" title="Đổi giao diện">
@@ -65,8 +68,9 @@
 
       <!-- Main Content Area -->
       <main class="content-area">
-        <article class="markdown-body">
-          <h1 id="huong-dan-phan-tich-nghien-cuu-va-tim-hieu-lab-5-day-5">Hướng Dẫn Phân Tích, Nghiên Cứu và Tìm Hiểu Lab 5 (Day-5)</h1>
+        <div class="content-container">
+          <article class="markdown-body">
+            <h1 id="huong-dan-phan-tich-nghien-cuu-va-tim-hieu-lab-5-day-5">Hướng Dẫn Phân Tích, Nghiên Cứu và Tìm Hiểu Lab 5 (Day-5)</h1>
 <p>Tài liệu này đóng vai trò là cẩm nang học tập giúp bạn nắm vững kiến trúc, luồng đi của dữ liệu và các công nghệ cốt lõi được áp dụng trong <strong>Day-5 / Lab 5: Dockerized Multi-Model AI Inference Service for AIoT</strong>.</p>
 <hr />
 <h2 id="1-muc-tieu-cua-lab-5">1. Mục Tiêu của Lab 5</h2>
@@ -100,14 +104,14 @@
 <h2 id="3-luong-hoat-ong-cua-he-thong-workflow">3. Luồng Hoạt Động của Hệ Thống (Workflow)</h2>
 <p>Hệ thống hoạt động theo mô hình <strong>Client - Server (API-driven)</strong>:</p>
 <pre class="mermaid">graph TD
-    Client[Client: Web UI / Curl / Thiết bị IoT] --&gt;|API Request| API[FastAPI Web Service]
-    API --&gt;|1. Nhận Telemetry JSON| SensorEngine[Sensor Inference Engine]
-    API --&gt;|2. Nhận Upload File Ảnh| VisionEngine[Vision Inference Engine]
+    Client[Client: Web UI / Curl / Thiết bị IoT] -->|API Request| API[FastAPI Web Service]
+    API -->|1. Nhận Telemetry JSON| SensorEngine[Sensor Inference Engine]
+    API -->|2. Nhận Upload File Ảnh| VisionEngine[Vision Inference Engine]
 
-    SensorEngine --&gt;|Decision &amp; Safety Rules| OutputSensor[Trả kết quả JSON dự báo / Anomaly]
-    VisionEngine --&gt;|Preprocess -&gt; ONNX Runtime| OutputVision[Trả kết quả phân loại Top-K / Vẽ nhãn lên ảnh]
+    SensorEngine -->|Decision & Safety Rules| OutputSensor[Trả kết quả JSON dự báo / Anomaly]
+    VisionEngine -->|Preprocess -> ONNX Runtime| OutputVision[Trả kết quả phân loại Top-K / Vẽ nhãn lên ảnh]
 
-    API --&gt;|Ghi log| CSVLogs[(outputs/ CSV Logs)]
+    API -->|Ghi log| CSVLogs[(outputs/ CSV Logs)]
 </pre>
 <h3 id="chi-tiet-cac-luong-xu-ly-chinh">Chi tiết các luồng xử lý chính:</h3>
 <h4 id="a-luong-xu-ly-du-lieu-cam-bien-sensor-inference">A. Luồng Xử Lý Dữ Liệu Cảm Biến (Sensor Inference)</h4>
@@ -152,15 +156,20 @@
 <h2 id="5-cac-chu-e-nghien-cuu-va-hoc-tap-chuyen-sau-tu-thu-muc-nay">5. Các Chủ Đề Nghiên Cứu và Học Tập Chuyên Sâu Từ Thư Mục Này</h2>
 <p>Để hiểu sâu hơn về kiến trúc hệ thống AIoT trong doanh nghiệp, bạn nên tự nghiên cứu các câu hỏi sau:</p>
 <ol>
-<li><strong>Tính linh hoạt (Interoperability)</strong>: Tại sao dự án lại chuyển đổi model sang định dạng <code>.onnx</code> thay vì chạy file <code>.pth</code> trực tiếp từ PyTorch? (Đọc thêm tài liệu: <a href="file:///e:/AIoT/Home-Work/Day-5/lab5_dockerized_multimodel_aiot_inference_service_v4/docs/model_formats_for_students.md">model_formats_for_students.md</a>).</li>
-<li><strong>Ảo hóa &amp; Đóng gói</strong>: Sự khác biệt cốt lõi về hiệu năng và tài nguyên khi deploy ứng dụng bằng Docker Container so với máy ảo VM truyền thống là gì? (Đọc thêm tài liệu: <a href="file:///e:/AIoT/Home-Work/Day-5/lab5_dockerized_multimodel_aiot_inference_service_v4/docs/docker_environment_comparison.md">docker_environment_comparison.md</a>).</li>
+<li><strong>Tính linh hoạt (Interoperability)</strong>: Tại sao dự án lại chuyển đổi model sang định dạng <code>.onnx</code> thay vì chạy file <code>.pth</code> trực tiếp từ PyTorch? (Đọc thêm tài liệu: <a href="model_formats_for_students.html">model_formats_for_students.md</a>).</li>
+<li><strong>Ảo hóa &amp; Đóng gói</strong>: Sự khác biệt cốt lõi về hiệu năng và tài nguyên khi deploy ứng dụng bằng Docker Container so với máy ảo VM truyền thống là gì? (Đọc thêm tài liệu: <a href="docker_environment_comparison.html">docker_environment_comparison.md</a>).</li>
 <li><strong>Quy tắc an toàn (Decision Safety)</strong>: Tại sao đầu ra của các thuật toán ML cảm biến không được truyền trực tiếp xuống cơ cấu chấp hành (actuators/relays) mà phải thông qua một tầng quy tắc đánh giá rủi ro (như hàm <code>risk_from_forecast</code>)?</li>
 </ol>
-        </article>
+          </article>
+        </div>
       </main>
+
+      <!-- Right Table of Contents Panel -->
+      <aside class="toc-panel" id="tocPanel"></aside>
     </div>
   </div>
 
+  <script src="../js/search_index.js"></script>
   <script src="../js/main.js"></script>
   <!-- Mermaid.js for Diagrams -->
   <script type="module">
@@ -170,17 +179,6 @@
       theme: document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default',
       securityLevel: 'loose'
     });
-    
-    // Handle theme toggle rendering for Mermaid
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.attributeName === 'data-theme') {
-          const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default';
-          location.reload(); // Quickest way to rerender SVG diagrams natively
-        }
-      });
-    });
-    observer.observe(document.documentElement, { attributes: true });
   </script>
 </body>
 </html>

@@ -8,6 +8,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
+  <!-- Highlight.js Theme -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" id="hljs-theme">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
 </head>
 <body>
   <div class="app-layout">
@@ -21,7 +24,7 @@
       </div>
       <div class="top-nav-right">
         <div class="search-container">
-          <input type="text" id="searchInput" placeholder="Tìm kiếm tài liệu...">
+          <input type="text" id="searchInput" placeholder="Tìm kiếm tài liệu... (/)">
           <div class="search-results" id="searchResults"></div>
         </div>
         <button class="theme-toggle" id="themeToggle" title="Đổi giao diện">
@@ -65,8 +68,9 @@
 
       <!-- Main Content Area -->
       <main class="content-area">
-        <article class="markdown-body">
-          <h1 id="01-tong-quan-du-an-project-overview">01. Tổng Quan Dự Án (Project Overview)</h1>
+        <div class="content-container">
+          <article class="markdown-body">
+            <h1 id="01-tong-quan-du-an-project-overview">01. Tổng Quan Dự Án (Project Overview)</h1>
 <p>Chào mừng bạn đến với tài liệu hướng dẫn kỹ thuật cho dự án <strong>Lab 5: Dịch vụ suy luận AIoT đa mô hình được Docker hóa (Dockerized Multi-Model AIoT Inference Service)</strong>.</p>
 <p>Tài liệu này được biên soạn bởi <strong>Senior AIoT Architect</strong> nhằm mục đích hướng dẫn chi tiết từ cấp độ cơ bản (dành cho học viên/sinh viên) đến nâng cao (chuẩn triển khai doanh nghiệp) về cách đưa các mô hình trí tuệ nhân tạo (AI/ML) từ môi trường nghiên cứu (Jupyter Notebook) lên hệ thống vận hành thực tế (Production).</p>
 <hr />
@@ -89,15 +93,15 @@
 <h2 id="2-muc-tieu-cua-du-an-lab-5">2. Mục Tiêu của Dự Án Lab 5</h2>
 <p>Dự án này được thiết kế nhằm giải quyết các thách thức trên thông qua các mục tiêu cốt lõi:</p>
 <pre class="mermaid">graph TD
-    A[Mục Tiêu Lab 5] --&gt; B[1. Đóng gói API dịch vụ]
-    A --&gt; C[2. Tối ưu hóa suy luận]
-    A --&gt; D[3. Chuẩn hóa môi trường]
-    A --&gt; E[4. Giám sát &amp; Lưu trữ]
+    A[Mục Tiêu Lab 5] --> B[1. Đóng gói API dịch vụ]
+    A --> C[2. Tối ưu hóa suy luận]
+    A --> D[3. Chuẩn hóa môi trường]
+    A --> E[4. Giám sát & Lưu trữ]
 
-    B --&gt; B1[Xây dựng FastAPI xử lý dữ liệu Telemetry &amp; Ảnh]
-    C --&gt; C1[Sử dụng ONNX Runtime chạy mô hình SqueezeNet nhẹ]
-    D --&gt; D1[Đóng gói Container bằng Docker &amp; Compose]
-    E --&gt; E1[Ghi log dữ liệu ra đĩa cứng của host qua Volumes]
+    B --> B1[Xây dựng FastAPI xử lý dữ liệu Telemetry & Ảnh]
+    C --> C1[Sử dụng ONNX Runtime chạy mô hình SqueezeNet nhẹ]
+    D --> D1[Đóng gói Container bằng Docker & Compose]
+    E --> E1[Ghi log dữ liệu ra đĩa cứng của host qua Volumes]
 </pre>
 <ul>
 <li><strong>API hóa mô hình</strong>: Sử dụng <strong>FastAPI</strong> để xây dựng các API Endpoint nhận dữ liệu số cảm biến và dữ liệu hình ảnh.</li>
@@ -116,11 +120,16 @@
 <li><strong>Cơ chế lưu trữ log bền vững (Persistent Logging)</strong>:</li>
 <li>Đồng bộ hóa log từ container ra đĩa cứng vật lý của máy chủ để truy vết request và phục vụ cho việc cải tiến mô hình sau này.</li>
 </ol>
-        </article>
+          </article>
+        </div>
       </main>
+
+      <!-- Right Table of Contents Panel -->
+      <aside class="toc-panel" id="tocPanel"></aside>
     </div>
   </div>
 
+  <script src="js/search_index.js"></script>
   <script src="js/main.js"></script>
   <!-- Mermaid.js for Diagrams -->
   <script type="module">
@@ -130,17 +139,6 @@
       theme: document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default',
       securityLevel: 'loose'
     });
-    
-    // Handle theme toggle rendering for Mermaid
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.attributeName === 'data-theme') {
-          const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default';
-          location.reload(); // Quickest way to rerender SVG diagrams natively
-        }
-      });
-    });
-    observer.observe(document.documentElement, { attributes: true });
   </script>
 </body>
 </html>
