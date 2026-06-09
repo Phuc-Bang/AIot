@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>01. Tổng Quan Dự Án (Project Overview) - AIoT Documentation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Top Header -->
+    <header class="top-nav">
+      <div class="top-nav-left">
+        <button class="mobile-menu-toggle" id="menuToggle">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+        </button>
+        <span class="logo">⚡ AIoT Docs</span>
+      </div>
+      <div class="top-nav-right">
+        <div class="search-container">
+          <input type="text" id="searchInput" placeholder="Tìm kiếm tài liệu...">
+          <div class="search-results" id="searchResults"></div>
+        </div>
+        <button class="theme-toggle" id="themeToggle" title="Đổi giao diện">
+          <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="main-layout">
+      <!-- Sidebar Navigation -->
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-section">
+  <h4 class="sidebar-title">Core Documentation</h4>
+  <ul class="sidebar-list">
+    <li><a href="pages/01_project_overview.html" class="sidebar-link active">01. Tổng quan dự án</a></li>
+    <li><a href="pages/02_architecture.html" class="sidebar-link ">02. Kiến trúc hệ thống</a></li>
+    <li><a href="pages/03_folder_structure.html" class="sidebar-link ">03. Cấu trúc thư mục</a></li>
+    <li><a href="pages/04_api_reference.html" class="sidebar-link ">04. Tài liệu API</a></li>
+    <li><a href="pages/05_model_pipeline.html" class="sidebar-link ">05. Quy trình suy luận</a></li>
+    <li><a href="pages/06_docker_deployment.html" class="sidebar-link ">06. Triển khai Docker</a></li>
+    <li><a href="pages/07_data_flow.html" class="sidebar-link ">07. Luồng dữ liệu</a></li>
+  </ul>
+</div>
+<div class="sidebar-section">
+  <h4 class="sidebar-title">References & Guides</h4>
+  <ul class="sidebar-list">
+    <li><a href="pages/lab5_study_guide.html" class="sidebar-link ">Cẩm nang nghiên cứu Lab 5</a></li>
+    <li><a href="pages/HUONG_DAN_CHAY_VA_QUAN_SAT.html" class="sidebar-link ">Hướng dẫn chạy & Quan sát</a></li>
+    <li><a href="pages/DUONG_DI_MODEL_TRONG_THUC_TE.html" class="sidebar-link ">Đường đi của model</a></li>
+    <li><a href="pages/model_formats_for_students.html" class="sidebar-link ">Định dạng model AI</a></li>
+    <li><a href="pages/docker_environment_comparison.html" class="sidebar-link ">So sánh môi trường Docker</a></li>
+    <li><a href="pages/docker_desktop_gui_beginner.html" class="sidebar-link ">Docker Desktop cho người mới</a></li>
+    <li><a href="pages/docker_ubuntu_engine_beginner.html" class="sidebar-link ">Docker Engine trên Ubuntu</a></li>
+    <li><a href="pages/submission_checklist_v4.html" class="sidebar-link ">Checklist nộp bài</a></li>
+    <li><a href="pages/taste_skill.html" class="sidebar-link ">Quy chuẩn thiết kế Taste Skill</a></li>
+  </ul>
+</div>
+      </aside>
+      <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+      <!-- Main Content Area -->
+      <main class="content-area">
+        <article class="markdown-body">
+          <h1 id="01-tong-quan-du-an-project-overview">01. Tổng Quan Dự Án (Project Overview)</h1>
+<p>Chào mừng bạn đến với tài liệu hướng dẫn kỹ thuật cho dự án <strong>Lab 5: Dịch vụ suy luận AIoT đa mô hình được Docker hóa (Dockerized Multi-Model AIoT Inference Service)</strong>.</p>
+<p>Tài liệu này được biên soạn bởi <strong>Senior AIoT Architect</strong> nhằm mục đích hướng dẫn chi tiết từ cấp độ cơ bản (dành cho học viên/sinh viên) đến nâng cao (chuẩn triển khai doanh nghiệp) về cách đưa các mô hình trí tuệ nhân tạo (AI/ML) từ môi trường nghiên cứu (Jupyter Notebook) lên hệ thống vận hành thực tế (Production).</p>
+<hr />
+<h2 id="1-van-e-thuc-te-va-boi-canh-du-an">1. Vấn Đề Thực Tế và Bối Cảnh Dự Án</h2>
+<p>Trong chu trình phát triển sản phẩm AIoT, việc huấn luyện mô hình (Model Training) chỉ chiếm khoảng 10-20% công sức. Thách thức lớn nhất nằm ở khâu <strong>Triển khai (Deployment)</strong>. </p>
+<h3 id="thach-thuc-1-khoang-cach-giua-nghien-cuu-va-van-hanh">Thách thức 1: Khoảng cách giữa Nghiên cứu và Vận hành</h3>
+<ul>
+<li><strong>Notebook</strong>: Các kỹ sư AI thường viết code trên Jupyter Notebook (<code>.ipynb</code>), sử dụng các thư viện huấn luyện nặng như PyTorch, TensorFlow.</li>
+<li><strong>Production</strong>: Các thiết bị phần cứng IoT (như cảm biến, vi điều khiển, camera IP) không thể tự chạy file <code>.ipynb</code>. Chúng cần các điểm cuối kết nối mạng dạng Web API (như REST API) để gửi dữ liệu và nhận kết quả dự báo tức thời.</li>
+</ul>
+<h3 id="thach-thuc-2-su-khac-biet-ve-moi-truong-works-on-my-machine">Thách thức 2: Sự khác biệt về môi trường ("Works on my machine")</h3>
+<ul>
+<li>Code chạy tốt trên máy tính của kỹ sư phát triển nhưng gặp lỗi khi chạy trên máy chủ (Server) hoặc máy tính nhúng ở biên (Edge device) do lệch phiên bản thư viện, xung đột cổng mạng hoặc khác biệt hệ điều hành (Windows vs Linux).</li>
+</ul>
+<h3 id="thach-thuc-3-hieu-nang-phan-cung-gioi-han-o-bien">Thách thức 3: Hiệu năng phần cứng giới hạn ở biên</h3>
+<ul>
+<li>Các thiết bị IoT biên thường chạy chip CPU cấu hình thấp. Việc cài đặt các framework học sâu nặng nề (PyTorch/TensorFlow) để chạy suy luận (Inference) là bất khả thi về mặt tài nguyên bộ nhớ và tốc độ xử lý.</li>
+</ul>
+<hr />
+<h2 id="2-muc-tieu-cua-du-an-lab-5">2. Mục Tiêu của Dự Án Lab 5</h2>
+<p>Dự án này được thiết kế nhằm giải quyết các thách thức trên thông qua các mục tiêu cốt lõi:</p>
+<pre class="mermaid">graph TD
+    A[Mục Tiêu Lab 5] --&gt; B[1. Đóng gói API dịch vụ]
+    A --&gt; C[2. Tối ưu hóa suy luận]
+    A --&gt; D[3. Chuẩn hóa môi trường]
+    A --&gt; E[4. Giám sát &amp; Lưu trữ]
+
+    B --&gt; B1[Xây dựng FastAPI xử lý dữ liệu Telemetry &amp; Ảnh]
+    C --&gt; C1[Sử dụng ONNX Runtime chạy mô hình SqueezeNet nhẹ]
+    D --&gt; D1[Đóng gói Container bằng Docker &amp; Compose]
+    E --&gt; E1[Ghi log dữ liệu ra đĩa cứng của host qua Volumes]
+</pre>
+<ul>
+<li><strong>API hóa mô hình</strong>: Sử dụng <strong>FastAPI</strong> để xây dựng các API Endpoint nhận dữ liệu số cảm biến và dữ liệu hình ảnh.</li>
+<li><strong>Tối ưu hóa mô hình</strong>: Chuyển đổi mô hình phân loại ảnh sang định dạng mở <strong>ONNX</strong> để chạy siêu nhẹ trên CPU.</li>
+<li><strong>Docker hóa dịch vụ</strong>: Viết công thức <strong>Dockerfile</strong> và <strong>Docker Compose</strong> để đóng gói toàn bộ runtime, giúp ứng dụng có thể chạy nhất quán ở mọi nơi.</li>
+<li><strong>Giám sát hoạt động</strong>: Thiết lập hệ thống ghi nhật ký (logging) tự động xuất ra file CSV để theo dõi sức khỏe và độ chính xác của mô hình.</li>
+</ul>
+<hr />
+<h2 id="3-cac-tinh-nang-noi-bat-cua-he-thong">3. Các Tính Năng Nổi Bật của Hệ Thống</h2>
+<ol>
+<li><strong>Xử lý đa luồng dữ liệu (Multi-Model Service)</strong>:</li>
+<li><strong>Telemetry (Dữ liệu số)</strong>: Dự báo chỉ số cảm biến (Moving Average) và phát hiện dị thường (Z-Score Rule).</li>
+<li><strong>Vision (Dữ liệu ảnh)</strong>: Phân loại hình ảnh bằng mạng SqueezeNet pre-trained trên tập dữ liệu 1000 lớp ImageNet-1K.</li>
+<li><strong>Giao diện Web trực quan (Embedded Demo UI)</strong>:</li>
+<li>Một trang giao diện tối (Dark mode) sang trọng, ứng dụng thiết kế kính mờ (Glassmorphism), cho phép người dùng kéo thả ảnh để test suy luận thời gian thực mà không cần viết code.</li>
+<li><strong>Cơ chế lưu trữ log bền vững (Persistent Logging)</strong>:</li>
+<li>Đồng bộ hóa log từ container ra đĩa cứng vật lý của máy chủ để truy vết request và phục vụ cho việc cải tiến mô hình sau này.</li>
+</ol>
+        </article>
+      </main>
+    </div>
+  </div>
+
+  <script src="js/main.js"></script>
+  <!-- Mermaid.js for Diagrams -->
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ 
+      startOnLoad: true, 
+      theme: document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default',
+      securityLevel: 'loose'
+    });
+    
+    // Handle theme toggle rendering for Mermaid
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === 'data-theme') {
+          const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default';
+          location.reload(); // Quickest way to rerender SVG diagrams natively
+        }
+      });
+    });
+    observer.observe(document.documentElement, { attributes: true });
+  </script>
+</body>
+</html>

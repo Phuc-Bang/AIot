@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>07. Luồng Dữ Liệu Trong Hệ Thống (Data Flow) - AIoT Documentation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Top Header -->
+    <header class="top-nav">
+      <div class="top-nav-left">
+        <button class="mobile-menu-toggle" id="menuToggle">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+        </button>
+        <span class="logo">⚡ AIoT Docs</span>
+      </div>
+      <div class="top-nav-right">
+        <div class="search-container">
+          <input type="text" id="searchInput" placeholder="Tìm kiếm tài liệu...">
+          <div class="search-results" id="searchResults"></div>
+        </div>
+        <button class="theme-toggle" id="themeToggle" title="Đổi giao diện">
+          <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="main-layout">
+      <!-- Sidebar Navigation -->
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-section">
+  <h4 class="sidebar-title">Core Documentation</h4>
+  <ul class="sidebar-list">
+    <li><a href="../pages/01_project_overview.html" class="sidebar-link ">01. Tổng quan dự án</a></li>
+    <li><a href="../pages/02_architecture.html" class="sidebar-link ">02. Kiến trúc hệ thống</a></li>
+    <li><a href="../pages/03_folder_structure.html" class="sidebar-link ">03. Cấu trúc thư mục</a></li>
+    <li><a href="../pages/04_api_reference.html" class="sidebar-link ">04. Tài liệu API</a></li>
+    <li><a href="../pages/05_model_pipeline.html" class="sidebar-link ">05. Quy trình suy luận</a></li>
+    <li><a href="../pages/06_docker_deployment.html" class="sidebar-link ">06. Triển khai Docker</a></li>
+    <li><a href="#" class="sidebar-link active">07. Luồng dữ liệu</a></li>
+  </ul>
+</div>
+<div class="sidebar-section">
+  <h4 class="sidebar-title">References & Guides</h4>
+  <ul class="sidebar-list">
+    <li><a href="../pages/lab5_study_guide.html" class="sidebar-link ">Cẩm nang nghiên cứu Lab 5</a></li>
+    <li><a href="../pages/HUONG_DAN_CHAY_VA_QUAN_SAT.html" class="sidebar-link ">Hướng dẫn chạy & Quan sát</a></li>
+    <li><a href="../pages/DUONG_DI_MODEL_TRONG_THUC_TE.html" class="sidebar-link ">Đường đi của model</a></li>
+    <li><a href="../pages/model_formats_for_students.html" class="sidebar-link ">Định dạng model AI</a></li>
+    <li><a href="../pages/docker_environment_comparison.html" class="sidebar-link ">So sánh môi trường Docker</a></li>
+    <li><a href="../pages/docker_desktop_gui_beginner.html" class="sidebar-link ">Docker Desktop cho người mới</a></li>
+    <li><a href="../pages/docker_ubuntu_engine_beginner.html" class="sidebar-link ">Docker Engine trên Ubuntu</a></li>
+    <li><a href="../pages/submission_checklist_v4.html" class="sidebar-link ">Checklist nộp bài</a></li>
+    <li><a href="../pages/taste_skill.html" class="sidebar-link ">Quy chuẩn thiết kế Taste Skill</a></li>
+  </ul>
+</div>
+      </aside>
+      <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+      <!-- Main Content Area -->
+      <main class="content-area">
+        <article class="markdown-body">
+          <h1 id="07-luong-du-lieu-trong-he-thong-data-flow">07. Luồng Dữ Liệu Trong Hệ Thống (Data Flow)</h1>
+<p>Hiểu rõ luồng dữ liệu (Data Flow) giúp bạn dễ dàng theo dõi đường đi của thông tin từ thiết bị IoT gửi lên, qua bộ xử lý AI, đến nơi lưu trữ log và quay ngược về người dùng dưới dạng kết quả hiển thị.</p>
+<hr />
+<h2 id="1-luong-du-lieu-cam-bien-telemetry-data-flow">1. Luồng Dữ Liệu Cảm Biến (Telemetry Data Flow)</h2>
+<p>Dữ liệu cảm biến số đi qua quy trình xử lý tuần tự sau:</p>
+<pre class="mermaid">sequenceDiagram
+    autonumber
+    actor IoT as Thiết Bị IoT (Cảm Biến)
+    participant API as FastAPI Web Service
+    participant Engine as Sensor Inference Engine
+    participant DB as CSV Log Files (Host Machine)
+
+    IoT-&gt;&gt;API: HTTP POST /detect-anomaly {JSON Payload}
+    Note over API: Kiểm tra định dạng dữ liệu (Pydantic validation)
+    API-&gt;&gt;Engine: Gửi thông tin (current_value, recent_values)
+    Note over Engine: Tính toán trung bình &amp; z-score
+    Engine--&gt;&gt;API: Trả về kết quả đánh giá rủi ro (NORMAL/WARNING/HIGH)
+    API-&gt;&gt;DB: Ghi log lịch sử request (service_log.csv)
+    API--&gt;&gt;IoT: Phản hồi kết quả đánh giá &amp; ghi chú an toàn (JSON)
+</pre>
+<ol>
+<li><strong>Sinh dữ liệu</strong>: Thiết bị IoT cảm biến (ví dụ cảm biến đo nhiệt độ) đo được chỉ số hiện tại và gửi gói tin JSON kèm lịch sử đo đạc trước đó lên API qua phương thức POST.</li>
+<li><strong>Tiếp nhận &amp; Validate</strong>: FastAPI nhận gói tin, sử dụng Pydantic để kiểm tra xem dữ liệu gửi lên có đầy đủ và đúng định dạng số (<code>float</code>/<code>int</code>) hay không.</li>
+<li><strong>Chạy suy luận</strong>: FastAPI gọi module <code>sensor_inference.py</code>. Hệ thống tính toán điểm z-score và đưa ra mức độ cảnh báo.</li>
+<li><strong>Lưu trữ lịch sử (Ghi Log)</strong>: FastAPI gọi module <code>logging_utils.py</code> để bổ sung (append) thông tin gồm mốc thời gian (timestamp), endpoint được gọi, tên cảm biến và mức độ cảnh báo vào tệp <code>outputs/service_log.csv</code> nằm trên đĩa cứng máy host.</li>
+<li><strong>Trả kết quả</strong>: API đóng gói kết quả và gửi lại gói phản hồi JSON cho thiết bị IoT.</li>
+</ol>
+<hr />
+<h2 id="2-luong-du-lieu-hinh-anh-vision-data-flow">2. Luồng Dữ Liệu Hình Ảnh (Vision Data Flow)</h2>
+<p>Hình ảnh được gửi từ camera giám sát IoT hoặc giao diện kéo thả web chạy qua luồng xử lý song song phức tạp hơn:</p>
+<pre class="mermaid">sequenceDiagram
+    autonumber
+    actor User as Client (Web UI / Camera IP)
+    participant API as FastAPI Web Service
+    participant PIL as Pillow Image Preprocessing
+    participant ONNX as ONNX Runtime Session
+    participant DB as CSV Log Files (Host Machine)
+
+    User-&gt;&gt;API: HTTP POST /classify-image (Multipart File)
+    Note over API: Đọc ảnh nhị phân &amp; kiểm tra kích thước file
+    API-&gt;&gt;PIL: Chuyển dữ liệu nhị phân thành đối tượng Image
+    Note over PIL: RGB -&gt; Resize 256 -&gt; Center Crop 224 -&gt; Normalize -&gt; Transpose (NCHW)
+    PIL--&gt;&gt;API: Trả về ma trận Tensor chuẩn hóa [1, 3, 224, 224]
+    API-&gt;&gt;ONNX: Nạp Tensor và chạy suy luận (session.run)
+    Note over ONNX: SqueezeNet chạy suy luận trên CPU
+    ONNX--&gt;&gt;API: Trả về mảng Logits (1000 giá trị)
+    Note over API: Tính toán Softmax ra % độ tin cậy
+    API-&gt;&gt;DB: Ghi log kết quả Top-1 &amp; thời gian inference (vision_inference_log.csv)
+    API--&gt;&gt;User: Trả về JSON Top-K nhãn dự đoán &amp; Confidence
+</pre>
+<ol>
+<li><strong>Upload ảnh</strong>: Người dùng chọn ảnh hoặc camera gửi ảnh chụp nhị phân (Multipart Form Data) lên API <code>/classify-image</code>.</li>
+<li><strong>Đọc và Tiền xử lý (Pillow)</strong>: API nhận file, dùng thư viện Pillow để chuyển thành ảnh màu RGB, tiến hành resize, cắt tâm (center crop), chuẩn hóa kênh màu và đổi chiều ma trận để tạo thành Tensor chuẩn đầu vào.</li>
+<li><strong>Suy luận (ONNX Runtime)</strong>: Tensor được đưa vào phiên chạy của ONNX Runtime CPU. Mô hình SqueezeNet phân tích các đặc trưng hình học trong ảnh và xuất ra mảng điểm số logits của 1000 lớp.</li>
+<li><strong>Hậu xử lý (Softmax)</strong>: API áp dụng hàm Softmax để quy đổi logits thành tỷ lệ xác suất (%) tự tin, sắp xếp và lọc ra Top-K nhãn cao nhất.</li>
+<li><strong>Ghi nhật ký hệ thống</strong>: Log chi tiết (Tên tệp, Định dạng ảnh, Nhãn dự đoán Top-1, Tỷ lệ %, Thời gian suy luận bằng mili-giây) được ghi ngay vào tệp <code>outputs/vision_inference_log.csv</code>.</li>
+<li><strong>Vẽ kết quả lên ảnh (Tùy chọn)</strong>: Nếu Client gọi endpoint <code>/classify-image-annotated</code>, API sẽ vẽ nhãn Top-1 lên góc ảnh nhờ Pillow và gửi trả về luồng ảnh PNG (StreamingResponse) để người dùng xem trực quan.</li>
+</ol>
+        </article>
+      </main>
+    </div>
+  </div>
+
+  <script src="../js/main.js"></script>
+  <!-- Mermaid.js for Diagrams -->
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ 
+      startOnLoad: true, 
+      theme: document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default',
+      securityLevel: 'loose'
+    });
+    
+    // Handle theme toggle rendering for Mermaid
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === 'data-theme') {
+          const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default';
+          location.reload(); // Quickest way to rerender SVG diagrams natively
+        }
+      });
+    });
+    observer.observe(document.documentElement, { attributes: true });
+  </script>
+</body>
+</html>

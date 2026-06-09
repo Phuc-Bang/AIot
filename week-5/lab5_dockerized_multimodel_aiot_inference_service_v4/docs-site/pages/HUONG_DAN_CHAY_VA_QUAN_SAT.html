@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HƯỚNG DẪN CHẠY VÀ QUAN SÁT KẾT QUẢ - LAB 5 V4 - AIoT Documentation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Top Header -->
+    <header class="top-nav">
+      <div class="top-nav-left">
+        <button class="mobile-menu-toggle" id="menuToggle">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+        </button>
+        <span class="logo">⚡ AIoT Docs</span>
+      </div>
+      <div class="top-nav-right">
+        <div class="search-container">
+          <input type="text" id="searchInput" placeholder="Tìm kiếm tài liệu...">
+          <div class="search-results" id="searchResults"></div>
+        </div>
+        <button class="theme-toggle" id="themeToggle" title="Đổi giao diện">
+          <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="main-layout">
+      <!-- Sidebar Navigation -->
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-section">
+  <h4 class="sidebar-title">Core Documentation</h4>
+  <ul class="sidebar-list">
+    <li><a href="../pages/01_project_overview.html" class="sidebar-link ">01. Tổng quan dự án</a></li>
+    <li><a href="../pages/02_architecture.html" class="sidebar-link ">02. Kiến trúc hệ thống</a></li>
+    <li><a href="../pages/03_folder_structure.html" class="sidebar-link ">03. Cấu trúc thư mục</a></li>
+    <li><a href="../pages/04_api_reference.html" class="sidebar-link ">04. Tài liệu API</a></li>
+    <li><a href="../pages/05_model_pipeline.html" class="sidebar-link ">05. Quy trình suy luận</a></li>
+    <li><a href="../pages/06_docker_deployment.html" class="sidebar-link ">06. Triển khai Docker</a></li>
+    <li><a href="../pages/07_data_flow.html" class="sidebar-link ">07. Luồng dữ liệu</a></li>
+  </ul>
+</div>
+<div class="sidebar-section">
+  <h4 class="sidebar-title">References & Guides</h4>
+  <ul class="sidebar-list">
+    <li><a href="../pages/lab5_study_guide.html" class="sidebar-link ">Cẩm nang nghiên cứu Lab 5</a></li>
+    <li><a href="#" class="sidebar-link active">Hướng dẫn chạy & Quan sát</a></li>
+    <li><a href="../pages/DUONG_DI_MODEL_TRONG_THUC_TE.html" class="sidebar-link ">Đường đi của model</a></li>
+    <li><a href="../pages/model_formats_for_students.html" class="sidebar-link ">Định dạng model AI</a></li>
+    <li><a href="../pages/docker_environment_comparison.html" class="sidebar-link ">So sánh môi trường Docker</a></li>
+    <li><a href="../pages/docker_desktop_gui_beginner.html" class="sidebar-link ">Docker Desktop cho người mới</a></li>
+    <li><a href="../pages/docker_ubuntu_engine_beginner.html" class="sidebar-link ">Docker Engine trên Ubuntu</a></li>
+    <li><a href="../pages/submission_checklist_v4.html" class="sidebar-link ">Checklist nộp bài</a></li>
+    <li><a href="../pages/taste_skill.html" class="sidebar-link ">Quy chuẩn thiết kế Taste Skill</a></li>
+  </ul>
+</div>
+      </aside>
+      <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+      <!-- Main Content Area -->
+      <main class="content-area">
+        <article class="markdown-body">
+          <h1 id="huong-dan-chay-va-quan-sat-ket-qua-lab-5-v4">HƯỚNG DẪN CHẠY VÀ QUAN SÁT KẾT QUẢ - LAB 5 V4</h1>
+<p>Tài liệu này hướng dẫn thao tác chạy hệ thống theo từng bước. Mỗi bước đều có ba phần: <strong>lệnh chạy</strong>, <strong>kết quả cần quan sát</strong>, và <strong>ý nghĩa của kết quả</strong>. Mục tiêu không chỉ là chạy cho ra kết quả, mà là hiểu một AI inference service vận hành như thế nào khi chuyển từ môi trường local sang Docker.</p>
+<hr />
+<h2 id="1-kiem-tra-cau-truc-project">1. Kiểm tra cấu trúc project</h2>
+<p>Chạy trong thư mục gốc của project:</p>
+<pre><code class="language-bash">ls
+</code></pre>
+<p>Kết quả cần quan sát:</p>
+<pre><code class="language-text">app/
+models/
+sample_images/
+sample_requests/
+outputs/
+scripts/
+docs/
+Dockerfile
+docker-compose.yml
+requirements.txt
+RUN_GUIDE.md
+</code></pre>
+<p>Ý nghĩa:</p>
+<ul>
+<li><code>app/</code>: mã nguồn FastAPI service.</li>
+<li><code>models/</code>: nơi lưu model hoặc cấu hình model.</li>
+<li><code>sample_images/</code>: ảnh mẫu dùng để kiểm thử vision model.</li>
+<li><code>sample_requests/</code>: JSON mẫu để gọi API cảm biến.</li>
+<li><code>outputs/</code>: nơi ghi log sau mỗi lần inference.</li>
+<li><code>Dockerfile</code>: công thức build Docker image.</li>
+<li><code>docker-compose.yml</code>: cấu hình chạy service bằng Docker Compose.</li>
+</ul>
+<p>Câu hỏi gợi mở:</p>
+<ul>
+<li>Nếu thiếu thư mục <code>models/vision</code>, endpoint ảnh có thể hoạt động không?</li>
+<li>Nếu thiếu thư mục <code>outputs</code>, container có ghi log ra máy host được không?</li>
+</ul>
+<hr />
+<h2 id="2-chay-local-truoc-khi-dung-docker">2. Chạy local trước khi dùng Docker</h2>
+<p>Mục tiêu của bước này là kiểm tra code, thư viện, model và API khi chưa có Docker. Nếu local chưa chạy được, Docker sẽ làm lỗi khó phân tích hơn.</p>
+<h3 id="21-tao-moi-truong-python">2.1. Tạo môi trường Python</h3>
+<p>WSL/Linux/macOS:</p>
+<pre><code class="language-bash">python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+</code></pre>
+<p>Windows PowerShell:</p>
+<pre><code class="language-powershell">python -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements.txt
+</code></pre>
+<p>Kết quả cần quan sát:</p>
+<ul>
+<li>Không có lỗi khi cài thư viện.</li>
+<li>Có thể import FastAPI, ONNX Runtime, Pillow.</li>
+</ul>
+<p>Kiểm tra nhanh:</p>
+<pre><code class="language-bash">python -c &quot;import fastapi, onnxruntime, PIL; print('IMPORT_OK')&quot;
+</code></pre>
+<p>Ý nghĩa:</p>
+<ul>
+<li>Local runtime đã đủ thư viện để chạy API.</li>
+<li>Nếu bước này lỗi, cần sửa môi trường Python trước khi build Docker.</li>
+</ul>
+<h3 id="22-tai-model-anh-nhe">2.2. Tải model ảnh nhẹ</h3>
+<pre><code class="language-bash">python scripts/download_vision_model.py
+</code></pre>
+<p>Kết quả cần quan sát:</p>
+<pre><code class="language-text">models/vision/squeezenet1.1-7.onnx
+models/vision/imagenet_classes.txt
+</code></pre>
+<p>Ý nghĩa:</p>
+<ul>
+<li>File <code>.onnx</code> là model ảnh đã huấn luyện sẵn.</li>
+<li>File <code>imagenet_classes.txt</code> ánh xạ class id sang tên class.</li>
+<li>Lab 5 dùng model ảnh cho inference, không train lại model ảnh.</li>
+</ul>
+<p>Câu hỏi gợi mở:</p>
+<ul>
+<li>Nếu model weights không có trong project, container có tự suy luận ảnh được không?</li>
+<li>Nếu lớp học không có Internet, cần chuẩn bị model weights từ trước ở đâu?</li>
+</ul>
+<h3 id="23-chay-fastapi-local">2.3. Chạy FastAPI local</h3>
+<pre><code class="language-bash">uvicorn app.main:app --reload
+</code></pre>
+<p>Mở trình duyệt:</p>
+<pre><code class="language-text">http://127.0.0.1:8000/health
+http://127.0.0.1:8000/docs
+http://127.0.0.1:8000/classify-image-demo
+</code></pre>
+<p>Kết quả cần quan sát ở <code>/health</code>:</p>
+<pre><code class="language-json">{
+  &quot;service_status&quot;: &quot;ok&quot;,
+  &quot;vision_model_loaded&quot;: true
+}
+</code></pre>
+<p>Ý nghĩa:</p>
+<ul>
+<li>API đã chạy.</li>
+<li>Vision model đã được load nếu <code>vision_model_loaded = true</code>.</li>
+<li>Nếu <code>vision_model_loaded = false</code>, cần kiểm tra file model trong <code>models/vision</code>.</li>
+</ul>
+<hr />
+<h2 id="3-quan-sat-service-qua-api-cam-bien">3. Quan sát service qua API cảm biến</h2>
+<h3 id="31-test-endpoint-forecast">3.1. Test endpoint <code>/forecast</code></h3>
+<pre><code class="language-bash">curl -X POST http://127.0.0.1:8000/forecast \
+  -H &quot;Content-Type: application/json&quot; \
+  -d @sample_requests/forecast_request.json
+</code></pre>
+<p>Kết quả cần quan sát:</p>
+<ul>
+<li>JSON trả về có <code>predicted_value</code>.</li>
+<li>Có <code>risk_level</code> hoặc <code>recommendation</code>.</li>
+<li>File <code>outputs/service_log.csv</code> có thêm dòng log.</li>
+</ul>
+<p>Ý nghĩa:</p>
+<ul>
+<li>Đây là inference trên dữ liệu số/time-series.</li>
+<li>Output của model chưa phải hành động điều khiển trực tiếp; hệ thống cần decision rule và safety rule.</li>
+</ul>
+<h3 id="32-test-endpoint-detect-anomaly">3.2. Test endpoint <code>/detect-anomaly</code></h3>
+<pre><code class="language-bash">curl -X POST http://127.0.0.1:8000/detect-anomaly \
+  -H &quot;Content-Type: application/json&quot; \
+  -d @sample_requests/detect_anomaly_request.json
+</code></pre>
+<p>Kết quả cần quan sát:</p>
+<ul>
+<li>JSON có <code>anomaly_score</code> hoặc <code>severity</code>.</li>
+<li>File <code>outputs/service_log.csv</code> có thêm log.</li>
+</ul>
+<p>Ý nghĩa:</p>
+<ul>
+<li>Endpoint này mô phỏng luồng Lab 3: telemetry -&gt; anomaly/risk -&gt; decision.</li>
+</ul>
+<hr />
+<h2 id="4-quan-sat-service-qua-anh-upload">4. Quan sát service qua ảnh upload</h2>
+<h3 id="41-test-bang-giao-dien-web">4.1. Test bằng giao diện web</h3>
+<p>Mở:</p>
+<pre><code class="language-text">http://127.0.0.1:8000/classify-image-demo
+</code></pre>
+<p>Thao tác:</p>
+<ol>
+<li>Chọn một ảnh trong máy hoặc dùng ảnh trong <code>sample_images/</code>.</li>
+<li>Bấm nút upload/classify.</li>
+<li>Quan sát ảnh gốc, ảnh có nhãn dự đoán và bảng top-k class.</li>
+</ol>
+<p>Kết quả cần quan sát:</p>
+<ul>
+<li>Ảnh gốc hiển thị ở khung bên trái.</li>
+<li>Ảnh kết quả có gắn nhãn top-1.</li>
+<li>Bảng kết quả có <code>rank</code>, <code>class_id</code>, <code>class_name</code>, <code>confidence</code>.</li>
+<li>File <code>outputs/vision_inference_log.csv</code> có thêm dòng log.</li>
+</ul>
+<p>Ý nghĩa:</p>
+<ul>
+<li>Đây là inference với dữ liệu ảnh.</li>
+<li>Model trả xác suất cho nhiều class, không chỉ một nhãn duy nhất.</li>
+<li>Top-1 sai không đồng nghĩa toàn bộ output vô ích; cần đọc top-5 và confidence.</li>
+</ul>
+<p>Câu hỏi gợi mở:</p>
+<ul>
+<li>Vì sao API trả top-5 thay vì chỉ top-1?</li>
+<li>Nếu confidence cao nhất chỉ khoảng 0.25, có nên dùng kết quả để ra quyết định tự động không?</li>
+<li>Vì sao ImageNet classifier tổng quát không thay thế được model chuyên ngành như nhận diện bệnh lá cây?</li>
+</ul>
+<h3 id="42-test-anh-bang-lenh-curl">4.2. Test ảnh bằng lệnh curl</h3>
+<pre><code class="language-bash">curl -X POST &quot;http://127.0.0.1:8000/classify-image?top_k=5&quot; \
+  -F &quot;file=@sample_images/classroom_object.jpg;type=image/jpeg&quot;
+</code></pre>
+<p>Kết quả cần quan sát:</p>
+<ul>
+<li>JSON response trả về <code>predictions</code>.</li>
+<li>Có <code>inference_time_ms</code>.</li>
+</ul>
+<p>Ý nghĩa:</p>
+<ul>
+<li>Giao diện web và curl đều gọi cùng một backend API.</li>
+<li>Frontend chỉ giúp thao tác trực quan hơn; inference thật nằm ở backend.</li>
+</ul>
+<hr />
+<h2 id="5-build-docker-image">5. Build Docker image</h2>
+<p>Dừng server local nếu đang chạy. Sau đó build image:</p>
+<pre><code class="language-bash">docker build -t lab5-aiot-inference:v4 .
+</code></pre>
+<p>Kiểm tra image:</p>
+<pre><code class="language-bash">docker images
+</code></pre>
+<p>Kết quả cần quan sát:</p>
+<pre><code class="language-text">REPOSITORY              TAG
+lab5-aiot-inference     v4
+</code></pre>
+<p>Ý nghĩa:</p>
+<ul>
+<li>Docker đã đóng gói code, thư viện, Dockerfile và lệnh chạy service thành image.</li>
+<li>Image là gói triển khai; container là instance đang chạy từ image.</li>
+</ul>
+<p>Câu hỏi gợi mở:</p>
+<ul>
+<li>Nếu sửa code trong <code>app/</code>, có cần build lại image không?</li>
+<li>Nếu model được mount bằng volume, có cần build lại image khi đổi model không?</li>
+</ul>
+<hr />
+<h2 id="6-chay-bang-docker-desktop-gui">6. Chạy bằng Docker Desktop GUI</h2>
+<h3 id="61-kiem-tra-docker-desktop">6.1. Kiểm tra Docker Desktop</h3>
+<p>Mở Docker Desktop và kiểm tra:</p>
+<pre><code class="language-text">Settings -&gt; General -&gt; Use the WSL 2 based engine
+Settings -&gt; Resources -&gt; WSL Integration -&gt; bật Ubuntu nếu dùng WSL
+</code></pre>
+<p>Kết quả cần quan sát:</p>
+<ul>
+<li>Docker Desktop ở trạng thái Running.</li>
+<li>Có thể mở tab Images và Containers.</li>
+</ul>
+<h3 id="62-chay-image-bang-giao-dien">6.2. Chạy image bằng giao diện</h3>
+<p>Sau khi build image:</p>
+<ol>
+<li>Mở Docker Desktop.</li>
+<li>Vào tab <strong>Images</strong>.</li>
+<li>Chọn image <code>lab5-aiot-inference:v4</code>.</li>
+<li>Bấm <strong>Run</strong>.</li>
+<li>Đặt container name: <code>lab5-aiot-api</code>.</li>
+<li>Cấu hình port: Host port <code>8000</code> -&gt; Container port <code>8000</code>.</li>
+<li>Nếu giao diện hỗ trợ volume, mount:</li>
+<li><code>outputs</code> trên máy host -&gt; <code>/app/outputs</code></li>
+<li><code>models/vision</code> trên máy host -&gt; <code>/app/models/vision</code></li>
+<li>Bấm <strong>Run</strong>.</li>
+<li>Vào tab <strong>Containers</strong> để kiểm tra container đang Running.</li>
+<li>Mở tab <strong>Logs</strong> để quan sát log server.</li>
+</ol>
+<p>Kết quả cần quan sát:</p>
+<ul>
+<li>Container <code>lab5-aiot-api</code> ở trạng thái Running.</li>
+<li>Logs có dòng Uvicorn đang chạy ở <code>0.0.0.0:8000</code>.</li>
+<li>Trình duyệt truy cập được <code>http://127.0.0.1:8000/docs</code>.</li>
+</ul>
+<p>Ý nghĩa:</p>
+<ul>
+<li>Docker Desktop giúp quan sát image/container/logs bằng giao diện.</li>
+<li>Bản chất service vẫn chạy trong container; giao diện chỉ là công cụ quản lý trực quan.</li>
+</ul>
+<h3 id="63-test-upload-anh-trong-container">6.3. Test upload ảnh trong container</h3>
+<p>Mở:</p>
+<pre><code class="language-text">http://127.0.0.1:8000/classify-image-demo
+</code></pre>
+<p>Kết quả cần quan sát:</p>
+<ul>
+<li>Giao diện upload ảnh hoạt động khi service chạy trong container.</li>
+<li>Ảnh kết quả và top-k class giống luồng local.</li>
+<li>Log inference được ghi vào <code>outputs/vision_inference_log.csv</code> trên host nếu mount volume đúng.</li>
+</ul>
+<hr />
+<h2 id="7-chay-bang-docker-trong-wsllinux-terminal">7. Chạy bằng Docker trong WSL/Linux terminal</h2>
+<pre><code class="language-bash">docker run --rm --name lab5-aiot-api -p 8000:8000 \
+  -v $(pwd)/outputs:/app/outputs \
+  -v $(pwd)/models/vision:/app/models/vision \
+  lab5-aiot-inference:v4
+</code></pre>
+<p>Kết quả cần quan sát:</p>
+<ul>
+<li>Terminal hiển thị log Uvicorn.</li>
+<li>Docker Desktop cũng nhìn thấy container đang chạy, nếu đang dùng Docker Desktop backend.</li>
+<li>Trình duyệt truy cập được <code>/docs</code> và <code>/classify-image-demo</code>.</li>
+</ul>
+<p>Ý nghĩa:</p>
+<ul>
+<li>WSL terminal giúp thao tác gần môi trường Linux server hơn.</li>
+<li>Docker Desktop trên Windows có thể cung cấp engine, còn Ubuntu WSL là môi trường terminal để gọi Docker CLI.</li>
+</ul>
+<hr />
+<h2 id="8-chay-bang-docker-compose">8. Chạy bằng Docker Compose</h2>
+<pre><code class="language-bash">docker compose up --build
+</code></pre>
+<p>Dừng service:</p>
+<pre><code class="language-bash">docker compose down
+</code></pre>
+<p>Kết quả cần quan sát:</p>
+<ul>
+<li>Compose tự build và chạy service theo <code>docker-compose.yml</code>.</li>
+<li>Có thể kiểm tra bằng <code>docker compose ps</code>.</li>
+<li>Logs hiển thị bằng <code>docker compose logs -f</code>.</li>
+</ul>
+<p>Ý nghĩa:</p>
+<ul>
+<li>Compose giúp thay thế lệnh <code>docker run</code> dài bằng một file cấu hình.</li>
+<li>Khi hệ thống có thêm dashboard, MQTT broker hoặc database, Compose giúp mô tả nhiều container cùng lúc.</li>
+</ul>
+<hr />
+<h2 id="9-so-sanh-khong-docker-va-co-docker">9. So sánh không Docker và có Docker</h2>
+<h3 id="91-khong-docker">9.1. Không Docker</h3>
+<p>Điền bảng sau sau khi chạy local:</p>
+<table>
+<thead>
+<tr>
+<th>Tiêu chí quan sát</th>
+<th>Kết quả ghi nhận</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Python version</td>
+<td></td>
+</tr>
+<tr>
+<td>Lỗi cài thư viện nếu có</td>
+<td></td>
+</tr>
+<tr>
+<td>Có load được vision model không</td>
+<td></td>
+</tr>
+<tr>
+<td>API <code>/health</code> có chạy không</td>
+<td></td>
+</tr>
+<tr>
+<td>Upload ảnh có thành công không</td>
+<td></td>
+</tr>
+<tr>
+<td>Log ghi ở đâu</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h3 id="92-co-docker">9.2. Có Docker</h3>
+<p>Điền bảng sau sau khi chạy container:</p>
+<table>
+<thead>
+<tr>
+<th>Tiêu chí quan sát</th>
+<th>Kết quả ghi nhận</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Image name/tag</td>
+<td></td>
+</tr>
+<tr>
+<td>Container name</td>
+<td></td>
+</tr>
+<tr>
+<td>Port mapping</td>
+<td></td>
+</tr>
+<tr>
+<td>Volume mapping</td>
+<td></td>
+</tr>
+<tr>
+<td>API <code>/health</code> có chạy không</td>
+<td></td>
+</tr>
+<tr>
+<td>Upload ảnh trong container có thành công không</td>
+<td></td>
+</tr>
+<tr>
+<td>Log có ghi ra host không</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>Kết luận cần rút ra:</p>
+<ul>
+<li>Docker giúp kiểm soát môi trường chạy.</li>
+<li>Docker không thay thế kiểm thử code.</li>
+<li>Docker chỉ có giá trị khi image, model, volume, port và log được cấu hình rõ ràng.</li>
+</ul>
+<hr />
+<h2 id="10-loi-thuong-gap-va-cach-quan-sat">10. Lỗi thường gặp và cách quan sát</h2>
+<table>
+<thead>
+<tr>
+<th>Hiện tượng</th>
+<th>Cần kiểm tra</th>
+<th>Lệnh hoặc vị trí quan sát</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Không mở được API</td>
+<td>Container có chạy không, port mapping đúng không</td>
+<td><code>docker ps</code>, Docker Desktop Containers</td>
+</tr>
+<tr>
+<td>API báo model ảnh chưa load</td>
+<td>Có file ONNX trong <code>models/vision</code> không</td>
+<td><code>ls models/vision</code></td>
+</tr>
+<tr>
+<td>Upload ảnh lỗi</td>
+<td>Định dạng/kích thước file</td>
+<td>Chọn ảnh JPG/PNG nhỏ hơn giới hạn</td>
+</tr>
+<tr>
+<td>Container chạy nhưng không có log trên host</td>
+<td>Volume outputs đã mount đúng chưa</td>
+<td>Docker Desktop Volumes hoặc <code>docker inspect</code></td>
+</tr>
+<tr>
+<td>Build image quá lâu</td>
+<td>Mạng, cache, package Python</td>
+<td>Docker build logs</td>
+</tr>
+<tr>
+<td>Chạy local được nhưng Docker lỗi</td>
+<td>File path, COPY trong Dockerfile, volume</td>
+<td>Docker logs</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="11-minh-chung-can-nop">11. Minh chứng cần nộp</h2>
+<ol>
+<li>Ảnh chụp API <code>/health</code> khi chạy local.</li>
+<li>Ảnh chụp giao diện <code>/classify-image-demo</code> sau khi upload ảnh local.</li>
+<li>Ảnh Docker Desktop tab Images có image <code>lab5-aiot-inference:v4</code>.</li>
+<li>Ảnh Docker Desktop tab Containers có container <code>lab5-aiot-api</code> đang Running.</li>
+<li>Ảnh Docker Desktop Logs của container.</li>
+<li>Ảnh Swagger <code>/docs</code> khi service chạy trong container.</li>
+<li>Ảnh giao diện <code>/classify-image-demo</code> khi service chạy trong container.</li>
+<li>File <code>outputs/service_log.csv</code> hoặc <code>outputs/vision_inference_log.csv</code>.</li>
+<li>Bảng so sánh không Docker và có Docker.</li>
+<li>Trả lời câu hỏi phân tích trong tài liệu lab.</li>
+</ol>
+        </article>
+      </main>
+    </div>
+  </div>
+
+  <script src="../js/main.js"></script>
+  <!-- Mermaid.js for Diagrams -->
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ 
+      startOnLoad: true, 
+      theme: document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default',
+      securityLevel: 'loose'
+    });
+    
+    // Handle theme toggle rendering for Mermaid
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === 'data-theme') {
+          const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default';
+          location.reload(); // Quickest way to rerender SVG diagrams natively
+        }
+      });
+    });
+    observer.observe(document.documentElement, { attributes: true });
+  </script>
+</body>
+</html>

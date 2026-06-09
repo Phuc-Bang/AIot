@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CHECKLIST NỘP BÀI - LAB 5 V4 - AIoT Documentation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Top Header -->
+    <header class="top-nav">
+      <div class="top-nav-left">
+        <button class="mobile-menu-toggle" id="menuToggle">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+        </button>
+        <span class="logo">⚡ AIoT Docs</span>
+      </div>
+      <div class="top-nav-right">
+        <div class="search-container">
+          <input type="text" id="searchInput" placeholder="Tìm kiếm tài liệu...">
+          <div class="search-results" id="searchResults"></div>
+        </div>
+        <button class="theme-toggle" id="themeToggle" title="Đổi giao diện">
+          <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="main-layout">
+      <!-- Sidebar Navigation -->
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-section">
+  <h4 class="sidebar-title">Core Documentation</h4>
+  <ul class="sidebar-list">
+    <li><a href="../pages/01_project_overview.html" class="sidebar-link ">01. Tổng quan dự án</a></li>
+    <li><a href="../pages/02_architecture.html" class="sidebar-link ">02. Kiến trúc hệ thống</a></li>
+    <li><a href="../pages/03_folder_structure.html" class="sidebar-link ">03. Cấu trúc thư mục</a></li>
+    <li><a href="../pages/04_api_reference.html" class="sidebar-link ">04. Tài liệu API</a></li>
+    <li><a href="../pages/05_model_pipeline.html" class="sidebar-link ">05. Quy trình suy luận</a></li>
+    <li><a href="../pages/06_docker_deployment.html" class="sidebar-link ">06. Triển khai Docker</a></li>
+    <li><a href="../pages/07_data_flow.html" class="sidebar-link ">07. Luồng dữ liệu</a></li>
+  </ul>
+</div>
+<div class="sidebar-section">
+  <h4 class="sidebar-title">References & Guides</h4>
+  <ul class="sidebar-list">
+    <li><a href="../pages/lab5_study_guide.html" class="sidebar-link ">Cẩm nang nghiên cứu Lab 5</a></li>
+    <li><a href="../pages/HUONG_DAN_CHAY_VA_QUAN_SAT.html" class="sidebar-link ">Hướng dẫn chạy & Quan sát</a></li>
+    <li><a href="../pages/DUONG_DI_MODEL_TRONG_THUC_TE.html" class="sidebar-link ">Đường đi của model</a></li>
+    <li><a href="../pages/model_formats_for_students.html" class="sidebar-link ">Định dạng model AI</a></li>
+    <li><a href="../pages/docker_environment_comparison.html" class="sidebar-link ">So sánh môi trường Docker</a></li>
+    <li><a href="../pages/docker_desktop_gui_beginner.html" class="sidebar-link ">Docker Desktop cho người mới</a></li>
+    <li><a href="../pages/docker_ubuntu_engine_beginner.html" class="sidebar-link ">Docker Engine trên Ubuntu</a></li>
+    <li><a href="#" class="sidebar-link active">Checklist nộp bài</a></li>
+    <li><a href="../pages/taste_skill.html" class="sidebar-link ">Quy chuẩn thiết kế Taste Skill</a></li>
+  </ul>
+</div>
+      </aside>
+      <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+      <!-- Main Content Area -->
+      <main class="content-area">
+        <article class="markdown-body">
+          <h1 id="checklist-nop-bai-lab-5-v4">CHECKLIST NỘP BÀI - LAB 5 V4</h1>
+<h2 id="1-minh-chung-chay-local">1. Minh chứng chạy local</h2>
+<ul>
+<li>Ảnh chụp <code>/health</code> khi chạy local.</li>
+<li>Ảnh chụp <code>/docs</code> khi chạy local.</li>
+<li>Ảnh chụp <code>/classify-image-demo</code> sau khi upload ảnh local.</li>
+<li>File <code>outputs/service_log.csv</code> hoặc <code>outputs/vision_inference_log.csv</code>.</li>
+</ul>
+<h2 id="2-minh-chung-docker-desktop">2. Minh chứng Docker Desktop</h2>
+<ul>
+<li>Ảnh tab Images có image <code>lab5-aiot-inference:v4</code>.</li>
+<li>Ảnh tab Containers có container <code>lab5-aiot-api</code> đang Running.</li>
+<li>Ảnh tab Logs trong container.</li>
+<li>Ảnh <code>/docs</code> khi service chạy trong container.</li>
+<li>Ảnh <code>/classify-image-demo</code> khi service chạy trong container.</li>
+</ul>
+<h2 id="3-minh-chung-docker-terminal-hoac-compose">3. Minh chứng Docker terminal hoặc Compose</h2>
+<ul>
+<li>Lệnh đã dùng để build image.</li>
+<li>Lệnh đã dùng để run container hoặc <code>docker compose up --build</code>.</li>
+<li>Ảnh hoặc text log cho thấy service chạy thành công.</li>
+</ul>
+<h2 id="4-bao-cao-ngan">4. Báo cáo ngắn</h2>
+<p>Báo cáo cần có các mục sau:</p>
+<ol>
+<li>Mục tiêu của Lab 5.</li>
+<li>Sơ đồ đường đi của model: model gốc -&gt; định dạng triển khai -&gt; API -&gt; Docker.</li>
+<li>Bảng so sánh chạy local và chạy Docker.</li>
+<li>Kết quả test API cảm biến.</li>
+<li>Kết quả test upload ảnh.</li>
+<li>Nhận xét về lợi ích và giới hạn của Docker.</li>
+<li>Nhận xét về giới hạn của model ảnh ImageNet general classifier.</li>
+</ol>
+<h2 id="5-cau-hoi-kiem-tra">5. Câu hỏi kiểm tra</h2>
+<ol>
+<li>Vì sao cần chạy local trước khi build Docker image?</li>
+<li>Image khác container ở điểm nào?</li>
+<li>Docker Desktop khác Docker Engine trên Ubuntu server ở điểm nào?</li>
+<li>Vì sao cần volume khi ghi log?</li>
+<li>Vì sao cần map port <code>8000:8000</code>?</li>
+<li>Pretrained model khác model tự train ở điểm nào?</li>
+<li>ONNX giải quyết vấn đề gì khi triển khai model?</li>
+<li>Nếu model ảnh chưa được tải, endpoint <code>/classify-image</code> sẽ gặp vấn đề gì?</li>
+<li>Nếu Docker chạy được nhưng trình duyệt không mở API được, cần kiểm tra những điểm nào?</li>
+<li>Trong doanh nghiệp, vì sao cần model version và image tag?</li>
+</ol>
+        </article>
+      </main>
+    </div>
+  </div>
+
+  <script src="../js/main.js"></script>
+  <!-- Mermaid.js for Diagrams -->
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ 
+      startOnLoad: true, 
+      theme: document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default',
+      securityLevel: 'loose'
+    });
+    
+    // Handle theme toggle rendering for Mermaid
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === 'data-theme') {
+          const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default';
+          location.reload(); // Quickest way to rerender SVG diagrams natively
+        }
+      });
+    });
+    observer.observe(document.documentElement, { attributes: true });
+  </script>
+</body>
+</html>

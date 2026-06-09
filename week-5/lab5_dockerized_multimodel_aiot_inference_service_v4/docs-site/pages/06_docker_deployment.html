@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>06. Triển Khai Với Docker & Docker Compose (Docker Deployment) - AIoT Documentation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Top Header -->
+    <header class="top-nav">
+      <div class="top-nav-left">
+        <button class="mobile-menu-toggle" id="menuToggle">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+        </button>
+        <span class="logo">⚡ AIoT Docs</span>
+      </div>
+      <div class="top-nav-right">
+        <div class="search-container">
+          <input type="text" id="searchInput" placeholder="Tìm kiếm tài liệu...">
+          <div class="search-results" id="searchResults"></div>
+        </div>
+        <button class="theme-toggle" id="themeToggle" title="Đổi giao diện">
+          <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="main-layout">
+      <!-- Sidebar Navigation -->
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-section">
+  <h4 class="sidebar-title">Core Documentation</h4>
+  <ul class="sidebar-list">
+    <li><a href="../pages/01_project_overview.html" class="sidebar-link ">01. Tổng quan dự án</a></li>
+    <li><a href="../pages/02_architecture.html" class="sidebar-link ">02. Kiến trúc hệ thống</a></li>
+    <li><a href="../pages/03_folder_structure.html" class="sidebar-link ">03. Cấu trúc thư mục</a></li>
+    <li><a href="../pages/04_api_reference.html" class="sidebar-link ">04. Tài liệu API</a></li>
+    <li><a href="../pages/05_model_pipeline.html" class="sidebar-link ">05. Quy trình suy luận</a></li>
+    <li><a href="#" class="sidebar-link active">06. Triển khai Docker</a></li>
+    <li><a href="../pages/07_data_flow.html" class="sidebar-link ">07. Luồng dữ liệu</a></li>
+  </ul>
+</div>
+<div class="sidebar-section">
+  <h4 class="sidebar-title">References & Guides</h4>
+  <ul class="sidebar-list">
+    <li><a href="../pages/lab5_study_guide.html" class="sidebar-link ">Cẩm nang nghiên cứu Lab 5</a></li>
+    <li><a href="../pages/HUONG_DAN_CHAY_VA_QUAN_SAT.html" class="sidebar-link ">Hướng dẫn chạy & Quan sát</a></li>
+    <li><a href="../pages/DUONG_DI_MODEL_TRONG_THUC_TE.html" class="sidebar-link ">Đường đi của model</a></li>
+    <li><a href="../pages/model_formats_for_students.html" class="sidebar-link ">Định dạng model AI</a></li>
+    <li><a href="../pages/docker_environment_comparison.html" class="sidebar-link ">So sánh môi trường Docker</a></li>
+    <li><a href="../pages/docker_desktop_gui_beginner.html" class="sidebar-link ">Docker Desktop cho người mới</a></li>
+    <li><a href="../pages/docker_ubuntu_engine_beginner.html" class="sidebar-link ">Docker Engine trên Ubuntu</a></li>
+    <li><a href="../pages/submission_checklist_v4.html" class="sidebar-link ">Checklist nộp bài</a></li>
+    <li><a href="../pages/taste_skill.html" class="sidebar-link ">Quy chuẩn thiết kế Taste Skill</a></li>
+  </ul>
+</div>
+      </aside>
+      <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+      <!-- Main Content Area -->
+      <main class="content-area">
+        <article class="markdown-body">
+          <h1 id="06-trien-khai-voi-docker-docker-compose-docker-deployment">06. Triển Khai Với Docker &amp; Docker Compose (Docker Deployment)</h1>
+<p>Triển khai container hóa (Containerization) là bước quan trọng nhất để đưa dịch vụ AIoT lên môi trường doanh nghiệp Cloud/Edge Server ổn định.</p>
+<hr />
+<h2 id="1-giai-ma-dockerfile-cong-thuc-xay-dung-image">1. Giải Mã Dockerfile (Công Thức Xây Dựng Image)</h2>
+<p>File <code>Dockerfile</code> quy định các bước biên dịch và tạo lập Docker Image từ trên xuống dưới:</p>
+<ul>
+<li><strong><code>FROM python:3.11-slim</code></strong>: Chọn hệ điều hành Linux siêu rút gọn Debian có sẵn Python 3.11 để giảm kích thước lưu đĩa.</li>
+<li><strong><code>ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 ...</code></strong>: Cấu hình biến môi trường giúp Python không sinh file <code>.pyc</code> dư thừa và in logs trực tiếp ra màn hình terminal ngay lập tức để dễ theo dõi.</li>
+<li><strong><code>WORKDIR /app</code></strong>: Thiết lập thư mục làm việc mặc định trong container là <code>/app</code>.</li>
+<li><strong><code>RUN apt-get update &amp;&amp; apt-get install -y --no-install-recommends curl &amp;&amp; rm -rf /var/lib/apt/lists/*</code></strong>: Cài đặt thêm thư viện mạng <code>curl</code> hỗ trợ chạy test và script giám sát.</li>
+<li><strong><code>COPY requirements.txt .</code> &amp; <code>RUN pip install --no-cache-dir -r requirements.txt</code></strong>: Cài đặt thư viện Python sạch sẽ, không lưu cache để tối ưu dung lượng.</li>
+<li><strong><code>COPY app/ app/</code> ...</strong>: Sao chép toàn bộ mã nguồn của bạn vào trong container.</li>
+<li><strong><code>EXPOSE 8000</code></strong>: Khai báo cổng ứng dụng <code>8000</code> mà container sẽ mở.</li>
+<li><strong><code>CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]</code></strong>: Khởi chạy ứng dụng bằng Uvicorn lắng nghe trên cổng <code>8000</code> của tất cả các dải IP nội bộ.</li>
+</ul>
+<hr />
+<h2 id="2-giai-ma-docker-composeyml-ieu-phoi-van-hanh">2. Giải Mã docker-compose.yml (Điều Phối Vận Hành)</h2>
+<p>Tệp Compose giúp điều phối việc chạy container dễ dàng thông qua các tệp cấu hình thay vì viết các dòng lệnh <code>docker run</code> dài:</p>
+<pre><code class="language-yaml">services:
+  aiot-api:
+    build: .
+    container_name: lab5-aiot-api
+    ports:
+      - &quot;8001:8000&quot;
+    environment:
+      - MODEL_DIR=/app/models
+      - OUTPUT_DIR=/app/outputs
+      - VISION_MODEL_PATH=/app/models/vision/squeezenet1.1-7.onnx
+      - VISION_LABELS_PATH=/app/models/vision/imagenet_classes.txt
+    volumes:
+      - ./outputs:/app/outputs
+      - ./models/vision:/app/models/vision
+    restart: unless-stopped
+</code></pre>
+<h3 id="cac-cau-hinh-quan-trong-can-luu-y">Các cấu hình quan trọng cần lưu ý:</h3>
+<ol>
+<li><strong>Port Mapping (<code>"8001:8000"</code>)</strong>:</li>
+<li><strong>Cú pháp</strong>: <code>"[Host Cổng]:[Container Cổng]"</code></li>
+<li><strong>Ý nghĩa</strong>: Ánh xạ cổng <code>8001</code> của máy thật (máy host của bạn) vào cổng <code>8000</code> nội bộ của Docker container. Mọi request gửi tới cổng <code>8001</code> của máy bạn sẽ được chuyển tiếp vào cổng <code>8000</code> của dịch vụ FastAPI chạy trong container. Thiết lập này giúp bạn tránh xung đột với ứng dụng <code>cardioguard-ai</code> đang chạy cổng <code>8000</code>.</li>
+<li><strong>Volume Mapping (Mount ổ đĩa ảo)</strong>:</li>
+<li><strong><code>./outputs:/app/outputs</code></strong>: Đồng bộ thư mục ghi log. Tất cả các file log cảm biến (<code>service_log.csv</code>) và log ảnh (<code>vision_inference_log.csv</code>) ghi bởi container sẽ được đồng bộ lập tức ra đĩa cứng vật lý của bạn. Nếu container bị lỗi hay bị xóa, <strong>dữ liệu log trên máy host vẫn được bảo toàn</strong>.</li>
+<li><strong><code>./models/vision:/app/models/vision</code></strong>: Chia sẻ tệp mô hình. Giúp container đọc trực tiếp file mô hình ONNX từ máy host mà không cần phải đóng gói file mô hình nặng đó vào bên trong Image, giúp Image của bạn cực kỳ nhẹ và build nhanh hơn.</li>
+<li><strong>Restart Policy (<code>restart: unless-stopped</code>)</strong>:</li>
+<li>Tự động khởi động lại container nếu nó gặp lỗi crash, trừ khi người dùng chủ động tắt nó. Đảm bảo tính sẵn sàng cao của dịch vụ AIoT.</li>
+</ol>
+<hr />
+<h2 id="3-cac-lenh-ieu-khien-van-hanh-docker">3. Các Lệnh Điều Khiển Vận Hành Docker</h2>
+<p>Mở Terminal tại thư mục chứa tệp <code>docker-compose.yml</code> và sử dụng các lệnh sau:</p>
+<ul>
+<li><strong>Khởi chạy container ở chế độ chạy nền (Detached mode)</strong>:
+  <code>bash
+  docker compose up -d</code></li>
+<li><strong>Khởi chạy kèm bắt buộc build lại Image khi có thay đổi code</strong>:
+  <code>bash
+  docker compose up -d --build</code></li>
+<li><strong>Xem logs hoạt động trực tiếp của container</strong>:
+  <code>bash
+  docker compose logs -f</code></li>
+<li><strong>Tắt dịch vụ và dọn dẹp các tài nguyên mạng ảo ảo</strong>:
+  <code>bash
+  docker compose down</code></li>
+<li><strong>Kiểm tra trạng thái container đang chạy</strong>:
+  <code>bash
+  docker compose ps</code></li>
+</ul>
+        </article>
+      </main>
+    </div>
+  </div>
+
+  <script src="../js/main.js"></script>
+  <!-- Mermaid.js for Diagrams -->
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ 
+      startOnLoad: true, 
+      theme: document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default',
+      securityLevel: 'loose'
+    });
+    
+    // Handle theme toggle rendering for Mermaid
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === 'data-theme') {
+          const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default';
+          location.reload(); // Quickest way to rerender SVG diagrams natively
+        }
+      });
+    });
+    observer.observe(document.documentElement, { attributes: true });
+  </script>
+</body>
+</html>

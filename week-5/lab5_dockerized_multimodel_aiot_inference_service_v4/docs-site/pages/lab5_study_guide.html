@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hướng Dẫn Phân Tích, Nghiên Cứu và Tìm Hiểu Lab 5 (Day-5) - AIoT Documentation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Top Header -->
+    <header class="top-nav">
+      <div class="top-nav-left">
+        <button class="mobile-menu-toggle" id="menuToggle">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+        </button>
+        <span class="logo">⚡ AIoT Docs</span>
+      </div>
+      <div class="top-nav-right">
+        <div class="search-container">
+          <input type="text" id="searchInput" placeholder="Tìm kiếm tài liệu...">
+          <div class="search-results" id="searchResults"></div>
+        </div>
+        <button class="theme-toggle" id="themeToggle" title="Đổi giao diện">
+          <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="main-layout">
+      <!-- Sidebar Navigation -->
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-section">
+  <h4 class="sidebar-title">Core Documentation</h4>
+  <ul class="sidebar-list">
+    <li><a href="../pages/01_project_overview.html" class="sidebar-link ">01. Tổng quan dự án</a></li>
+    <li><a href="../pages/02_architecture.html" class="sidebar-link ">02. Kiến trúc hệ thống</a></li>
+    <li><a href="../pages/03_folder_structure.html" class="sidebar-link ">03. Cấu trúc thư mục</a></li>
+    <li><a href="../pages/04_api_reference.html" class="sidebar-link ">04. Tài liệu API</a></li>
+    <li><a href="../pages/05_model_pipeline.html" class="sidebar-link ">05. Quy trình suy luận</a></li>
+    <li><a href="../pages/06_docker_deployment.html" class="sidebar-link ">06. Triển khai Docker</a></li>
+    <li><a href="../pages/07_data_flow.html" class="sidebar-link ">07. Luồng dữ liệu</a></li>
+  </ul>
+</div>
+<div class="sidebar-section">
+  <h4 class="sidebar-title">References & Guides</h4>
+  <ul class="sidebar-list">
+    <li><a href="#" class="sidebar-link active">Cẩm nang nghiên cứu Lab 5</a></li>
+    <li><a href="../pages/HUONG_DAN_CHAY_VA_QUAN_SAT.html" class="sidebar-link ">Hướng dẫn chạy & Quan sát</a></li>
+    <li><a href="../pages/DUONG_DI_MODEL_TRONG_THUC_TE.html" class="sidebar-link ">Đường đi của model</a></li>
+    <li><a href="../pages/model_formats_for_students.html" class="sidebar-link ">Định dạng model AI</a></li>
+    <li><a href="../pages/docker_environment_comparison.html" class="sidebar-link ">So sánh môi trường Docker</a></li>
+    <li><a href="../pages/docker_desktop_gui_beginner.html" class="sidebar-link ">Docker Desktop cho người mới</a></li>
+    <li><a href="../pages/docker_ubuntu_engine_beginner.html" class="sidebar-link ">Docker Engine trên Ubuntu</a></li>
+    <li><a href="../pages/submission_checklist_v4.html" class="sidebar-link ">Checklist nộp bài</a></li>
+    <li><a href="../pages/taste_skill.html" class="sidebar-link ">Quy chuẩn thiết kế Taste Skill</a></li>
+  </ul>
+</div>
+      </aside>
+      <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+      <!-- Main Content Area -->
+      <main class="content-area">
+        <article class="markdown-body">
+          <h1 id="huong-dan-phan-tich-nghien-cuu-va-tim-hieu-lab-5-day-5">Hướng Dẫn Phân Tích, Nghiên Cứu và Tìm Hiểu Lab 5 (Day-5)</h1>
+<p>Tài liệu này đóng vai trò là cẩm nang học tập giúp bạn nắm vững kiến trúc, luồng đi của dữ liệu và các công nghệ cốt lõi được áp dụng trong <strong>Day-5 / Lab 5: Dockerized Multi-Model AI Inference Service for AIoT</strong>.</p>
+<hr />
+<h2 id="1-muc-tieu-cua-lab-5">1. Mục Tiêu của Lab 5</h2>
+<p>Trọng tâm của Lab 5 không phải là huấn luyện (training) AI model, mà là <strong>triển khai (deployment) và đóng gói (packaging)</strong>. Nó kết nối các kiến thức từ các ngày trước đó (dữ liệu cảm biến, phân tích dự báo) để đưa lên một hệ thống chạy dịch vụ thực tế.</p>
+<ul>
+<li><strong>Multi-Model</strong>: Dịch vụ xử lý đồng thời cả dữ liệu dạng chuỗi thời gian (time-series) từ cảm biến và dữ liệu dạng hình ảnh (computer vision).</li>
+<li><strong>Dockerization</strong>: Đóng gói toàn bộ runtime (Python, thư viện, model weights, API logic) thành một Docker Container độc lập, nhất quán, có thể chạy ở mọi nơi mà không bị lỗi môi trường.</li>
+</ul>
+<hr />
+<h2 id="2-giai-ma-cau-truc-thu-muc">2. Giải Mã Cấu Trúc Thư Mục</h2>
+<p>Thư mục <code>Day-5</code> bao gồm các tệp tin tài liệu lý thuyết và một dự án mẫu hoàn chỉnh:</p>
+<pre><code class="language-text">Day-5/
+├── docs/                                   # Tài liệu hướng dẫn môn học (Word)
+│   └── Lab_5_v4_Dockerized_Multi_Model_AI_Inference_Service_AIOT.docx
+├── lab5_dockerized_multimodel_aiot_inference_service_v4_code.zip # Code dự án dạng nén
+└── lab5_dockerized_multimodel_aiot_inference_service_v4/         # Mã nguồn giải nén (Dự án chính)
+    ├── Dockerfile                          # Công thức đóng gói Docker Image
+    ├── docker-compose.yml                  # Cấu hình điều phối chạy container
+    ├── requirements.txt                    # Khai báo các thư viện Python cần thiết
+    ├── RUN_GUIDE.md                        # Hướng dẫn chạy nhanh và debug
+    ├── app/                                # Mã nguồn FastAPI
+    ├── models/                             # Nơi lưu trữ Model AI
+    ├── sample_images/                      # Ảnh mẫu để test upload
+    ├── sample_requests/                    # Dữ liệu JSON mẫu để test API
+    ├── outputs/                            # Nơi ghi log hoạt động của hệ thống
+    ├── scripts/                            # Các kịch bản tự động tải model và test nhanh
+    ├── tests/                              # Bộ kiểm thử tự động (Unit Tests)
+    └── docs/                               # Tài liệu học tập chuyên sâu
+</code></pre>
+<hr />
+<h2 id="3-luong-hoat-ong-cua-he-thong-workflow">3. Luồng Hoạt Động của Hệ Thống (Workflow)</h2>
+<p>Hệ thống hoạt động theo mô hình <strong>Client - Server (API-driven)</strong>:</p>
+<pre class="mermaid">graph TD
+    Client[Client: Web UI / Curl / Thiết bị IoT] --&gt;|API Request| API[FastAPI Web Service]
+    API --&gt;|1. Nhận Telemetry JSON| SensorEngine[Sensor Inference Engine]
+    API --&gt;|2. Nhận Upload File Ảnh| VisionEngine[Vision Inference Engine]
+
+    SensorEngine --&gt;|Decision &amp; Safety Rules| OutputSensor[Trả kết quả JSON dự báo / Anomaly]
+    VisionEngine --&gt;|Preprocess -&gt; ONNX Runtime| OutputVision[Trả kết quả phân loại Top-K / Vẽ nhãn lên ảnh]
+
+    API --&gt;|Ghi log| CSVLogs[(outputs/ CSV Logs)]
+</pre>
+<h3 id="chi-tiet-cac-luong-xu-ly-chinh">Chi tiết các luồng xử lý chính:</h3>
+<h4 id="a-luong-xu-ly-du-lieu-cam-bien-sensor-inference">A. Luồng Xử Lý Dữ Liệu Cảm Biến (Sensor Inference)</h4>
+<ul>
+<li><strong>Các Endpoint</strong>: <code>/detect-anomaly</code> (phát hiện dị thường), <code>/forecast</code> (dự báo xu hướng chuỗi thời gian), <code>/predict-risk</code> (đánh giá mức độ rủi ro).</li>
+<li><strong>Cơ chế</strong>: Nhận dữ liệu telemetry thời gian thực qua định dạng JSON, chạy thuật toán tính toán nhanh (Z-Score, Moving Average) và đưa ra quyết định cảnh báo dựa trên quy tắc an toàn (safety rules).</li>
+</ul>
+<h4 id="b-luong-xu-ly-hinh-anh-computer-vision-inference">B. Luồng Xử Lý Hình Ảnh (Computer Vision Inference)</h4>
+<ul>
+<li><strong>Các Endpoint</strong>: <code>/classify-image</code> (trả về JSON Top-K nhãn dự đoán), <code>/classify-image-annotated</code> (trả về ảnh PNG đã được vẽ nhãn dự đoán trực tiếp lên góc ảnh).</li>
+<li><strong>Cơ chế</strong>: </li>
+<li>Client upload tệp tin ảnh qua API Multipart Form.</li>
+<li>Ảnh được PIL (Pillow) đọc và thực hiện <strong>tiền xử lý (preprocess)</strong>: resize về kích thước $224 \times 224$ px, chuẩn hóa kênh màu (mean, std) theo phân phối của tập ImageNet.</li>
+<li>Đưa Tensor ảnh vào <strong>ONNX Runtime</strong> để chạy suy luận (inference) cực nhanh thông qua model <strong>SqueezeNet</strong>.</li>
+<li>Trả về nhãn có xác suất cao nhất.</li>
+</ul>
+<hr />
+<h2 id="4-phan-tich-sau-cac-tep-tin-quan-trong">4. Phân Tích Sâu Các Tệp Tin Quan Trọng</h2>
+<h3 id="1-dockerfile-cong-thuc-ong-goi">1. <code>Dockerfile</code> - Công thức Đóng Gói</h3>
+<ul>
+<li>Dự án sử dụng base image <code>python:3.11-slim</code> để giảm dung lượng tải xuống và tăng tốc độ khởi động.</li>
+<li>Cài đặt thêm thư viện <code>curl</code> phục vụ cho việc kiểm tra sức khỏe hệ thống (healthcheck).</li>
+<li>Sử dụng lệnh <code>pip install --no-cache-dir -r requirements.txt</code> để cài đặt thư viện sạch sẽ, không lưu bộ nhớ đệm (giúp image có dung lượng nhỏ hơn).</li>
+<li>Thiết lập các biến môi trường cấu hình đường dẫn (<code>MODEL_DIR</code>, <code>OUTPUT_DIR</code>,...) để code Python dễ dàng truy cập.</li>
+</ul>
+<h3 id="2-docker-composeyml-nguoi-ieu-phoi">2. <code>docker-compose.yml</code> - Người Điều Phối</h3>
+<ul>
+<li>Giúp quản lý việc khởi chạy container bằng file cấu hình thay vì gõ dòng lệnh <code>docker run</code> quá dài.</li>
+<li><strong>Volume Mapping</strong> (<code>./outputs:/app/outputs</code>): Tạo đường liên kết dữ liệu giữa máy host và container. Khi container ghi log vào <code>/app/outputs/service_log.csv</code>, tệp tin này sẽ xuất hiện và được lưu trữ ngay trên ổ đĩa vật lý của máy bạn, tránh việc dữ liệu bị xóa mất khi tắt container.</li>
+<li><strong>Port Mapping</strong> (<code>8001:8000</code>): Chuyển tiếp cổng <code>8001</code> của máy bạn vào cổng <code>8000</code> bên trong container.</li>
+</ul>
+<h3 id="3-appmainpy-bo-nao-cua-api">3. <code>app/main.py</code> - Bộ Não của API</h3>
+<ul>
+<li>Khởi tạo đối tượng <code>FastAPI</code> và định nghĩa các route cho ứng dụng.</li>
+<li>Tích hợp giao diện HTML đơn giản tại <code>/classify-image-demo</code> để người dùng không cần cài postman vẫn có thể trực quan hóa việc upload ảnh và kiểm tra độ chính xác của model.</li>
+</ul>
+<h3 id="4-appvision_inferencepy-logic-suy-luan">4. <code>app/vision_inference.py</code> - Logic Suy Luận</h3>
+<ul>
+<li>Chứa lớp <code>VisionClassifier</code>. Đây là nơi nạp model ONNX (<code>onnxruntime.InferenceSession</code>), thực hiện các công thức toán học tiền xử lý ảnh (chuyển đổi chiều kênh màu, crop ảnh) và thuật toán <strong>Softmax</strong> để quy đổi đầu ra (logits) của model thành xác suất (confidence) từ $0$ đến $1$.</li>
+</ul>
+<hr />
+<h2 id="5-cac-chu-e-nghien-cuu-va-hoc-tap-chuyen-sau-tu-thu-muc-nay">5. Các Chủ Đề Nghiên Cứu và Học Tập Chuyên Sâu Từ Thư Mục Này</h2>
+<p>Để hiểu sâu hơn về kiến trúc hệ thống AIoT trong doanh nghiệp, bạn nên tự nghiên cứu các câu hỏi sau:</p>
+<ol>
+<li><strong>Tính linh hoạt (Interoperability)</strong>: Tại sao dự án lại chuyển đổi model sang định dạng <code>.onnx</code> thay vì chạy file <code>.pth</code> trực tiếp từ PyTorch? (Đọc thêm tài liệu: <a href="file:///e:/AIoT/Home-Work/Day-5/lab5_dockerized_multimodel_aiot_inference_service_v4/docs/model_formats_for_students.md">model_formats_for_students.md</a>).</li>
+<li><strong>Ảo hóa &amp; Đóng gói</strong>: Sự khác biệt cốt lõi về hiệu năng và tài nguyên khi deploy ứng dụng bằng Docker Container so với máy ảo VM truyền thống là gì? (Đọc thêm tài liệu: <a href="file:///e:/AIoT/Home-Work/Day-5/lab5_dockerized_multimodel_aiot_inference_service_v4/docs/docker_environment_comparison.md">docker_environment_comparison.md</a>).</li>
+<li><strong>Quy tắc an toàn (Decision Safety)</strong>: Tại sao đầu ra của các thuật toán ML cảm biến không được truyền trực tiếp xuống cơ cấu chấp hành (actuators/relays) mà phải thông qua một tầng quy tắc đánh giá rủi ro (như hàm <code>risk_from_forecast</code>)?</li>
+</ol>
+        </article>
+      </main>
+    </div>
+  </div>
+
+  <script src="../js/main.js"></script>
+  <!-- Mermaid.js for Diagrams -->
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ 
+      startOnLoad: true, 
+      theme: document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default',
+      securityLevel: 'loose'
+    });
+    
+    // Handle theme toggle rendering for Mermaid
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === 'data-theme') {
+          const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default';
+          location.reload(); // Quickest way to rerender SVG diagrams natively
+        }
+      });
+    });
+    observer.observe(document.documentElement, { attributes: true });
+  </script>
+</body>
+</html>

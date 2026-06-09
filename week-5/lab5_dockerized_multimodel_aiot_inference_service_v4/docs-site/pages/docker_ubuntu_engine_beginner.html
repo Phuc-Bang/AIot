@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DOCKER ENGINE TRÊN UBUNTU SERVER/VM - AIoT Documentation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Top Header -->
+    <header class="top-nav">
+      <div class="top-nav-left">
+        <button class="mobile-menu-toggle" id="menuToggle">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+        </button>
+        <span class="logo">⚡ AIoT Docs</span>
+      </div>
+      <div class="top-nav-right">
+        <div class="search-container">
+          <input type="text" id="searchInput" placeholder="Tìm kiếm tài liệu...">
+          <div class="search-results" id="searchResults"></div>
+        </div>
+        <button class="theme-toggle" id="themeToggle" title="Đổi giao diện">
+          <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="main-layout">
+      <!-- Sidebar Navigation -->
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-section">
+  <h4 class="sidebar-title">Core Documentation</h4>
+  <ul class="sidebar-list">
+    <li><a href="../pages/01_project_overview.html" class="sidebar-link ">01. Tổng quan dự án</a></li>
+    <li><a href="../pages/02_architecture.html" class="sidebar-link ">02. Kiến trúc hệ thống</a></li>
+    <li><a href="../pages/03_folder_structure.html" class="sidebar-link ">03. Cấu trúc thư mục</a></li>
+    <li><a href="../pages/04_api_reference.html" class="sidebar-link ">04. Tài liệu API</a></li>
+    <li><a href="../pages/05_model_pipeline.html" class="sidebar-link ">05. Quy trình suy luận</a></li>
+    <li><a href="../pages/06_docker_deployment.html" class="sidebar-link ">06. Triển khai Docker</a></li>
+    <li><a href="../pages/07_data_flow.html" class="sidebar-link ">07. Luồng dữ liệu</a></li>
+  </ul>
+</div>
+<div class="sidebar-section">
+  <h4 class="sidebar-title">References & Guides</h4>
+  <ul class="sidebar-list">
+    <li><a href="../pages/lab5_study_guide.html" class="sidebar-link ">Cẩm nang nghiên cứu Lab 5</a></li>
+    <li><a href="../pages/HUONG_DAN_CHAY_VA_QUAN_SAT.html" class="sidebar-link ">Hướng dẫn chạy & Quan sát</a></li>
+    <li><a href="../pages/DUONG_DI_MODEL_TRONG_THUC_TE.html" class="sidebar-link ">Đường đi của model</a></li>
+    <li><a href="../pages/model_formats_for_students.html" class="sidebar-link ">Định dạng model AI</a></li>
+    <li><a href="../pages/docker_environment_comparison.html" class="sidebar-link ">So sánh môi trường Docker</a></li>
+    <li><a href="../pages/docker_desktop_gui_beginner.html" class="sidebar-link ">Docker Desktop cho người mới</a></li>
+    <li><a href="#" class="sidebar-link active">Docker Engine trên Ubuntu</a></li>
+    <li><a href="../pages/submission_checklist_v4.html" class="sidebar-link ">Checklist nộp bài</a></li>
+    <li><a href="../pages/taste_skill.html" class="sidebar-link ">Quy chuẩn thiết kế Taste Skill</a></li>
+  </ul>
+</div>
+      </aside>
+      <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+      <!-- Main Content Area -->
+      <main class="content-area">
+        <article class="markdown-body">
+          <h1 id="docker-engine-tren-ubuntu-servervm">DOCKER ENGINE TRÊN UBUNTU SERVER/VM</h1>
+<p>Phần này trình bày hướng triển khai gần môi trường doanh nghiệp hơn. Docker Engine được cài trực tiếp trên Ubuntu server hoặc Ubuntu máy ảo. Không dùng Docker Desktop GUI.</p>
+<h2 id="1-khac-biet-so-voi-docker-desktop">1. Khác biệt so với Docker Desktop</h2>
+<table>
+<thead>
+<tr>
+<th>Nội dung</th>
+<th>Docker Desktop</th>
+<th>Docker Engine trên Ubuntu</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Môi trường</td>
+<td>Laptop cá nhân, có GUI</td>
+<td>Server/VM Linux, chủ yếu terminal</td>
+</tr>
+<tr>
+<td>Quản lý container</td>
+<td>GUI và CLI</td>
+<td>CLI, script, CI/CD</td>
+</tr>
+<tr>
+<td>Mục tiêu</td>
+<td>Học tập, phát triển, demo</td>
+<td>Triển khai, vận hành, tự động hóa</td>
+</tr>
+<tr>
+<td>Quan sát logs</td>
+<td>Docker Desktop Logs hoặc CLI</td>
+<td><code>docker logs</code>, <code>docker compose logs</code></td>
+</tr>
+<tr>
+<td>Quản lý service lâu dài</td>
+<td>Có thể dùng nhưng thiên local dev</td>
+<td>Dùng restart policy, systemd, CI/CD, orchestration</td>
+</tr>
+</tbody>
+</table>
+<h2 id="2-luong-trien-khai-co-ban">2. Luồng triển khai cơ bản</h2>
+<pre><code class="language-text">Cài Docker Engine
+-&gt; copy project lên server
+-&gt; build image hoặc pull image từ registry
+-&gt; chạy container
+-&gt; mở port
+-&gt; kiểm tra health check
+-&gt; xem logs
+-&gt; cấu hình restart policy
+</code></pre>
+<h2 id="3-lenh-co-ban">3. Lệnh cơ bản</h2>
+<pre><code class="language-bash">docker build -t lab5-aiot-inference:v4 .
+docker run -d --name lab5-aiot-api --restart unless-stopped \
+  -p 8000:8000 \
+  -v $(pwd)/outputs:/app/outputs \
+  -v $(pwd)/models/vision:/app/models/vision \
+  lab5-aiot-inference:v4
+</code></pre>
+<p>Kiểm tra:</p>
+<pre><code class="language-bash">docker ps
+docker logs -f lab5-aiot-api
+curl http://127.0.0.1:8000/health
+</code></pre>
+<h2 id="4-khi-dung-docker-compose">4. Khi dùng Docker Compose</h2>
+<pre><code class="language-bash">docker compose up -d --build
+docker compose ps
+docker compose logs -f
+docker compose down
+</code></pre>
+<p>Ý nghĩa:</p>
+<ul>
+<li><code>up -d</code>: chạy nền.</li>
+<li><code>ps</code>: xem service đang chạy.</li>
+<li><code>logs -f</code>: theo dõi logs realtime.</li>
+<li><code>down</code>: dừng và gỡ container do Compose tạo.</li>
+</ul>
+<h2 id="5-cau-hoi-goi-mo">5. Câu hỏi gợi mở</h2>
+<ol>
+<li>Vì sao server doanh nghiệp thường không dùng Docker Desktop GUI?</li>
+<li>Vì sao cần <code>--restart unless-stopped</code> khi chạy service lâu dài?</li>
+<li>Nếu model được cập nhật, nên đổi image tag hay ghi đè tag cũ?</li>
+<li>Nếu port 8000 không truy cập được từ máy khác, cần kiểm tra firewall, security group hay Docker port mapping?</li>
+</ol>
+        </article>
+      </main>
+    </div>
+  </div>
+
+  <script src="../js/main.js"></script>
+  <!-- Mermaid.js for Diagrams -->
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ 
+      startOnLoad: true, 
+      theme: document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default',
+      securityLevel: 'loose'
+    });
+    
+    // Handle theme toggle rendering for Mermaid
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === 'data-theme') {
+          const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default';
+          location.reload(); // Quickest way to rerender SVG diagrams natively
+        }
+      });
+    });
+    observer.observe(document.documentElement, { attributes: true });
+  </script>
+</body>
+</html>

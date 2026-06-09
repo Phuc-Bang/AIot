@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CHẠY LAB 5 BẰNG DOCKER DESKTOP GUI - AIoT Documentation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Top Header -->
+    <header class="top-nav">
+      <div class="top-nav-left">
+        <button class="mobile-menu-toggle" id="menuToggle">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+        </button>
+        <span class="logo">⚡ AIoT Docs</span>
+      </div>
+      <div class="top-nav-right">
+        <div class="search-container">
+          <input type="text" id="searchInput" placeholder="Tìm kiếm tài liệu...">
+          <div class="search-results" id="searchResults"></div>
+        </div>
+        <button class="theme-toggle" id="themeToggle" title="Đổi giao diện">
+          <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="main-layout">
+      <!-- Sidebar Navigation -->
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-section">
+  <h4 class="sidebar-title">Core Documentation</h4>
+  <ul class="sidebar-list">
+    <li><a href="../pages/01_project_overview.html" class="sidebar-link ">01. Tổng quan dự án</a></li>
+    <li><a href="../pages/02_architecture.html" class="sidebar-link ">02. Kiến trúc hệ thống</a></li>
+    <li><a href="../pages/03_folder_structure.html" class="sidebar-link ">03. Cấu trúc thư mục</a></li>
+    <li><a href="../pages/04_api_reference.html" class="sidebar-link ">04. Tài liệu API</a></li>
+    <li><a href="../pages/05_model_pipeline.html" class="sidebar-link ">05. Quy trình suy luận</a></li>
+    <li><a href="../pages/06_docker_deployment.html" class="sidebar-link ">06. Triển khai Docker</a></li>
+    <li><a href="../pages/07_data_flow.html" class="sidebar-link ">07. Luồng dữ liệu</a></li>
+  </ul>
+</div>
+<div class="sidebar-section">
+  <h4 class="sidebar-title">References & Guides</h4>
+  <ul class="sidebar-list">
+    <li><a href="../pages/lab5_study_guide.html" class="sidebar-link ">Cẩm nang nghiên cứu Lab 5</a></li>
+    <li><a href="../pages/HUONG_DAN_CHAY_VA_QUAN_SAT.html" class="sidebar-link ">Hướng dẫn chạy & Quan sát</a></li>
+    <li><a href="../pages/DUONG_DI_MODEL_TRONG_THUC_TE.html" class="sidebar-link ">Đường đi của model</a></li>
+    <li><a href="../pages/model_formats_for_students.html" class="sidebar-link ">Định dạng model AI</a></li>
+    <li><a href="../pages/docker_environment_comparison.html" class="sidebar-link ">So sánh môi trường Docker</a></li>
+    <li><a href="#" class="sidebar-link active">Docker Desktop cho người mới</a></li>
+    <li><a href="../pages/docker_ubuntu_engine_beginner.html" class="sidebar-link ">Docker Engine trên Ubuntu</a></li>
+    <li><a href="../pages/submission_checklist_v4.html" class="sidebar-link ">Checklist nộp bài</a></li>
+    <li><a href="../pages/taste_skill.html" class="sidebar-link ">Quy chuẩn thiết kế Taste Skill</a></li>
+  </ul>
+</div>
+      </aside>
+      <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+      <!-- Main Content Area -->
+      <main class="content-area">
+        <article class="markdown-body">
+          <h1 id="chay-lab-5-bang-docker-desktop-gui">CHẠY LAB 5 BẰNG DOCKER DESKTOP GUI</h1>
+<p>Mục tiêu của phần này là quan sát Docker bằng giao diện: image nằm ở đâu, container chạy ở đâu, log xem ở đâu, service mở port như thế nào.</p>
+<h2 id="1-kiem-tra-docker-desktop">1. Kiểm tra Docker Desktop</h2>
+<p>Mở Docker Desktop và kiểm tra:</p>
+<pre><code class="language-text">Settings -&gt; General -&gt; Use the WSL 2 based engine
+Settings -&gt; Resources -&gt; WSL Integration -&gt; bật Ubuntu nếu dùng WSL
+</code></pre>
+<p>Kiểm tra bằng terminal:</p>
+<pre><code class="language-bash">docker --version
+docker run hello-world
+</code></pre>
+<h2 id="2-build-image-truoc">2. Build image trước</h2>
+<p>Docker Desktop có thể quan sát image sau khi image được build. Chạy trong thư mục project:</p>
+<pre><code class="language-bash">docker build -t lab5-aiot-inference:v4 .
+</code></pre>
+<p>Sau khi build, mở Docker Desktop -&gt; Images. Cần thấy image:</p>
+<pre><code class="language-text">lab5-aiot-inference:v4
+</code></pre>
+<h2 id="3-run-image-bang-giao-dien">3. Run image bằng giao diện</h2>
+<p>Thao tác:</p>
+<ol>
+<li>Vào tab Images.</li>
+<li>Chọn image <code>lab5-aiot-inference:v4</code>.</li>
+<li>Bấm Run.</li>
+<li>Đặt container name: <code>lab5-aiot-api</code>.</li>
+<li>Map port: host <code>8000</code> -&gt; container <code>8000</code>.</li>
+<li>Nếu giao diện có phần volume, mount:</li>
+<li><code>outputs</code> -&gt; <code>/app/outputs</code></li>
+<li><code>models/vision</code> -&gt; <code>/app/models/vision</code></li>
+<li>Bấm Run.</li>
+</ol>
+<p>Nếu hộp thoại Run không hiển thị rõ phần volume, có thể chạy container bằng terminal hoặc Compose rồi quay lại Docker Desktop để quan sát.</p>
+<h2 id="4-quan-sat-container">4. Quan sát container</h2>
+<p>Mở Docker Desktop -&gt; Containers.</p>
+<p>Cần quan sát:</p>
+<ul>
+<li>Container <code>lab5-aiot-api</code> ở trạng thái Running.</li>
+<li>Port hiển thị dạng <code>8000:8000</code>.</li>
+<li>Có nút mở logs.</li>
+</ul>
+<p>Mở Logs và tìm các dòng tương tự:</p>
+<pre><code class="language-text">Uvicorn running on http://0.0.0.0:8000
+Application startup complete
+</code></pre>
+<p>Ý nghĩa:</p>
+<ul>
+<li>Service đang chạy bên trong container.</li>
+<li>Port 8000 trong container đã được map ra port 8000 trên máy host.</li>
+</ul>
+<h2 id="5-test-bang-trinh-duyet">5. Test bằng trình duyệt</h2>
+<p>Mở:</p>
+<pre><code class="language-text">http://127.0.0.1:8000/health
+http://127.0.0.1:8000/docs
+http://127.0.0.1:8000/classify-image-demo
+</code></pre>
+<p>Cần quan sát:</p>
+<ul>
+<li><code>/health</code> trả <code>service_status: ok</code>.</li>
+<li><code>/docs</code> hiển thị API Swagger.</li>
+<li><code>/classify-image-demo</code> cho phép chọn ảnh, upload và xem kết quả.</li>
+</ul>
+<h2 id="6-anh-minh-chung-can-chup">6. Ảnh minh chứng cần chụp</h2>
+<ol>
+<li>Tab Images có image <code>lab5-aiot-inference:v4</code>.</li>
+<li>Tab Containers có container <code>lab5-aiot-api</code> đang Running.</li>
+<li>Tab Logs có log Uvicorn.</li>
+<li>Trình duyệt mở <code>/docs</code>.</li>
+<li>Giao diện <code>/classify-image-demo</code> sau khi upload ảnh.</li>
+</ol>
+        </article>
+      </main>
+    </div>
+  </div>
+
+  <script src="../js/main.js"></script>
+  <!-- Mermaid.js for Diagrams -->
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ 
+      startOnLoad: true, 
+      theme: document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default',
+      securityLevel: 'loose'
+    });
+    
+    // Handle theme toggle rendering for Mermaid
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === 'data-theme') {
+          const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default';
+          location.reload(); // Quickest way to rerender SVG diagrams natively
+        }
+      });
+    });
+    observer.observe(document.documentElement, { attributes: true });
+  </script>
+</body>
+</html>

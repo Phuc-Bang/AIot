@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>02. Kiến Trúc Hệ Thống (System Architecture) - AIoT Documentation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Top Header -->
+    <header class="top-nav">
+      <div class="top-nav-left">
+        <button class="mobile-menu-toggle" id="menuToggle">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+        </button>
+        <span class="logo">⚡ AIoT Docs</span>
+      </div>
+      <div class="top-nav-right">
+        <div class="search-container">
+          <input type="text" id="searchInput" placeholder="Tìm kiếm tài liệu...">
+          <div class="search-results" id="searchResults"></div>
+        </div>
+        <button class="theme-toggle" id="themeToggle" title="Đổi giao diện">
+          <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="main-layout">
+      <!-- Sidebar Navigation -->
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-section">
+  <h4 class="sidebar-title">Core Documentation</h4>
+  <ul class="sidebar-list">
+    <li><a href="../pages/01_project_overview.html" class="sidebar-link ">01. Tổng quan dự án</a></li>
+    <li><a href="#" class="sidebar-link active">02. Kiến trúc hệ thống</a></li>
+    <li><a href="../pages/03_folder_structure.html" class="sidebar-link ">03. Cấu trúc thư mục</a></li>
+    <li><a href="../pages/04_api_reference.html" class="sidebar-link ">04. Tài liệu API</a></li>
+    <li><a href="../pages/05_model_pipeline.html" class="sidebar-link ">05. Quy trình suy luận</a></li>
+    <li><a href="../pages/06_docker_deployment.html" class="sidebar-link ">06. Triển khai Docker</a></li>
+    <li><a href="../pages/07_data_flow.html" class="sidebar-link ">07. Luồng dữ liệu</a></li>
+  </ul>
+</div>
+<div class="sidebar-section">
+  <h4 class="sidebar-title">References & Guides</h4>
+  <ul class="sidebar-list">
+    <li><a href="../pages/lab5_study_guide.html" class="sidebar-link ">Cẩm nang nghiên cứu Lab 5</a></li>
+    <li><a href="../pages/HUONG_DAN_CHAY_VA_QUAN_SAT.html" class="sidebar-link ">Hướng dẫn chạy & Quan sát</a></li>
+    <li><a href="../pages/DUONG_DI_MODEL_TRONG_THUC_TE.html" class="sidebar-link ">Đường đi của model</a></li>
+    <li><a href="../pages/model_formats_for_students.html" class="sidebar-link ">Định dạng model AI</a></li>
+    <li><a href="../pages/docker_environment_comparison.html" class="sidebar-link ">So sánh môi trường Docker</a></li>
+    <li><a href="../pages/docker_desktop_gui_beginner.html" class="sidebar-link ">Docker Desktop cho người mới</a></li>
+    <li><a href="../pages/docker_ubuntu_engine_beginner.html" class="sidebar-link ">Docker Engine trên Ubuntu</a></li>
+    <li><a href="../pages/submission_checklist_v4.html" class="sidebar-link ">Checklist nộp bài</a></li>
+    <li><a href="../pages/taste_skill.html" class="sidebar-link ">Quy chuẩn thiết kế Taste Skill</a></li>
+  </ul>
+</div>
+      </aside>
+      <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+      <!-- Main Content Area -->
+      <main class="content-area">
+        <article class="markdown-body">
+          <h1 id="02-kien-truc-he-thong-system-architecture">02. Kiến Trúc Hệ Thống (System Architecture)</h1>
+<p>Hệ thống được thiết kế theo kiến trúc <strong>API-driven Microservice</strong> khép kín trong môi trường container của Docker. Tất cả các luồng giao tiếp giữa thiết bị IoT hoặc Client bên ngoài với mô hình AI đều được điều phối bởi FastAPI.</p>
+<hr />
+<h2 id="1-so-o-kien-truc-tong-the">1. Sơ Đồ Kiến Trúc Tổng Thể</h2>
+<p>Dưới đây là sơ đồ kiến trúc thể hiện cách các thành phần tương tác với nhau từ máy host vật lý đi vào môi trường ảo của Docker container:</p>
+<pre class="mermaid">graph TB
+    subgraph Host Machine (Máy thật)
+        Client[Trình duyệt Web / Client HTTP]
+        VolumeLogs[(Thư mục outputs/)]
+        VolumeModels[(Thư mục models/vision/)]
+    end
+
+    subgraph Docker Container (Môi trường ảo)
+        direction TB
+        PortMapping[Cổng mạng 8000]
+        FastAPIServer[FastAPI Application]
+
+        subgraph Logic suy luận
+            SensorEngine[Sensor Inference Engine]
+            VisionEngine[ONNX Vision Classifier]
+        end
+
+        FileLogs[(/app/outputs/)]
+        FileModels[(/app/models/vision/)]
+    end
+
+    %% Giao tiếp cổng mạng
+    Client --&gt;|Gửi Request cổng 8001| PortMapping
+    PortMapping --&gt;|Định tuyến nội bộ| FastAPIServer
+
+    %% Luồng xử lý
+    FastAPIServer --&gt;|1. Nhận Telemetry JSON| SensorEngine
+    FastAPIServer --&gt;|2. Nhận file ảnh| VisionEngine
+
+    %% Gắn ổ đĩa ảo (Volume mounts)
+    FileLogs &lt;==&gt;|Ghi đè thời gian thực| VolumeLogs
+    FileModels &lt;==|Đọc file mô hình .onnx| VolumeModels
+</pre>
+<hr />
+<h2 id="2-cac-thanh-phan-chinh-trong-kien-truc">2. Các Thành Phần Chính Trong Kiến Trúc</h2>
+<h3 id="a-tang-client-client-layer">A. Tầng Client (Client Layer)</h3>
+<ul>
+<li><strong>Web UI Dashboard</strong>: Người dùng tương tác trực quan tại <code>/classify-image-demo</code> để tải ảnh lên và xem kết quả.</li>
+<li><strong>IoT Devices / HTTP Clients</strong>: Các cảm biến hoặc thiết bị biên gửi yêu cầu HTTP POST kèm dữ liệu số (JSON payload) hoặc ảnh nhị phân (multipart/form-data) trực tiếp tới các điểm cuối (endpoints) của API.</li>
+</ul>
+<h3 id="b-tang-cau-noi-mang-network-bridge">B. Tầng Cầu Nối Mạng (Network Bridge)</h3>
+<ul>
+<li><strong>Cổng mạng (Port Mapping)</strong>: Docker ánh xạ cổng vật lý của máy host (<code>8001</code>) vào cổng ảo của container (<code>8000</code>). Nhờ cơ chế này, dịch vụ có thể chạy cô lập hoàn toàn bên trong container mà vẫn tiếp nhận được yêu cầu từ thế giới bên ngoài.</li>
+</ul>
+<h3 id="c-tang-ung-dung-application-layer-fastapi">C. Tầng Ứng Dụng (Application Layer - FastAPI)</h3>
+<ul>
+<li>Đóng vai trò là người tiếp đón và điều phối. FastAPI nhận dữ liệu đầu vào, thực hiện kiểm tra định dạng dữ liệu (validation nhờ thư viện Pydantic), phân phối dữ liệu cho các bộ máy suy luận (inference engines) tương ứng, ghi log và đóng gói dữ liệu đầu ra trả về cho Client dưới dạng chuẩn JSON hoặc dữ liệu luồng ảnh (StreamingResponse).</li>
+</ul>
+<h3 id="d-tang-suy-luan-ai-inference-layer">D. Tầng Suy Luận AI (Inference Layer)</h3>
+<ul>
+<li><strong>Bộ máy phân tích cảm biến (Sensor Inference Engine)</strong>: Thực hiện tính toán z-score để phát hiện dị thường và phương pháp trung bình trượt (Moving Average) để dự báo chỉ số tiếp theo.</li>
+<li><strong>Bộ máy phân loại ảnh (ONNX Vision Classifier)</strong>: Khởi tạo phiên làm việc với mô hình <code>onnxruntime</code> trên nền phần cứng CPU (<code>CPUExecutionProvider</code>). Thực hiện các thuật toán tiền xử lý ma trận ảnh gốc sang Tensor chuẩn hóa và áp dụng hàm Softmax để xác định nhãn vật thể.</li>
+</ul>
+<h3 id="e-tang-luu-tru-luu-em-storage-volume-layer">E. Tầng Lưu Trữ Lưu Đệm (Storage &amp; Volume Layer)</h3>
+<ul>
+<li><strong>Volume Mounts</strong>: Liên kết các thư mục lưu trữ tĩnh giữa máy host và Docker container.</li>
+<li>Thư mục <code>models/</code> giúp đưa file mô hình dung lượng lớn vào container một cách an toàn mà không làm phình kích thước Docker Image.</li>
+<li>Thư mục <code>outputs/</code> làm nhiệm vụ ghi lại toàn bộ nhật ký sự kiện, đảm bảo dữ liệu ghi log được lưu vĩnh viễn trên máy thật của bạn.</li>
+</ul>
+        </article>
+      </main>
+    </div>
+  </div>
+
+  <script src="../js/main.js"></script>
+  <!-- Mermaid.js for Diagrams -->
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ 
+      startOnLoad: true, 
+      theme: document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default',
+      securityLevel: 'loose'
+    });
+    
+    // Handle theme toggle rendering for Mermaid
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === 'data-theme') {
+          const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default';
+          location.reload(); // Quickest way to rerender SVG diagrams natively
+        }
+      });
+    });
+    observer.observe(document.documentElement, { attributes: true });
+  </script>
+</body>
+</html>

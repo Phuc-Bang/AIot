@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ĐỊNH DẠNG MODEL TRONG TRIỂN KHAI AI - AIoT Documentation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Top Header -->
+    <header class="top-nav">
+      <div class="top-nav-left">
+        <button class="mobile-menu-toggle" id="menuToggle">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+        </button>
+        <span class="logo">⚡ AIoT Docs</span>
+      </div>
+      <div class="top-nav-right">
+        <div class="search-container">
+          <input type="text" id="searchInput" placeholder="Tìm kiếm tài liệu...">
+          <div class="search-results" id="searchResults"></div>
+        </div>
+        <button class="theme-toggle" id="themeToggle" title="Đổi giao diện">
+          <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="main-layout">
+      <!-- Sidebar Navigation -->
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-section">
+  <h4 class="sidebar-title">Core Documentation</h4>
+  <ul class="sidebar-list">
+    <li><a href="../pages/01_project_overview.html" class="sidebar-link ">01. Tổng quan dự án</a></li>
+    <li><a href="../pages/02_architecture.html" class="sidebar-link ">02. Kiến trúc hệ thống</a></li>
+    <li><a href="../pages/03_folder_structure.html" class="sidebar-link ">03. Cấu trúc thư mục</a></li>
+    <li><a href="../pages/04_api_reference.html" class="sidebar-link ">04. Tài liệu API</a></li>
+    <li><a href="../pages/05_model_pipeline.html" class="sidebar-link ">05. Quy trình suy luận</a></li>
+    <li><a href="../pages/06_docker_deployment.html" class="sidebar-link ">06. Triển khai Docker</a></li>
+    <li><a href="../pages/07_data_flow.html" class="sidebar-link ">07. Luồng dữ liệu</a></li>
+  </ul>
+</div>
+<div class="sidebar-section">
+  <h4 class="sidebar-title">References & Guides</h4>
+  <ul class="sidebar-list">
+    <li><a href="../pages/lab5_study_guide.html" class="sidebar-link ">Cẩm nang nghiên cứu Lab 5</a></li>
+    <li><a href="../pages/HUONG_DAN_CHAY_VA_QUAN_SAT.html" class="sidebar-link ">Hướng dẫn chạy & Quan sát</a></li>
+    <li><a href="../pages/DUONG_DI_MODEL_TRONG_THUC_TE.html" class="sidebar-link ">Đường đi của model</a></li>
+    <li><a href="#" class="sidebar-link active">Định dạng model AI</a></li>
+    <li><a href="../pages/docker_environment_comparison.html" class="sidebar-link ">So sánh môi trường Docker</a></li>
+    <li><a href="../pages/docker_desktop_gui_beginner.html" class="sidebar-link ">Docker Desktop cho người mới</a></li>
+    <li><a href="../pages/docker_ubuntu_engine_beginner.html" class="sidebar-link ">Docker Engine trên Ubuntu</a></li>
+    <li><a href="../pages/submission_checklist_v4.html" class="sidebar-link ">Checklist nộp bài</a></li>
+    <li><a href="../pages/taste_skill.html" class="sidebar-link ">Quy chuẩn thiết kế Taste Skill</a></li>
+  </ul>
+</div>
+      </aside>
+      <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+      <!-- Main Content Area -->
+      <main class="content-area">
+        <article class="markdown-body">
+          <h1 id="inh-dang-model-trong-trien-khai-ai">ĐỊNH DẠNG MODEL TRONG TRIỂN KHAI AI</h1>
+<h2 id="1-khong-bat-au-bang-onnx">1. Không bắt đầu bằng ONNX</h2>
+<p>Model thường được train trong một framework cụ thể. Sau khi train xong, model được lưu ở định dạng gốc của framework đó. Khi đưa vào triển khai, định dạng triển khai được lựa chọn dựa trên runtime, phần cứng, tốc độ inference, kích thước model và khả năng bảo trì.</p>
+<h2 id="2-inh-dang-model-thuong-gap">2. Định dạng model thường gặp</h2>
+<table>
+<thead>
+<tr>
+<th>Framework</th>
+<th>Định dạng thường gặp</th>
+<th>Ý nghĩa</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PyTorch</td>
+<td><code>.pt</code>, <code>.pth</code>, <code>state_dict</code></td>
+<td>Lưu trọng số và/hoặc trạng thái model trong hệ PyTorch</td>
+</tr>
+<tr>
+<td>TensorFlow/Keras</td>
+<td><code>.keras</code>, SavedModel, <code>.h5</code></td>
+<td>Lưu model trong hệ sinh thái TensorFlow/Keras</td>
+</tr>
+<tr>
+<td>scikit-learn</td>
+<td><code>.joblib</code>, <code>.pkl</code></td>
+<td>Lưu model ML cổ điển trong Python</td>
+</tr>
+<tr>
+<td>ONNX</td>
+<td><code>.onnx</code></td>
+<td>Định dạng mở để trao đổi và chạy inference bằng ONNX Runtime</td>
+</tr>
+<tr>
+<td>TensorFlow Lite</td>
+<td><code>.tflite</code></td>
+<td>Định dạng nhẹ cho mobile và edge device</td>
+</tr>
+</tbody>
+</table>
+<h2 id="3-uong-chuyen-oi-trien-khai">3. Đường chuyển đổi triển khai</h2>
+<pre><code class="language-text">PyTorch/TensorFlow/scikit-learn model
+-&gt; kiểm thử inference trong framework gốc
+-&gt; xuất sang ONNX/TFLite nếu cần
+-&gt; kiểm tra sai khác sau chuyển đổi
+-&gt; đóng gói runtime vào API service
+-&gt; build Docker image
+-&gt; triển khai container
+</code></pre>
+<h2 id="4-loi-ich-va-anh-oi">4. Lợi ích và đánh đổi</h2>
+<table>
+<thead>
+<tr>
+<th>Hướng triển khai</th>
+<th>Lợi ích</th>
+<th>Đánh đổi</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Dùng framework gốc</td>
+<td>Dễ debug, gần code train</td>
+<td>Runtime nặng, phụ thuộc framework</td>
+</tr>
+<tr>
+<td>ONNX Runtime</td>
+<td>Portable hơn, gọn hơn cho inference</td>
+<td>Cần convert và kiểm tra operator</td>
+</tr>
+<tr>
+<td>TFLite</td>
+<td>Phù hợp mobile/edge</td>
+<td>Có thể cần quantization, giới hạn operator</td>
+</tr>
+<tr>
+<td>Quantization</td>
+<td>Model nhỏ và nhanh hơn</td>
+<td>Có thể giảm độ chính xác</td>
+</tr>
+</tbody>
+</table>
+<h2 id="5-cau-hoi-goi-mo">5. Câu hỏi gợi mở</h2>
+<ol>
+<li>Nếu một model chỉ chạy được trong đúng môi trường train ban đầu, quá trình triển khai có bền vững không?</li>
+<li>Vì sao cần kiểm tra kết quả trước và sau khi chuyển sang ONNX?</li>
+<li>Khi nào nên ưu tiên model nhẹ thay vì model có độ chính xác cao hơn?</li>
+<li>Với thiết bị biên, kích thước model và latency ảnh hưởng thế nào đến hệ thống?</li>
+</ol>
+        </article>
+      </main>
+    </div>
+  </div>
+
+  <script src="../js/main.js"></script>
+  <!-- Mermaid.js for Diagrams -->
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ 
+      startOnLoad: true, 
+      theme: document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default',
+      securityLevel: 'loose'
+    });
+    
+    // Handle theme toggle rendering for Mermaid
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === 'data-theme') {
+          const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default';
+          location.reload(); // Quickest way to rerender SVG diagrams natively
+        }
+      });
+    });
+    observer.observe(document.documentElement, { attributes: true });
+  </script>
+</body>
+</html>

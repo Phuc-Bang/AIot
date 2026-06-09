@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>05. Quy Trình Suy Luận Của Mô Hình (Model Pipeline) - AIoT Documentation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Top Header -->
+    <header class="top-nav">
+      <div class="top-nav-left">
+        <button class="mobile-menu-toggle" id="menuToggle">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+        </button>
+        <span class="logo">⚡ AIoT Docs</span>
+      </div>
+      <div class="top-nav-right">
+        <div class="search-container">
+          <input type="text" id="searchInput" placeholder="Tìm kiếm tài liệu...">
+          <div class="search-results" id="searchResults"></div>
+        </div>
+        <button class="theme-toggle" id="themeToggle" title="Đổi giao diện">
+          <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="main-layout">
+      <!-- Sidebar Navigation -->
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-section">
+  <h4 class="sidebar-title">Core Documentation</h4>
+  <ul class="sidebar-list">
+    <li><a href="../pages/01_project_overview.html" class="sidebar-link ">01. Tổng quan dự án</a></li>
+    <li><a href="../pages/02_architecture.html" class="sidebar-link ">02. Kiến trúc hệ thống</a></li>
+    <li><a href="../pages/03_folder_structure.html" class="sidebar-link ">03. Cấu trúc thư mục</a></li>
+    <li><a href="../pages/04_api_reference.html" class="sidebar-link ">04. Tài liệu API</a></li>
+    <li><a href="#" class="sidebar-link active">05. Quy trình suy luận</a></li>
+    <li><a href="../pages/06_docker_deployment.html" class="sidebar-link ">06. Triển khai Docker</a></li>
+    <li><a href="../pages/07_data_flow.html" class="sidebar-link ">07. Luồng dữ liệu</a></li>
+  </ul>
+</div>
+<div class="sidebar-section">
+  <h4 class="sidebar-title">References & Guides</h4>
+  <ul class="sidebar-list">
+    <li><a href="../pages/lab5_study_guide.html" class="sidebar-link ">Cẩm nang nghiên cứu Lab 5</a></li>
+    <li><a href="../pages/HUONG_DAN_CHAY_VA_QUAN_SAT.html" class="sidebar-link ">Hướng dẫn chạy & Quan sát</a></li>
+    <li><a href="../pages/DUONG_DI_MODEL_TRONG_THUC_TE.html" class="sidebar-link ">Đường đi của model</a></li>
+    <li><a href="../pages/model_formats_for_students.html" class="sidebar-link ">Định dạng model AI</a></li>
+    <li><a href="../pages/docker_environment_comparison.html" class="sidebar-link ">So sánh môi trường Docker</a></li>
+    <li><a href="../pages/docker_desktop_gui_beginner.html" class="sidebar-link ">Docker Desktop cho người mới</a></li>
+    <li><a href="../pages/docker_ubuntu_engine_beginner.html" class="sidebar-link ">Docker Engine trên Ubuntu</a></li>
+    <li><a href="../pages/submission_checklist_v4.html" class="sidebar-link ">Checklist nộp bài</a></li>
+    <li><a href="../pages/taste_skill.html" class="sidebar-link ">Quy chuẩn thiết kế Taste Skill</a></li>
+  </ul>
+</div>
+      </aside>
+      <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+      <!-- Main Content Area -->
+      <main class="content-area">
+        <article class="markdown-body">
+          <h1 id="05-quy-trinh-suy-luan-cua-mo-hinh-model-pipeline">05. Quy Trình Suy Luận Của Mô Hình (Model Pipeline)</h1>
+<p>Dự án này tích hợp song song hai loại đường ống xử lý mô hình (Model Pipelines): xử lý dữ liệu telemetry cảm biến số và xử lý hình ảnh qua mô hình mạng nơ-ron tích chập (CNN) định dạng ONNX.</p>
+<hr />
+<h2 id="1-uong-ong-xu-ly-du-lieu-cam-bien-sensor-pipeline">1. Đường Ống Xử Lý Dữ Liệu Cảm Biến (Sensor Pipeline)</h2>
+<p>Dữ liệu từ cảm biến gửi lên được xử lý bằng các quy tắc toán học nhanh gọn nhằm phát hiện dị thường và dự báo ngắn hạn.</p>
+<h3 id="a-phat-hien-di-thuong-bang-thuat-toan-z-score">A. Phát hiện dị thường bằng thuật toán Z-Score</h3>
+<p>Thuật toán đo lường mức độ sai lệch của giá trị hiện tại ($x_{current}$) so với giá trị trung bình lịch sử ($\mu$) thông qua độ lệch chuẩn ($\sigma$):</p>
+<p>$$\text{Score (Z)} = \frac{|x_{current} - \mu|}{\sigma}$$</p>
+<ul>
+<li><strong>Cơ chế xử lý</strong>:</li>
+<li>Nhận chuỗi giá trị lịch sử <code>recent_values</code> (Yêu cầu $\ge 3$ điểm dữ liệu).</li>
+<li>Tính giá trị trung bình ($\mu$) và độ lệch chuẩn ($\sigma$). Nếu $\sigma \approx 0$, gán độ lệch chuẩn tối thiểu là $1e-6$ để tránh lỗi chia cho $0$.</li>
+<li>Tính điểm $Z$. Nếu $Z \ge \text{threshold_z}$ (mặc định là 2.5), điểm dữ liệu được coi là <strong>Dị thường (Anomaly)</strong>.</li>
+<li>Trả về mức độ nghiêm trọng (<code>NORMAL</code>, <code>WARNING</code>, <code>HIGH</code>) để hỗ trợ ra quyết định.</li>
+</ul>
+<hr />
+<h2 id="2-uong-ong-xu-ly-hinh-anh-vision-pipeline">2. Đường Ống Xử Lý Hình Ảnh (Vision Pipeline)</h2>
+<p>Mô hình phân loại ảnh được xây dựng trên cấu trúc mạng <strong>SqueezeNet 1.1</strong> lưu ở định dạng <strong>ONNX</strong>. </p>
+<pre class="mermaid">graph TD
+    A[Ảnh Gốc JPG/PNG từ Client] --&gt;|1. Convert RGB| B[Chuyển đổi hệ màu RGB]
+    B --&gt;|2. Resize| C[Resize cạnh ngắn hơn về 256px]
+    C --&gt;|3. Center Crop| D[Cắt tâm lấy khung 224x224px]
+    D --&gt;|4. Normalize| E[Chuẩn hóa pixel 0..1 &amp; trừ Mean / chia Std]
+    E --&gt;|5. Transpose| F[Chuyển đổi chiều Tensor từ HWC sang CHW]
+    F --&gt;|6. Batch Dimension| G[Thêm chiều Batch NCHW 1, 3, 224, 224]
+    G --&gt;|7. Inference| H[Nạp vào ONNX Runtime CPU]
+    H --&gt;|8. Softmax| I[Chuyển đổi đầu ra logits sang xác suất %]
+    I --&gt;|9. Postprocess| J[Ánh xạ nhãn và trả về Top-K]
+</pre>
+<h3 id="a-chi-tiet-cac-buoc-tien-xu-ly-anh-image-preprocessing">A. Chi tiết các bước tiền xử lý ảnh (Image Preprocessing)</h3>
+<p>Mô hình SqueezeNet được huấn luyện trên tập dữ liệu ImageNet yêu cầu đầu vào có định dạng ma trận rất nghiêm ngặt. Việc tiền xử lý được lập trình trong tệp <code>app/vision_inference.py</code>:</p>
+<ol>
+<li><strong>Chuẩn hóa kích thước (Resizing &amp; Cropping)</strong>:</li>
+<li>Giữ nguyên tỷ lệ ảnh gốc, thay đổi kích thước sao cho cạnh ngắn nhất bằng $256$ pixel.</li>
+<li>Tiến hành cắt lấy trung tâm (Center Crop) một khung hình vuông kích thước $224 \times 224$ pixel.</li>
+<li><strong>Chuẩn hóa giá trị Pixel (Normalization)</strong>:</li>
+<li>Quy đổi giá trị các điểm ảnh từ dải $[0, 255]$ về $[0.0, 1.0]$.</li>
+<li>Thực hiện trừ giá trị trung bình (Mean) và chia cho độ lệch chuẩn (Standard Deviation) trên từng kênh màu R-G-B của tập ImageNet:
+     $$\text{Pixel}_{\text{normalized}} = \frac{\text{Pixel} - \text{Mean}}{\text{Std}}$$<ul>
+<li>$\text{Mean} = [0.485, 0.456, 0.406]$</li>
+<li>$\text{Std} = [0.229, 0.224, 0.225]$</li>
+</ul>
+</li>
+<li><strong>Chuyển đổi chiều mảng (Transpose &amp; Batch Dimension)</strong>:</li>
+<li>Chuyển đổi định dạng lưu trữ từ <code>HWC</code> (Chiều cao, Chiều rộng, Số kênh màu) sang <code>CHW</code> (Kênh màu, Chiều cao, Chiều rộng).</li>
+<li>Thêm một chiều ảo ở đầu (Batch size) để đưa Tensor về cấu hình đầu vào <code>[1, 3, 224, 224]</code> sẵn sàng đưa vào ONNX Session.</li>
+</ol>
+<h3 id="b-chay-suy-luan-hau-xu-ly-inference-softmax">B. Chạy suy luận &amp; Hậu xử lý (Inference &amp; Softmax)</h3>
+<ul>
+<li><strong>ONNX Runtime</strong>: Gọi hàm <code>session.run()</code> để thực thi suy luận trên CPU. Đầu ra trả về là một mảng 1000 giá trị điểm số (Logits) đại diện cho 1000 lớp đối tượng.</li>
+<li><strong>Hàm Softmax</strong>: Để chuyển đổi các logits thô ($z_i$) thành xác suất phần trăm dễ hiểu ($p_i$), ta áp dụng công thức Softmax:
+  $$p_i = \frac{e^{z_i}}{\sum_{j=1}^{1000} e^{z_j}}$$</li>
+<li><strong>Kết quả</strong>: Sắp xếp các nhãn theo xác suất giảm dần và lấy ra Top-K phần tử đầu tiên để phản hồi cho client.</li>
+</ul>
+        </article>
+      </main>
+    </div>
+  </div>
+
+  <script src="../js/main.js"></script>
+  <!-- Mermaid.js for Diagrams -->
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ 
+      startOnLoad: true, 
+      theme: document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default',
+      securityLevel: 'loose'
+    });
+    
+    // Handle theme toggle rendering for Mermaid
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === 'data-theme') {
+          const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default';
+          location.reload(); // Quickest way to rerender SVG diagrams natively
+        }
+      });
+    });
+    observer.observe(document.documentElement, { attributes: true });
+  </script>
+</body>
+</html>

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>03. Cấu Trúc Thư Mục Dự Án (Folder Structure) - AIoT Documentation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Top Header -->
+    <header class="top-nav">
+      <div class="top-nav-left">
+        <button class="mobile-menu-toggle" id="menuToggle">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+        </button>
+        <span class="logo">⚡ AIoT Docs</span>
+      </div>
+      <div class="top-nav-right">
+        <div class="search-container">
+          <input type="text" id="searchInput" placeholder="Tìm kiếm tài liệu...">
+          <div class="search-results" id="searchResults"></div>
+        </div>
+        <button class="theme-toggle" id="themeToggle" title="Đổi giao diện">
+          <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="main-layout">
+      <!-- Sidebar Navigation -->
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-section">
+  <h4 class="sidebar-title">Core Documentation</h4>
+  <ul class="sidebar-list">
+    <li><a href="../pages/01_project_overview.html" class="sidebar-link ">01. Tổng quan dự án</a></li>
+    <li><a href="../pages/02_architecture.html" class="sidebar-link ">02. Kiến trúc hệ thống</a></li>
+    <li><a href="#" class="sidebar-link active">03. Cấu trúc thư mục</a></li>
+    <li><a href="../pages/04_api_reference.html" class="sidebar-link ">04. Tài liệu API</a></li>
+    <li><a href="../pages/05_model_pipeline.html" class="sidebar-link ">05. Quy trình suy luận</a></li>
+    <li><a href="../pages/06_docker_deployment.html" class="sidebar-link ">06. Triển khai Docker</a></li>
+    <li><a href="../pages/07_data_flow.html" class="sidebar-link ">07. Luồng dữ liệu</a></li>
+  </ul>
+</div>
+<div class="sidebar-section">
+  <h4 class="sidebar-title">References & Guides</h4>
+  <ul class="sidebar-list">
+    <li><a href="../pages/lab5_study_guide.html" class="sidebar-link ">Cẩm nang nghiên cứu Lab 5</a></li>
+    <li><a href="../pages/HUONG_DAN_CHAY_VA_QUAN_SAT.html" class="sidebar-link ">Hướng dẫn chạy & Quan sát</a></li>
+    <li><a href="../pages/DUONG_DI_MODEL_TRONG_THUC_TE.html" class="sidebar-link ">Đường đi của model</a></li>
+    <li><a href="../pages/model_formats_for_students.html" class="sidebar-link ">Định dạng model AI</a></li>
+    <li><a href="../pages/docker_environment_comparison.html" class="sidebar-link ">So sánh môi trường Docker</a></li>
+    <li><a href="../pages/docker_desktop_gui_beginner.html" class="sidebar-link ">Docker Desktop cho người mới</a></li>
+    <li><a href="../pages/docker_ubuntu_engine_beginner.html" class="sidebar-link ">Docker Engine trên Ubuntu</a></li>
+    <li><a href="../pages/submission_checklist_v4.html" class="sidebar-link ">Checklist nộp bài</a></li>
+    <li><a href="../pages/taste_skill.html" class="sidebar-link ">Quy chuẩn thiết kế Taste Skill</a></li>
+  </ul>
+</div>
+      </aside>
+      <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+      <!-- Main Content Area -->
+      <main class="content-area">
+        <article class="markdown-body">
+          <h1 id="03-cau-truc-thu-muc-du-an-folder-structure">03. Cấu Trúc Thư Mục Dự Án (Folder Structure)</h1>
+<p>Một dự án AIoT chuẩn doanh nghiệp cần có cấu trúc thư mục rõ ràng, phân định rạch ròi giữa mã nguồn ứng dụng (app), dữ liệu tĩnh (assets/sample_images), các kịch bản chạy thử (scripts), tệp tin kiểm thử (tests) và tệp tin đóng gói (Docker configurations).</p>
+<hr />
+<h2 id="1-so-o-cay-thu-muc-chi-tiet">1. Sơ Đồ Cây Thư Mục Chi Tiết</h2>
+<p>Dưới đây là sơ đồ chi tiết của dự án Week 5 sau khi đã được tối ưu hóa cấu trúc (tách biệt Frontend):</p>
+<pre><code class="language-text">lab5_dockerized_multimodel_aiot_inference_service_v4/
+├── Dockerfile                        # Công thức build Docker Image
+├── docker-compose.yml                # Cấu hình khởi chạy docker-compose
+├── requirements.txt                  # Danh sách thư viện Python cần thiết
+├── .dockerignore                     # Danh sách file bỏ qua khi đóng gói image
+├── .gitignore                        # Danh sách file bỏ qua khi dùng Git
+├── README.md                         # Hướng dẫn tổng quan dự án
+├── RUN_GUIDE.md                      # Hướng dẫn chi tiết các bước chạy và quan sát
+├── RUN_TEST_LOG.txt                  # Nhật ký lưu trữ lịch sử test
+│
+├── app/                              # Mã nguồn chính của FastAPI
+│   ├── __init__.py                   # Đánh dấu thư mục là một Python package
+│   ├── main.py                       # Tệp chạy chính khởi tạo FastAPI và các route
+│   ├── schemas.py                    # Định nghĩa cấu trúc dữ liệu đầu vào (Pydantic models)
+│   ├── sensor_inference.py           # Thuật toán phân tích cảm biến (z-score, Moving Avg)
+│   ├── vision_inference.py           # Trực quan hóa và suy luận mô hình ảnh ONNX
+│   ├── logging_utils.py              # Các hàm phụ trợ ghi log ra file CSV
+│   └── templates/                    # Thư mục chứa giao diện tĩnh (Frontend)
+│       └── classify-image-demo.html  # Trang HTML/CSS/JS cao cấp (được tách ra từ main.py)
+│
+├── models/                           # Thư mục chứa các tệp trọng số AI
+│   └── vision/                       # Nơi lưu trữ mô hình ảnh
+│       ├── squeezenet1.1-7.onnx      # File mô hình ONNX SqueezeNet (4.73 MB)
+│       └── imagenet_classes.txt      # File ánh xạ nhãn lớp (1000 classes của ImageNet)
+│
+├── sample_images/                    # Ảnh mẫu để kiểm thử tính năng upload phân loại
+│   └── classroom_object.jpg          # Ảnh mẫu chụp lớp học
+│
+├── sample_requests/                  # Payload JSON mẫu để test API cảm biến
+│   ├── detect_anomaly_request.json   # Payload mẫu test phát hiện dị thường
+│   └── forecast_request.json         # Payload mẫu test dự báo chỉ số
+│
+├── outputs/                          # Thư mục lưu nhật ký hoạt động (Ghi log)
+│   ├── .gitkeep                      # Đảm bảo Git theo dõi thư mục rỗng này
+│   ├── service_log.csv               # Log ghi nhận lịch sử gọi API cảm biến
+│   └── vision_inference_log.csv      # Log ghi nhận lịch sử upload phân loại ảnh
+│
+├── scripts/                          # Kịch bản tự động hỗ trợ vận hành
+│   ├── download_vision_model.py      # Tải tự động file model ONNX từ Internet
+│   └── smoke_test_local.py           # Chạy test nhanh các luồng API local
+│
+└── tests/                            # Thư mục kiểm thử tự động
+    └── test_api_local.py             # Các unit test viết bằng pytest
+</code></pre>
+<hr />
+<h2 id="2-y-nghia-cua-viec-phan-chia-cau-truc-ma-nguon">2. Ý Nghĩa Của Việc Phân Chia Cấu Trúc Mã Nguồn</h2>
+<h3 id="a-tach-biet-frontend-va-backend-apptemplates">A. Tách biệt Frontend và Backend (<code>app/templates/</code>)</h3>
+<ul>
+<li><strong>Trước đây</strong>: File HTML giao diện được viết dưới dạng một chuỗi văn bản (String) khổng lồ nằm trực tiếp trong file mã nguồn Python <code>app/main.py</code>. Điều này làm code Python cực kỳ dài, khó đọc, không thể sử dụng tính năng tự động gợi ý code (IntelliSense) của các IDE khi chỉnh sửa HTML/CSS/JS.</li>
+<li><strong>Giải pháp tối ưu</strong>: Tách toàn bộ mã giao diện ra tệp <a href="file:///e:/AIoT/Home-Work/week-5/lab5_dockerized_multimodel_aiot_inference_service_v4/app/templates/classify-image-demo.html">classify-image-demo.html</a>. File <code>main.py</code> chỉ làm nhiệm vụ đọc tệp tin này từ đĩa và trả về qua giao thức HTTP. Giao diện được thiết kế theo chuẩn <code>taste-skill</code> giúp tăng tính thẩm mỹ vượt trội.</li>
+</ul>
+<h3 id="b-module-hoa-cong-viec-modularization">B. Module Hóa Công Việc (Modularization)</h3>
+<ul>
+<li><strong><code>app/schemas.py</code></strong>: Định nghĩa khuôn mẫu dữ liệu (Data contract). Nếu Client gửi sai định dạng (ví dụ thiếu trường dữ liệu hoặc sai kiểu dữ liệu), FastAPI sẽ tự động chặn và trả lỗi về ngay tại cổng kiểm soát đầu tiên, giúp bảo vệ các hàm tính toán xử lý ở phía sau.</li>
+<li><strong><code>app/sensor_inference.py</code></strong> &amp; <strong><code>app/vision_inference.py</code></strong>: Tách biệt hoàn toàn phần xử lý toán học/mô hình AI ra khỏi phần điều phối mạng. Nhờ vậy, khi bạn muốn thay thế mô hình phân loại ảnh mới mạnh hơn, bạn chỉ việc sửa logic trong file <code>vision_inference.py</code> mà không cần đụng vào file định cấu hình API <code>main.py</code>.</li>
+</ul>
+        </article>
+      </main>
+    </div>
+  </div>
+
+  <script src="../js/main.js"></script>
+  <!-- Mermaid.js for Diagrams -->
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ 
+      startOnLoad: true, 
+      theme: document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default',
+      securityLevel: 'loose'
+    });
+    
+    // Handle theme toggle rendering for Mermaid
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === 'data-theme') {
+          const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default';
+          location.reload(); // Quickest way to rerender SVG diagrams natively
+        }
+      });
+    });
+    observer.observe(document.documentElement, { attributes: true });
+  </script>
+</body>
+</html>

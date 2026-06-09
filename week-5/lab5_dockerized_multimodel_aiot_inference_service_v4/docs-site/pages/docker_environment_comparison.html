@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PHÂN BIỆT DOCKER DESKTOP, WSL UBUNTU VÀ DOCKER ENGINE TRÊN UBUNTU - AIoT Documentation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Top Header -->
+    <header class="top-nav">
+      <div class="top-nav-left">
+        <button class="mobile-menu-toggle" id="menuToggle">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+        </button>
+        <span class="logo">⚡ AIoT Docs</span>
+      </div>
+      <div class="top-nav-right">
+        <div class="search-container">
+          <input type="text" id="searchInput" placeholder="Tìm kiếm tài liệu...">
+          <div class="search-results" id="searchResults"></div>
+        </div>
+        <button class="theme-toggle" id="themeToggle" title="Đổi giao diện">
+          <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="main-layout">
+      <!-- Sidebar Navigation -->
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-section">
+  <h4 class="sidebar-title">Core Documentation</h4>
+  <ul class="sidebar-list">
+    <li><a href="../pages/01_project_overview.html" class="sidebar-link ">01. Tổng quan dự án</a></li>
+    <li><a href="../pages/02_architecture.html" class="sidebar-link ">02. Kiến trúc hệ thống</a></li>
+    <li><a href="../pages/03_folder_structure.html" class="sidebar-link ">03. Cấu trúc thư mục</a></li>
+    <li><a href="../pages/04_api_reference.html" class="sidebar-link ">04. Tài liệu API</a></li>
+    <li><a href="../pages/05_model_pipeline.html" class="sidebar-link ">05. Quy trình suy luận</a></li>
+    <li><a href="../pages/06_docker_deployment.html" class="sidebar-link ">06. Triển khai Docker</a></li>
+    <li><a href="../pages/07_data_flow.html" class="sidebar-link ">07. Luồng dữ liệu</a></li>
+  </ul>
+</div>
+<div class="sidebar-section">
+  <h4 class="sidebar-title">References & Guides</h4>
+  <ul class="sidebar-list">
+    <li><a href="../pages/lab5_study_guide.html" class="sidebar-link ">Cẩm nang nghiên cứu Lab 5</a></li>
+    <li><a href="../pages/HUONG_DAN_CHAY_VA_QUAN_SAT.html" class="sidebar-link ">Hướng dẫn chạy & Quan sát</a></li>
+    <li><a href="../pages/DUONG_DI_MODEL_TRONG_THUC_TE.html" class="sidebar-link ">Đường đi của model</a></li>
+    <li><a href="../pages/model_formats_for_students.html" class="sidebar-link ">Định dạng model AI</a></li>
+    <li><a href="#" class="sidebar-link active">So sánh môi trường Docker</a></li>
+    <li><a href="../pages/docker_desktop_gui_beginner.html" class="sidebar-link ">Docker Desktop cho người mới</a></li>
+    <li><a href="../pages/docker_ubuntu_engine_beginner.html" class="sidebar-link ">Docker Engine trên Ubuntu</a></li>
+    <li><a href="../pages/submission_checklist_v4.html" class="sidebar-link ">Checklist nộp bài</a></li>
+    <li><a href="../pages/taste_skill.html" class="sidebar-link ">Quy chuẩn thiết kế Taste Skill</a></li>
+  </ul>
+</div>
+      </aside>
+      <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+      <!-- Main Content Area -->
+      <main class="content-area">
+        <article class="markdown-body">
+          <h1 id="phan-biet-docker-desktop-wsl-ubuntu-va-docker-engine-tren-ubuntu">PHÂN BIỆT DOCKER DESKTOP, WSL UBUNTU VÀ DOCKER ENGINE TRÊN UBUNTU</h1>
+<h2 id="1-ba-moi-truong-de-nham-lan">1. Ba môi trường dễ nhầm lẫn</h2>
+<p>Các cụm từ sau cùng liên quan đến Docker nhưng không giống nhau:</p>
+<ol>
+<li>Docker Desktop trên Windows.</li>
+<li>Docker CLI trong Ubuntu WSL.</li>
+<li>Docker Engine cài trực tiếp trên Ubuntu server hoặc Ubuntu máy ảo.</li>
+</ol>
+<h2 id="2-bang-so-sanh">2. Bảng so sánh</h2>
+<table>
+<thead>
+<tr>
+<th>Tiêu chí</th>
+<th>Docker Desktop trên Windows</th>
+<th>Docker trong WSL Ubuntu</th>
+<th>Docker Engine trên Ubuntu server/VM</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Bản chất</td>
+<td>Ứng dụng desktop có GUI và Docker engine tích hợp</td>
+<td>Terminal Linux trong Windows, thường kết nối Docker Desktop engine</td>
+<td>Docker Engine cài trực tiếp trên hệ điều hành Ubuntu</td>
+</tr>
+<tr>
+<td>Giao diện</td>
+<td>Có Images, Containers, Logs, Volumes</td>
+<td>Chủ yếu dùng lệnh</td>
+<td>Chủ yếu dùng lệnh</td>
+</tr>
+<tr>
+<td>Phù hợp</td>
+<td>Học tập, demo, development trên laptop</td>
+<td>Làm quen Linux workflow</td>
+<td>Server, lab doanh nghiệp, cloud VM</td>
+</tr>
+<tr>
+<td>Có cần WSL không</td>
+<td>Trên Windows thường dùng WSL 2 backend</td>
+<td>Có</td>
+<td>Không nếu đã chạy Ubuntu thật/VM/server</td>
+</tr>
+<tr>
+<td>Gần thực tế server</td>
+<td>Trung bình</td>
+<td>Khá gần</td>
+<td>Gần nhất</td>
+</tr>
+</tbody>
+</table>
+<h2 id="3-docker-desktop-tren-windows">3. Docker Desktop trên Windows</h2>
+<p>Docker Desktop cung cấp giao diện để quan sát image, container, logs, port và volumes. Trên Windows, Docker Desktop thường dùng WSL 2 backend để chạy Linux containers. Môi trường này phù hợp cho học tập vì giảm độ khó khi mới làm quen Docker.</p>
+<p>Cần quan sát trong Lab 5:</p>
+<ul>
+<li>Tab Images có image <code>lab5-aiot-inference:v4</code>.</li>
+<li>Tab Containers có container <code>lab5-aiot-api</code> đang Running.</li>
+<li>Tab Logs có log Uvicorn.</li>
+<li>Trình duyệt mở được <code>/docs</code> và <code>/classify-image-demo</code>.</li>
+</ul>
+<h2 id="4-docker-trong-wsl-ubuntu">4. Docker trong WSL Ubuntu</h2>
+<p>Ubuntu WSL là môi trường Linux chạy trong Windows. Khi Docker Desktop bật WSL Integration, lệnh <code>docker</code> trong Ubuntu WSL có thể gọi Docker engine do Docker Desktop quản lý.</p>
+<p>Ý nghĩa học tập:</p>
+<ul>
+<li>Làm quen cú pháp Linux.</li>
+<li>Gần với thao tác trên server hơn Docker Desktop GUI.</li>
+<li>Hạn chế lỗi do khác biệt đường dẫn Windows/Linux nếu project đặt trong filesystem WSL.</li>
+</ul>
+<h2 id="5-docker-engine-tren-ubuntu-server-hoac-vm">5. Docker Engine trên Ubuntu server hoặc VM</h2>
+<p>Đây là hướng triển khai gần thực tế doanh nghiệp hơn. Docker Engine được cài trực tiếp trên Ubuntu. Không có Docker Desktop GUI. Toàn bộ thao tác thường thực hiện bằng terminal, script, CI/CD hoặc công cụ orchestration.</p>
+<p>Luồng tư duy:</p>
+<pre><code class="language-text">Cài Docker Engine
+-&gt; pull/build image
+-&gt; run container hoặc docker compose up
+-&gt; mở port
+-&gt; kiểm tra logs
+-&gt; cấu hình restart policy
+-&gt; giám sát service
+</code></pre>
+<h2 id="6-ket-luan-can-nho">6. Kết luận cần nhớ</h2>
+<ul>
+<li>Docker Desktop thuận tiện cho học tập và development trên laptop.</li>
+<li>WSL Ubuntu giúp Windows có trải nghiệm gần Linux server.</li>
+<li>Ubuntu server/VM với Docker Engine là hướng triển khai gần môi trường doanh nghiệp hơn.</li>
+<li>Bản chất cần nắm là image, container, port, volume, log và version; giao diện sử dụng có thể thay đổi theo môi trường.</li>
+</ul>
+        </article>
+      </main>
+    </div>
+  </div>
+
+  <script src="../js/main.js"></script>
+  <!-- Mermaid.js for Diagrams -->
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ 
+      startOnLoad: true, 
+      theme: document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default',
+      securityLevel: 'loose'
+    });
+    
+    // Handle theme toggle rendering for Mermaid
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === 'data-theme') {
+          const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default';
+          location.reload(); // Quickest way to rerender SVG diagrams natively
+        }
+      });
+    });
+    observer.observe(document.documentElement, { attributes: true });
+  </script>
+</body>
+</html>

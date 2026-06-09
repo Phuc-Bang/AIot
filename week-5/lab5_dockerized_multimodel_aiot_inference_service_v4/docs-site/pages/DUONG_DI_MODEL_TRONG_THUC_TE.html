@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ĐƯỜNG ĐI CỦA MODEL TRONG HỆ THỐNG THỰC TẾ - AIoT Documentation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Top Header -->
+    <header class="top-nav">
+      <div class="top-nav-left">
+        <button class="mobile-menu-toggle" id="menuToggle">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+        </button>
+        <span class="logo">⚡ AIoT Docs</span>
+      </div>
+      <div class="top-nav-right">
+        <div class="search-container">
+          <input type="text" id="searchInput" placeholder="Tìm kiếm tài liệu...">
+          <div class="search-results" id="searchResults"></div>
+        </div>
+        <button class="theme-toggle" id="themeToggle" title="Đổi giao diện">
+          <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="main-layout">
+      <!-- Sidebar Navigation -->
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-section">
+  <h4 class="sidebar-title">Core Documentation</h4>
+  <ul class="sidebar-list">
+    <li><a href="../pages/01_project_overview.html" class="sidebar-link ">01. Tổng quan dự án</a></li>
+    <li><a href="../pages/02_architecture.html" class="sidebar-link ">02. Kiến trúc hệ thống</a></li>
+    <li><a href="../pages/03_folder_structure.html" class="sidebar-link ">03. Cấu trúc thư mục</a></li>
+    <li><a href="../pages/04_api_reference.html" class="sidebar-link ">04. Tài liệu API</a></li>
+    <li><a href="../pages/05_model_pipeline.html" class="sidebar-link ">05. Quy trình suy luận</a></li>
+    <li><a href="../pages/06_docker_deployment.html" class="sidebar-link ">06. Triển khai Docker</a></li>
+    <li><a href="../pages/07_data_flow.html" class="sidebar-link ">07. Luồng dữ liệu</a></li>
+  </ul>
+</div>
+<div class="sidebar-section">
+  <h4 class="sidebar-title">References & Guides</h4>
+  <ul class="sidebar-list">
+    <li><a href="../pages/lab5_study_guide.html" class="sidebar-link ">Cẩm nang nghiên cứu Lab 5</a></li>
+    <li><a href="../pages/HUONG_DAN_CHAY_VA_QUAN_SAT.html" class="sidebar-link ">Hướng dẫn chạy & Quan sát</a></li>
+    <li><a href="#" class="sidebar-link active">Đường đi của model</a></li>
+    <li><a href="../pages/model_formats_for_students.html" class="sidebar-link ">Định dạng model AI</a></li>
+    <li><a href="../pages/docker_environment_comparison.html" class="sidebar-link ">So sánh môi trường Docker</a></li>
+    <li><a href="../pages/docker_desktop_gui_beginner.html" class="sidebar-link ">Docker Desktop cho người mới</a></li>
+    <li><a href="../pages/docker_ubuntu_engine_beginner.html" class="sidebar-link ">Docker Engine trên Ubuntu</a></li>
+    <li><a href="../pages/submission_checklist_v4.html" class="sidebar-link ">Checklist nộp bài</a></li>
+    <li><a href="../pages/taste_skill.html" class="sidebar-link ">Quy chuẩn thiết kế Taste Skill</a></li>
+  </ul>
+</div>
+      </aside>
+      <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+      <!-- Main Content Area -->
+      <main class="content-area">
+        <article class="markdown-body">
+          <h1 id="uong-i-cua-model-trong-he-thong-thuc-te">ĐƯỜNG ĐI CỦA MODEL TRONG HỆ THỐNG THỰC TẾ</h1>
+<p>Tài liệu này tách riêng phần model để tránh hiểu nhầm rằng ONNX là điểm bắt đầu. Trong hệ thống thực tế, model thường bắt đầu từ quá trình huấn luyện trong một framework, sau đó mới được đóng gói thành service và triển khai.</p>
+<h2 id="1-uong-i-tong-quat">1. Đường đi tổng quát</h2>
+<pre><code class="language-text">Dữ liệu huấn luyện
+-&gt; train model trong framework
+-&gt; lưu model ở định dạng gốc
+-&gt; kiểm thử inference local
+-&gt; chuyển đổi hoặc tối ưu định dạng nếu cần
+-&gt; đóng gói vào API service
+-&gt; build Docker image
+-&gt; chạy container
+-&gt; ghi log, giám sát, cập nhật version
+</code></pre>
+<p>Ý nghĩa:</p>
+<ul>
+<li>Giai đoạn train quyết định model học được gì.</li>
+<li>Giai đoạn inference quyết định model phục vụ hệ thống như thế nào.</li>
+<li>Giai đoạn deployment quyết định model có chạy ổn định trên môi trường khác hay không.</li>
+</ul>
+<h2 id="2-inh-dang-model-goc">2. Định dạng model gốc</h2>
+<table>
+<thead>
+<tr>
+<th>Nguồn model</th>
+<th>Định dạng thường gặp</th>
+<th>Đặc điểm</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PyTorch</td>
+<td><code>.pt</code>, <code>.pth</code>, <code>state_dict</code></td>
+<td>Phù hợp nghiên cứu và train deep learning; khi load có thể cần đúng kiến trúc model Python</td>
+</tr>
+<tr>
+<td>TensorFlow/Keras</td>
+<td><code>.keras</code>, SavedModel, <code>.h5</code></td>
+<td>Phù hợp hệ sinh thái TensorFlow; có đường chuyển sang TensorFlow Lite</td>
+</tr>
+<tr>
+<td>scikit-learn</td>
+<td><code>.joblib</code>, <code>.pkl</code></td>
+<td>Phù hợp model cổ điển như Linear, Random Forest, Gradient Boosting</td>
+</tr>
+</tbody>
+</table>
+<p>Câu hỏi gợi mở:</p>
+<ul>
+<li>Nếu chỉ gửi file <code>.pth</code> nhưng thiếu class định nghĩa model, quá trình load model có thể gặp lỗi gì?</li>
+<li>Nếu model <code>.joblib</code> được lưu bằng một version scikit-learn khác, việc deploy có thể rủi ro ở điểm nào?</li>
+</ul>
+<h2 id="3-vi-sao-xuat-hien-onnx">3. Vì sao xuất hiện ONNX?</h2>
+<p>ONNX là định dạng mở để biểu diễn model theo hướng dễ trao đổi giữa các framework và runtime. Trong Lab 5, ONNX được dùng cho model ảnh vì mục tiêu là inference nhẹ, dễ chạy CPU và dễ đóng gói vào Docker.</p>
+<p>Lợi ích:</p>
+<ul>
+<li>Giảm phụ thuộc vào framework huấn luyện ban đầu.</li>
+<li>Có thể dùng ONNX Runtime để chạy inference.</li>
+<li>Phù hợp khi cần triển khai model trong service độc lập.</li>
+</ul>
+<p>Đánh đổi:</p>
+<ul>
+<li>Không phải mọi operator đều chuyển đổi hoàn hảo.</li>
+<li>Cần kiểm tra kết quả trước và sau khi convert.</li>
+<li>Debug có thể khó hơn so với framework gốc.</li>
+</ul>
+<h2 id="4-cac-inh-dang-nhe-khac">4. Các định dạng nhẹ khác</h2>
+<table>
+<thead>
+<tr>
+<th>Định dạng/hướng tối ưu</th>
+<th>Dùng khi nào</th>
+<th>Lợi ích</th>
+<th>Đánh đổi</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>TensorFlow Lite</td>
+<td>Mobile, Android, edge device</td>
+<td>Nhẹ, hợp thiết bị yếu</td>
+<td>Phải convert từ TensorFlow/Keras, có thể giới hạn operator</td>
+</tr>
+<tr>
+<td>Quantized ONNX</td>
+<td>CPU/edge inference</td>
+<td>Model nhỏ hơn, inference có thể nhanh hơn</td>
+<td>Có thể giảm độ chính xác</td>
+</tr>
+<tr>
+<td>TorchScript</td>
+<td>Triển khai trong hệ PyTorch</td>
+<td>Giữ gần hệ PyTorch</td>
+<td>Ít portable hơn ONNX</td>
+</tr>
+<tr>
+<td>OpenVINO</td>
+<td>Intel CPU/iGPU/VPU</td>
+<td>Tối ưu tốt cho phần cứng Intel</td>
+<td>Phụ thuộc toolchain và phần cứng</td>
+</tr>
+</tbody>
+</table>
+<h2 id="5-model-anh-trong-lab-5">5. Model ảnh trong Lab 5</h2>
+<p>Lab 5 dùng SqueezeNet ONNX pretrained ImageNet-1K. Đây là model ảnh nhẹ để kiểm thử inference service. Model này không được train lại trong Lab 5.</p>
+<p>Mục tiêu học tập:</p>
+<ul>
+<li>Hiểu cách model đã huấn luyện sẵn được đưa vào API.</li>
+<li>Hiểu endpoint upload ảnh nhận file, tiền xử lý ảnh, chạy model, trả top-k class.</li>
+<li>Hiểu Docker đóng gói runtime, API, thư viện và đường dẫn model.</li>
+</ul>
+<p>Giới hạn cần nhận thức:</p>
+<ul>
+<li>ImageNet classifier là model tổng quát, không phải model chuyên ngành.</li>
+<li>1000 class không có nghĩa là nhận diện được mọi vật thể trong đời sống.</li>
+<li>Kết quả model cần được đọc cùng confidence và bối cảnh sử dụng.</li>
+</ul>
+<h2 id="6-chuan-doanh-nghiep-thuong-gap">6. Chuẩn doanh nghiệp thường gặp</h2>
+<p>Trong môi trường doanh nghiệp, service AI thường cần các thành phần sau:</p>
+<table>
+<thead>
+<tr>
+<th>Thành phần</th>
+<th>Vai trò</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>API contract</td>
+<td>Quy định input/output rõ ràng</td>
+</tr>
+<tr>
+<td>Model version</td>
+<td>Biết service đang dùng model nào</td>
+</tr>
+<tr>
+<td>Docker image tag</td>
+<td>Quản lý phiên bản triển khai</td>
+</tr>
+<tr>
+<td>Registry</td>
+<td>Nơi lưu và phân phối image</td>
+</tr>
+<tr>
+<td>Health check</td>
+<td>Kiểm tra service còn sống hay không</td>
+</tr>
+<tr>
+<td>Logs</td>
+<td>Truy vết request, lỗi, thời gian inference</td>
+</tr>
+<tr>
+<td>Monitoring</td>
+<td>Theo dõi latency, lỗi, tài nguyên</td>
+</tr>
+<tr>
+<td>Rollback</td>
+<td>Quay lại phiên bản trước nếu bản mới lỗi</td>
+</tr>
+</tbody>
+</table>
+<p>Câu hỏi gợi mở:</p>
+<ul>
+<li>Nếu đổi model mới nhưng giữ nguyên API, service phía ngoài có cần sửa không?</li>
+<li>Nếu model mới cho kết quả tệ hơn, cần quay lại phiên bản cũ bằng cách nào?</li>
+<li>Nếu latency tăng mạnh sau khi đổi model, log nào cần được đọc trước?</li>
+</ul>
+        </article>
+      </main>
+    </div>
+  </div>
+
+  <script src="../js/main.js"></script>
+  <!-- Mermaid.js for Diagrams -->
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ 
+      startOnLoad: true, 
+      theme: document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default',
+      securityLevel: 'loose'
+    });
+    
+    // Handle theme toggle rendering for Mermaid
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === 'data-theme') {
+          const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default';
+          location.reload(); // Quickest way to rerender SVG diagrams natively
+        }
+      });
+    });
+    observer.observe(document.documentElement, { attributes: true });
+  </script>
+</body>
+</html>
