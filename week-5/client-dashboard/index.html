@@ -771,7 +771,7 @@
         
         try {
           // Since index.html can be opened anywhere, fetch relative image file and convert to File object
-          const res = await fetch(`../${val}`);
+          const res = await fetch(`../lab5_dockerized_multimodel_aiot_inference_service_v4/${val}`);
           if (!res.ok) throw new Error("Preset image not found.");
           const blob = await res.blob();
           const file = new File([blob], "classroom_object.jpg", { type: "image/jpeg" });
