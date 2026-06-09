@@ -1,0 +1,4 @@
+image_id,device_id,timestamp,source_type,image_path,processed_path,width,height,brightness,processing_status,processing_time_ms,note
+img_2d74745232,simulated_camera,2026-06-09T07:36:26,demo_script,data/raw_images/img_2d74745232.jpg,data/processed_images/img_2d74745232_processed_steps.jpg,640,360,233.55,processed,171.03,demo_frame=0
+img_e35d0bf94d,simulated_camera,2026-06-09T07:36:26,demo_script,data/raw_images/img_e35d0bf94d.jpg,data/processed_images/img_e35d0bf94d_processed_steps.jpg,640,360,233.55,processed,7.17,demo_frame=1
+img_494650f8dd,camera:no_camera_fallback,2026-06-09T07:36:29,motion_capture,data/raw_images/img_494650f8dd.jpg,data/processed_images/img_494650f8dd_processed_steps.jpg,640,360,233.55,processed,5.06,"motion_score=1162.0, threshold=25, min_area=800"
