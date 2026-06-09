@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AIoT Edge Client Dashboard - Lab 5</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts (Plus Jakarta Sans) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+      color: #f1f5f9;
+      min-height: 100vh;
+    }
+    .glass-card {
+      background: rgba(30, 41, 59, 0.45);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    }
+    .glass-input {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #f1f5f9;
+      transition: all 0.3s;
+    }
+    .glass-input:focus {
+      border-color: #38bdf8;
+      box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.25);
+      outline: none;
+    }
+    .active-tab {
+      border-bottom: 2px solid #38bdf8;
+      color: #38bdf8;
+    }
+  </style>
+</head>
+<body class="p-4 md:p-8">
+  <div class="max-w-7xl mx-auto space-y-6">
+    <!-- Header -->
+    <header class="glass-card rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="p-3 bg-sky-500/10 text-sky-400 rounded-xl">
+          <i data-lucide="cpu" class="w-8 height-8"></i>
+        </div>
+        <div>
+          <h1 class="text-2xl font-bold tracking-tight">AIoT Edge Client Dashboard</h1>
+          <p class="text-slate-400 text-sm">Giao diện điều phối và phân tích mô hình AI (Lab 5)</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-4 flex-wrap w-full md:w-auto justify-end">
+        <div class="flex items-center gap-2">
+          <label for="apiUrlInput" class="text-xs text-slate-400 font-semibold uppercase">API URL:</label>
+          <input type="text" id="apiUrlInput" value="http://localhost:8001" class="glass-input rounded-lg px-3 py-1.5 text-sm w-48 font-mono">
+        </div>
+        <button id="btnTestConn" class="bg-sky-600 hover:bg-sky-500 text-white text-sm font-semibold px-4 py-2 rounded-xl transition flex items-center gap-2">
+          <i data-lucide="refresh-cw" class="w-4 h-4" id="connSpinner"></i> Test Kết Nối
+        </button>
+        <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900/60 border border-slate-700/50">
+          <span class="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse" id="statusDot"></span>
+          <span class="text-xs font-semibold uppercase tracking-wider" id="statusText">Mất kết nối</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <!-- Left Column: Telemetry (Sensor API) -->
+      <div class="col-span-1 lg:col-span-6 space-y-6">
+        <!-- Telemetry Controls -->
+        <section class="glass-card rounded-2xl p-6 space-y-6">
+          <div class="flex items-center justify-between border-b border-white/5 pb-4">
+            <h2 class="text-lg font-bold flex items-center gap-2 text-sky-400">
+              <i data-lucide="activity" class="w-5 h-5"></i> 1. Telemetry Inference Engine
+            </h2>
+            <span class="text-xs px-2.5 py-1 bg-sky-500/10 text-sky-400 rounded-full font-semibold">Sensor API</span>
+          </div>
+
+          <!-- Tabs for Anomaly & Forecast -->
+          <div class="flex border-b border-white/5">
+            <button id="tabAnomaly" class="flex-1 py-2 text-center text-sm font-semibold border-b-2 active-tab transition">Phát hiện Dị Thường</button>
+            <button id="tabForecast" class="flex-1 py-2 text-center text-sm font-semibold border-slate-700 text-slate-400 border-b transition">Dự Báo & Rủi Ro</button>
+          </div>
+
+          <!-- Tab Content: Anomaly -->
+          <div id="contentAnomaly" class="space-y-4">
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-medium text-slate-400 mb-1">Mục tiêu (Target)</label>
+                <input type="text" id="anomalyTarget" value="temperature" class="w-full glass-input rounded-lg px-3 py-2 text-sm font-mono">
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-slate-400 mb-1">Ngưỡng Z-Score (threshold_z)</label>
+                <div class="flex items-center gap-3">
+                  <input type="range" id="anomalyThresholdSlider" min="1.0" max="4.0" step="0.1" value="2.0" class="w-full accent-sky-500">
+                  <span id="anomalyThresholdValue" class="text-sm font-mono w-8">2.0</span>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-medium text-slate-400 mb-1">Giá trị hiện tại (current_value): <span id="curValDisplay" class="font-mono font-bold text-sky-400">38.5</span></label>
+              <input type="range" id="anomalyCurValSlider" min="20.0" max="50.0" step="0.5" value="38.5" class="w-full accent-sky-500">
+            </div>
+
+            <div>
+              <label class="block text-xs font-medium text-slate-400 mb-1">Chuỗi giá trị gần đây (recent_values - phân tách bởi dấu phẩy)</label>
+              <input type="text" id="anomalyRecentValues" value="26.5, 27.0, 26.8, 27.2, 27.5, 27.1, 26.9" class="w-full glass-input rounded-lg px-3 py-2 text-sm font-mono">
+            </div>
+
+            <button id="btnRunAnomaly" class="w-full bg-sky-600 hover:bg-sky-500 text-white font-semibold py-2.5 rounded-xl transition flex items-center justify-center gap-2">
+              <i data-lucide="play" class="w-4 h-4"></i> Phân Tích Dị Thường
+            </button>
+
+            <!-- Anomaly Result Card -->
+            <div id="resultAnomalyCard" class="hidden rounded-xl p-4 border transition duration-300">
+              <div class="flex items-start justify-between">
+                <div>
+                  <h4 class="font-bold text-sm uppercase tracking-wider" id="anomalyTitle">--</h4>
+                  <p class="text-xs text-slate-300 mt-1" id="anomalyExp">--</p>
+                </div>
+                <div class="text-right">
+                  <span class="text-2xl font-black font-mono block" id="anomalyScoreVal">0.00</span>
+                  <span class="text-[10px] text-slate-400 uppercase tracking-widest block font-bold">Z-Score</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab Content: Forecast -->
+          <div id="contentForecast" class="hidden space-y-4">
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-medium text-slate-400 mb-1">Mục tiêu (Target)</label>
+                <input type="text" id="forecastTarget" value="co2" class="w-full glass-input rounded-lg px-3 py-2 text-sm font-mono">
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-slate-400 mb-1">Tầm xa (horizon_minutes)</label>
+                <input type="number" id="forecastHorizon" value="15" class="w-full glass-input rounded-lg px-3 py-2 text-sm font-mono">
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-medium text-slate-400 mb-1">Chuỗi chỉ số CO2 gần đây (recent_values - phân tách bởi dấu phẩy)</label>
+              <input type="text" id="forecastRecentValues" value="800.0, 850.0, 900.0, 960.0, 1020.0, 1100.0" class="w-full glass-input rounded-lg px-3 py-2 text-sm font-mono">
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-medium text-slate-400 mb-1">Ngưỡng Cảnh Báo (ppm)</label>
+                <input type="number" id="riskWarning" value="1000" class="w-full glass-input rounded-lg px-3 py-2 text-sm font-mono">
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-slate-400 mb-1">Ngưỡng Nguy Hiểm (ppm)</label>
+                <input type="number" id="riskHigh" value="1200" class="w-full glass-input rounded-lg px-3 py-2 text-sm font-mono">
+              </div>
+            </div>
+
+            <button id="btnRunForecast" class="w-full bg-sky-600 hover:bg-sky-500 text-white font-semibold py-2.5 rounded-xl transition flex items-center justify-center gap-2">
+              <i data-lucide="trending-up" class="w-4 h-4"></i> Dự Báo & Đánh Giá Rủi Ro
+            </button>
+
+            <!-- Forecast and Risk Card -->
+            <div id="resultForecastCard" class="hidden rounded-xl p-4 border transition duration-300">
+              <div class="grid grid-cols-2 gap-4">
+                <div class="border-r border-white/5 pr-4">
+                  <h4 class="text-xs text-slate-400 uppercase tracking-widest font-bold">Dự Báo (15m)</h4>
+                  <span class="text-xl font-bold font-mono block mt-1 text-sky-400" id="forecastValue">0.00 ppm</span>
+                  <span class="text-[10px] text-slate-400 mt-1 block" id="forecastDelta">Tăng: +0.00 ppm</span>
+                </div>
+                <div class="pl-2">
+                  <h4 class="text-xs text-slate-400 uppercase tracking-widest font-bold">Mức Rủi Ro</h4>
+                  <span class="text-lg font-bold block mt-1" id="riskLevelVal">--</span>
+                  <span class="text-[10px] text-slate-300 block leading-tight mt-1" id="riskAction">Hành động: --</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Chart Section -->
+        <section class="glass-card rounded-2xl p-6 space-y-4">
+          <h3 class="text-sm font-bold uppercase tracking-wider text-slate-400">Trực Quan Hóa Chuỗi Dữ Liệu</h3>
+          <div class="relative w-full h-[220px]">
+            <canvas id="telemetryChart"></canvas>
+          </div>
+        </section>
+      </div>
+
+      <!-- Right Column: Computer Vision (ONNX API) -->
+      <div class="col-span-1 lg:col-span-6 space-y-6">
+        <section class="glass-card rounded-2xl p-6 space-y-6">
+          <div class="flex items-center justify-between border-b border-white/5 pb-4">
+            <h2 class="text-lg font-bold flex items-center gap-2 text-sky-400">
+              <i data-lucide="eye" class="w-5 h-5"></i> 2. Vision Inference Engine
+            </h2>
+            <span class="text-xs px-2.5 py-1 bg-sky-500/10 text-sky-400 rounded-full font-semibold">ONNX SqueezeNet</span>
+          </div>
+
+          <!-- Image Selection & Parameters -->
+          <div class="space-y-4">
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-medium text-slate-400 mb-1">Chọn Nhãn Top-K</label>
+                <div class="flex items-center gap-3">
+                  <input type="range" id="visionTopKSlider" min="1" max="10" step="1" value="5" class="w-full accent-sky-500">
+                  <span id="visionTopKVal" class="text-sm font-mono w-6">5</span>
+                </div>
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-slate-400 mb-1">Mẫu Nhanh (Preset Image)</label>
+                <select id="presetImageSelect" class="w-full glass-input rounded-lg px-3 py-1.5 text-sm">
+                  <option value="">-- Chọn ảnh mẫu có sẵn --</option>
+                  <option value="sample_images/classroom_object.jpg">Ảnh Lớp Học (Classroom)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Upload Area -->
+            <div id="dropzone" class="border-2 border-dashed border-slate-700/60 hover:border-sky-500/60 rounded-xl p-8 text-center cursor-pointer transition bg-slate-950/20 relative group">
+              <input type="file" id="imageFileInput" class="hidden" accept="image/*">
+              <div class="space-y-2" id="dropzoneInstructions">
+                <i data-lucide="upload-cloud" class="w-10 h-10 mx-auto text-slate-400 group-hover:text-sky-400 transition"></i>
+                <p class="text-sm font-semibold">Kéo thả hoặc click để tải ảnh lên</p>
+                <p class="text-xs text-slate-500">Chấp nhận JPG, PNG (Tối đa 5MB)</p>
+              </div>
+              <div id="previewContainer" class="hidden flex justify-center max-h-[160px] overflow-hidden rounded-lg">
+                <img id="imagePreview" src="" alt="Preview" class="max-h-[160px] object-contain">
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <button id="btnClassify" class="bg-sky-600 hover:bg-sky-500 text-white font-semibold py-2.5 rounded-xl transition flex items-center justify-center gap-2">
+                <i data-lucide="play" class="w-4 h-4"></i> Phân Loại Nhãn
+              </button>
+              <button id="btnAnnotate" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-2.5 rounded-xl transition flex items-center justify-center gap-2">
+                <i data-lucide="image" class="w-4 h-4"></i> Vẽ Nhãn (Annotate)
+              </button>
+            </div>
+          </div>
+
+          <!-- Vision Outputs Tabs -->
+          <div class="space-y-4 pt-4 border-t border-white/5">
+            <div class="flex border-b border-white/5">
+              <button id="tabClassifyOut" class="flex-1 py-1.5 text-center text-xs font-bold uppercase tracking-wider border-b-2 active-tab transition">Kết Quả Phân Loại</button>
+              <button id="tabAnnotateOut" class="flex-1 py-1.5 text-center text-xs font-bold uppercase tracking-wider border-slate-700 text-slate-400 border-b transition">Ảnh Gắn Nhãn Server</button>
+            </div>
+
+            <!-- Tab Content: Classification Results -->
+            <div id="contentClassifyOut" class="space-y-3">
+              <div id="classifyStatusMsg" class="text-xs text-slate-400 italic text-center py-4">Chưa có dữ liệu phân loại. Hãy nhấn nút "Phân Loại Nhãn" ở trên.</div>
+              <div id="predictionsList" class="space-y-2.5 hidden">
+                <!-- Predictions will be appended here dynamically -->
+              </div>
+            </div>
+
+            <!-- Tab Content: Annotated Image Output -->
+            <div id="contentAnnotateOut" class="hidden flex flex-col items-center justify-center py-2">
+              <div id="annotateStatusMsg" class="text-xs text-slate-400 italic text-center py-4">Chưa có ảnh gắn nhãn. Hãy nhấn nút "Vẽ Nhãn" ở trên.</div>
+              <div id="annotatedImageContainer" class="hidden rounded-xl overflow-hidden border border-white/10 max-h-[300px]">
+                <img id="annotatedImageResult" src="" alt="Annotated Image" class="max-h-[300px] object-contain">
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main script logic -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Initialize Lucide Icons
+      lucide.createIcons();
+
+      // UI Elements
+      const apiUrlInput = document.getElementById('apiUrlInput');
+      const btnTestConn = document.getElementById('btnTestConn');
+      const connSpinner = document.getElementById('connSpinner');
+      const statusDot = document.getElementById('statusDot');
+      const statusText = document.getElementById('statusText');
+
+      const tabAnomaly = document.getElementById('tabAnomaly');
+      const tabForecast = document.getElementById('tabForecast');
+      const contentAnomaly = document.getElementById('contentAnomaly');
+      const contentForecast = document.getElementById('contentForecast');
+
+      const anomalyThresholdSlider = document.getElementById('anomalyThresholdSlider');
+      const anomalyThresholdValue = document.getElementById('anomalyThresholdValue');
+      const anomalyCurValSlider = document.getElementById('anomalyCurValSlider');
+      const curValDisplay = document.getElementById('curValDisplay');
+      const anomalyRecentValues = document.getElementById('anomalyRecentValues');
+      const btnRunAnomaly = document.getElementById('btnRunAnomaly');
+      const resultAnomalyCard = document.getElementById('resultAnomalyCard');
+      const anomalyTitle = document.getElementById('anomalyTitle');
+      const anomalyExp = document.getElementById('anomalyExp');
+      const anomalyScoreVal = document.getElementById('anomalyScoreVal');
+
+      const forecastTarget = document.getElementById('forecastTarget');
+      const forecastHorizon = document.getElementById('forecastHorizon');
+      const forecastRecentValues = document.getElementById('forecastRecentValues');
+      const riskWarning = document.getElementById('riskWarning');
+      const riskHigh = document.getElementById('riskHigh');
+      const btnRunForecast = document.getElementById('btnRunForecast');
+      const resultForecastCard = document.getElementById('resultForecastCard');
+      const forecastValue = document.getElementById('forecastValue');
+      const forecastDelta = document.getElementById('forecastDelta');
+      const riskLevelVal = document.getElementById('riskLevelVal');
+      const riskAction = document.getElementById('riskAction');
+
+      const visionTopKSlider = document.getElementById('visionTopKSlider');
+      const visionTopKVal = document.getElementById('visionTopKVal');
+      const presetImageSelect = document.getElementById('presetImageSelect');
+      const dropzone = document.getElementById('dropzone');
+      const imageFileInput = document.getElementById('imageFileInput');
+      const dropzoneInstructions = document.getElementById('dropzoneInstructions');
+      const previewContainer = document.getElementById('previewContainer');
+      const imagePreview = document.getElementById('imagePreview');
+      const btnClassify = document.getElementById('btnClassify');
+      const btnAnnotate = document.getElementById('btnAnnotate');
+
+      const tabClassifyOut = document.getElementById('tabClassifyOut');
+      const tabAnnotateOut = document.getElementById('tabAnnotateOut');
+      const contentClassifyOut = document.getElementById('contentClassifyOut');
+      const contentAnnotateOut = document.getElementById('contentAnnotateOut');
+      const classifyStatusMsg = document.getElementById('classifyStatusMsg');
+      const predictionsList = document.getElementById('predictionsList');
+      const annotateStatusMsg = document.getElementById('annotateStatusMsg');
+      const annotatedImageContainer = document.getElementById('annotatedImageContainer');
+      const annotatedImageResult = document.getElementById('annotatedImageResult');
+
+      let selectedFile = null;
+
+      // Chart.js Initialization
+      const ctx = document.getElementById('telemetryChart').getContext('2d');
+      const telemetryChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['Point 1', 'Point 2', 'Point 3', 'Point 4', 'Point 5', 'Point 6', 'Dự báo (15m)'],
+          datasets: [{
+            label: 'Chỉ số cảm biến',
+            data: [26.5, 27.0, 26.8, 27.2, 27.5, 27.1, null],
+            borderColor: '#38bdf8',
+            backgroundColor: 'rgba(56, 189, 248, 0.1)',
+            borderWidth: 2,
+            tension: 0.3,
+            fill: true,
+            pointBackgroundColor: '#38bdf8',
+            pointRadius: 4
+          }, {
+            label: 'Giá trị dự báo',
+            data: [null, null, null, null, null, 27.1, 28.5],
+            borderColor: '#10b981',
+            borderDash: [5, 5],
+            borderWidth: 2,
+            pointBackgroundColor: '#10b981',
+            pointRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              labels: { color: '#94a3b8', font: { family: 'Plus Jakarta Sans', size: 11 } }
+            }
+          },
+          scales: {
+            x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } },
+            y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } }
+          }
+        }
+      });
+
+      // 1. Connection Logic
+      async function testConnection(showToast = true) {
+        const baseUrl = apiUrlInput.value.trim();
+        connSpinner.classList.add('animate-spin');
+        try {
+          const res = await fetch(`${baseUrl}/health`);
+          if (res.ok) {
+            const data = await res.json();
+            statusDot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500";
+            statusText.textContent = "Đã Kết Nối";
+            statusText.className = "text-xs font-semibold uppercase tracking-wider text-emerald-400";
+            if (showToast) alert(`Kết nối thành công! Server Lab 5 đang chạy. Vision ONNX Loaded: ${data.vision_model_loaded}`);
+          } else {
+            setDisconnected();
+          }
+        } catch (err) {
+          setDisconnected();
+          if (showToast) alert(`Không kết nối được tới AI Server tại: ${baseUrl}\nHãy đảm bảo server đang chạy.`);
+        } finally {
+          connSpinner.classList.remove('animate-spin');
+        }
+      }
+
+      function setDisconnected() {
+        statusDot.className = "w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse";
+        statusText.textContent = "Mất kết nối";
+        statusText.className = "text-xs font-semibold uppercase tracking-wider text-rose-400";
+      }
+
+      btnTestConn.addEventListener('click', () => testConnection(true));
+      setTimeout(() => testConnection(false), 500); // Silent check on load
+
+      // 2. Tab Navigation
+      tabAnomaly.addEventListener('click', () => {
+        tabAnomaly.className = "flex-1 py-2 text-center text-sm font-semibold border-b-2 active-tab transition";
+        tabForecast.className = "flex-1 py-2 text-center text-sm font-semibold border-slate-700 text-slate-400 border-b transition";
+        contentAnomaly.classList.remove('hidden');
+        contentForecast.classList.add('hidden');
+      });
+
+      tabForecast.addEventListener('click', () => {
+        tabForecast.className = "flex-1 py-2 text-center text-sm font-semibold border-b-2 active-tab transition";
+        tabAnomaly.className = "flex-1 py-2 text-center text-sm font-semibold border-slate-700 text-slate-400 border-b transition";
+        contentForecast.classList.remove('hidden');
+        contentAnomaly.classList.add('hidden');
+      });
+
+      tabClassifyOut.addEventListener('click', () => {
+        tabClassifyOut.className = "flex-1 py-1.5 text-center text-xs font-bold uppercase tracking-wider border-b-2 active-tab transition";
+        tabAnnotateOut.className = "flex-1 py-1.5 text-center text-xs font-bold uppercase tracking-wider border-slate-700 text-slate-400 border-b transition";
+        contentClassifyOut.classList.remove('hidden');
+        contentAnnotateOut.classList.add('hidden');
+      });
+
+      tabAnnotateOut.addEventListener('click', () => {
+        tabAnnotateOut.className = "flex-1 py-1.5 text-center text-xs font-bold uppercase tracking-wider border-b-2 active-tab transition";
+        tabClassifyOut.className = "flex-1 py-1.5 text-center text-xs font-bold uppercase tracking-wider border-slate-700 text-slate-400 border-b transition";
+        contentAnnotateOut.classList.remove('hidden');
+        contentClassifyOut.classList.add('hidden');
+      });
+
+      // 3. Telemetry Controls Binding
+      anomalyThresholdSlider.addEventListener('input', (e) => {
+        anomalyThresholdValue.textContent = e.target.value;
+      });
+      anomalyCurValSlider.addEventListener('input', (e) => {
+        curValDisplay.textContent = e.target.value;
+      });
+      visionTopKSlider.addEventListener('input', (e) => {
+        visionTopKVal.textContent = e.target.value;
+      });
+
+      // 4. Anomaly Action
+      btnRunAnomaly.addEventListener('click', async () => {
+        const baseUrl = apiUrlInput.value.trim();
+        const target = document.getElementById('anomalyTarget').value.trim();
+        const current_value = parseFloat(anomalyCurValSlider.value);
+        const recent_values = anomalyRecentValues.value.split(',').map(v => parseFloat(v.trim())).filter(v => !isNaN(v));
+        const threshold_z = parseFloat(anomalyThresholdSlider.value);
+
+        if (recent_values.length === 0) {
+          alert("Recent values không hợp lệ.");
+          return;
+        }
+
+        try {
+          const res = await fetch(`${baseUrl}/detect-anomaly`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ target, current_value, recent_values, threshold_z })
+          });
+          
+          if (!res.ok) throw new Error(await res.text());
+          const data = await res.json();
+          
+          const model_output = data.model_output;
+          const event = data.event;
+          
+          anomalyScoreVal.textContent = model_output.anomaly_score.toFixed(2);
+          anomalyExp.textContent = `Giải thích: ${event.explanation}`;
+          
+          resultAnomalyCard.classList.remove('hidden');
+          if (model_output.is_anomaly) {
+            anomalyTitle.textContent = `Dị thường! Cấp độ: ${event.severity}`;
+            resultAnomalyCard.className = "rounded-xl p-4 border border-rose-500/30 bg-rose-950/20 text-rose-200 transition duration-300";
+          } else {
+            anomalyTitle.textContent = `Bình thường. Cấp độ: ${event.severity}`;
+            resultAnomalyCard.className = "rounded-xl p-4 border border-emerald-500/30 bg-emerald-950/20 text-emerald-200 transition duration-300";
+          }
+
+          // Update Chart
+          const labels = recent_values.map((_, i) => `Đo ${i+1}`);
+          labels.push("Hiện tại");
+          const chartData = [...recent_values, current_value];
+          telemetryChart.data.labels = labels;
+          telemetryChart.data.datasets[0].label = `Chỉ số (${target})`;
+          telemetryChart.data.datasets[0].data = chartData;
+          
+          // Clear forecast dataset in chart
+          telemetryChart.data.datasets[1].data = recent_values.map(() => null);
+          telemetryChart.update();
+
+        } catch (err) {
+          alert(`Lỗi khi gọi API detect-anomaly: ${err.message}`);
+        }
+      });
+
+      // 5. Forecast Action
+      btnRunForecast.addEventListener('click', async () => {
+        const baseUrl = apiUrlInput.value.trim();
+        const target = forecastTarget.value.trim();
+        const horizon_minutes = parseInt(forecastHorizon.value);
+        const recent_values = forecastRecentValues.value.split(',').map(v => parseFloat(v.trim())).filter(v => !isNaN(v));
+        
+        const warning_threshold = parseFloat(riskWarning.value);
+        const high_threshold = parseFloat(riskHigh.value);
+
+        if (recent_values.length === 0) {
+          alert("Recent values không hợp lệ.");
+          return;
+        }
+
+        try {
+          // A. Call Forecast
+          const forecastRes = await fetch(`${baseUrl}/forecast`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ target, recent_values, horizon_minutes })
+          });
+          if (!forecastRes.ok) throw new Error(await forecastRes.text());
+          const forecastData = await forecastRes.json();
+          const predicted_value = forecastData.model_output.predicted_value;
+
+          // B. Call Risk
+          const riskRes = await fetch(`${baseUrl}/predict-risk`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ target, predicted_value, warning_threshold, high_threshold })
+          });
+          if (!riskRes.ok) throw new Error(await riskRes.text());
+          const riskData = await riskRes.json();
+          const decision = riskData.decision;
+
+          // Display
+          forecastValue.textContent = `${predicted_value.toFixed(2)} ppm`;
+          const delta = forecastData.model_output.forecast_delta;
+          forecastDelta.textContent = `${delta >= 0 ? 'Tăng' : 'Giảm'}: ${delta >= 0 ? '+' : ''}${delta.toFixed(2)} ppm`;
+          
+          riskLevelVal.textContent = decision.risk_level;
+          riskAction.textContent = `Hành động: ${decision.recommendation}`;
+          
+          resultForecastCard.classList.remove('hidden');
+          if (decision.risk_level === 'HIGH') {
+            resultForecastCard.className = "rounded-xl p-4 border border-rose-500/30 bg-rose-950/20 transition duration-300";
+            riskLevelVal.className = "text-lg font-bold block mt-1 text-rose-400";
+          } else if (decision.risk_level === 'WARNING') {
+            resultForecastCard.className = "rounded-xl p-4 border border-yellow-500/30 bg-yellow-950/20 transition duration-300";
+            riskLevelVal.className = "text-lg font-bold block mt-1 text-yellow-400";
+          } else {
+            resultForecastCard.className = "rounded-xl p-4 border border-emerald-500/30 bg-emerald-950/20 transition duration-300";
+            riskLevelVal.className = "text-lg font-bold block mt-1 text-emerald-400";
+          }
+
+          // Update Chart
+          const labels = recent_values.map((_, i) => `Đo ${i+1}`);
+          labels.push(`Dự báo (${horizon_minutes}m)`);
+          
+          telemetryChart.data.labels = labels;
+          telemetryChart.data.datasets[0].label = `Chỉ số (${target})`;
+          telemetryChart.data.datasets[0].data = [...recent_values, null];
+          
+          // Forecast dotted line dataset
+          const forecastDataset = recent_values.map(() => null);
+          forecastDataset[recent_values.length - 1] = recent_values[recent_values.length - 1]; // Connect last historical point
+          forecastDataset.push(predicted_value);
+          telemetryChart.data.datasets[1].data = forecastDataset;
+          
+          telemetryChart.update();
+
+        } catch (err) {
+          alert(`Lỗi khi xử lý dữ liệu dự báo: ${err.message}`);
+        }
+      });
+
+      // 6. Vision Dropzone & File Upload
+      dropzone.addEventListener('click', () => imageFileInput.click());
+      
+      dropzone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropzone.classList.add('border-sky-500', 'bg-sky-500/5');
+      });
+
+      dropzone.addEventListener('dragleave', () => {
+        dropzone.classList.remove('border-sky-500', 'bg-sky-500/5');
+      });
+
+      dropzone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropzone.classList.remove('border-sky-500', 'bg-sky-500/5');
+        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+          handleImageFile(e.dataTransfer.files[0]);
+        }
+      });
+
+      imageFileInput.addEventListener('change', (e) => {
+        if (e.target.files && e.target.files.length > 0) {
+          handleImageFile(e.target.files[0]);
+        }
+      });
+
+      function handleImageFile(file) {
+        if (!file.type.startsWith('image/')) {
+          alert("Vui lòng chỉ tải lên tệp tin hình ảnh.");
+          return;
+        }
+        selectedFile = file;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          imagePreview.src = e.target.result;
+          dropzoneInstructions.classList.add('hidden');
+          previewContainer.classList.remove('hidden');
+        };
+        reader.readAsDataURL(file);
+      }
+
+      // Quick Preset Select
+      presetImageSelect.addEventListener('change', async (e) => {
+        const val = e.target.value;
+        if (!val) return;
+        
+        try {
+          // Since index.html can be opened anywhere, fetch relative image file and convert to File object
+          const res = await fetch(`../${val}`);
+          if (!res.ok) throw new Error("Preset image not found.");
+          const blob = await res.blob();
+          const file = new File([blob], "classroom_object.jpg", { type: "image/jpeg" });
+          handleImageFile(file);
+        } catch (err) {
+          alert(`Lỗi tải ảnh mẫu: ${err.message}`);
+        }
+      });
+
+      // 7. Vision Actions
+      btnClassify.addEventListener('click', async () => {
+        const baseUrl = apiUrlInput.value.trim();
+        const top_k = parseInt(visionTopKSlider.value);
+        if (!selectedFile) {
+          alert("Vui lòng tải ảnh lên trước khi phân loại.");
+          return;
+        }
+
+        tabClassifyOut.click();
+        classifyStatusMsg.textContent = "Đang phân loại nhãn...";
+        predictionsList.classList.add('hidden');
+
+        const formData = new FormData();
+        formData.append('file', selectedFile);
+
+        try {
+          const res = await fetch(`${baseUrl}/classify-image?top_k=${top_k}`, {
+            method: 'POST',
+            body: formData
+          });
+
+          if (!res.ok) throw new Error(await res.text());
+          const data = await res.json();
+          const predictions = data.model_output.predictions;
+
+          classifyStatusMsg.classList.add('hidden');
+          predictionsList.innerHTML = predictions.map(pred => {
+            const pct = (pred.confidence * 100).toFixed(1);
+            return `
+              <div class="space-y-1">
+                <div class="flex justify-between text-xs font-semibold">
+                  <span class="text-slate-200">#${pred.rank} - ${pred.class_name}</span>
+                  <span class="text-sky-400">${pct}%</span>
+                </div>
+                <div class="w-full bg-slate-900/80 rounded-full h-2 overflow-hidden border border-white/5">
+                  <div class="bg-gradient-to-r from-sky-500 to-sky-400 h-2 rounded-full" style="width: ${pct}%"></div>
+                </div>
+              </div>
+            `;
+          }).join('');
+          predictionsList.classList.remove('hidden');
+
+        } catch (err) {
+          classifyStatusMsg.textContent = `Lỗi: ${err.message}`;
+        }
+      });
+
+      btnAnnotate.addEventListener('click', async () => {
+        const baseUrl = apiUrlInput.value.trim();
+        const top_k = parseInt(visionTopKSlider.value);
+        if (!selectedFile) {
+          alert("Vui lòng tải ảnh lên trước.");
+          return;
+        }
+
+        tabAnnotateOut.click();
+        annotateStatusMsg.textContent = "Đang tải ảnh gắn nhãn...";
+        annotatedImageContainer.classList.add('hidden');
+
+        const formData = new FormData();
+        formData.append('file', selectedFile);
+
+        try {
+          const res = await fetch(`${baseUrl}/classify-image-annotated?top_k=${top_k}`, {
+            method: 'POST',
+            body: formData
+          });
+
+          if (!res.ok) throw new Error("Lỗi máy chủ khi vẽ nhãn");
+          const blob = await res.blob();
+          const objectURL = URL.createObjectURL(blob);
+          
+          annotateStatusMsg.classList.add('hidden');
+          annotatedImageResult.src = objectURL;
+          annotatedImageContainer.classList.remove('hidden');
+
+        } catch (err) {
+          annotateStatusMsg.textContent = `Lỗi: ${err.message}`;
+        }
+      });
+    });
+  </script>
+</body>
+</html>

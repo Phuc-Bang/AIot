@@ -19,6 +19,8 @@ VISION_MODEL_PATH = os.getenv("VISION_MODEL_PATH", "models/vision/squeezenet1.1-
 VISION_LABELS_PATH = os.getenv("VISION_LABELS_PATH", "models/vision/imagenet_classes.txt")
 MAX_UPLOAD_BYTES = int(os.getenv("MAX_UPLOAD_BYTES", str(5 * 1024 * 1024)))
 
+from fastapi.middleware.cors import CORSMiddleware
+
 app = FastAPI(
     title="Lab 5 - Dockerized Multi-Model AIoT Inference Service",
     version="1.1.0",
@@ -26,6 +28,14 @@ app = FastAPI(
         "AIoT inference service with sensor endpoints, a lightweight ONNX vision model, "
         "and a simple browser UI for image upload."
     )
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 vision_model = VisionClassifier(VISION_MODEL_PATH, VISION_LABELS_PATH)
