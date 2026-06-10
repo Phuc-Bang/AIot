@@ -318,6 +318,23 @@ class CameraManager:
         for cid in list(self._captures.keys()):
             self._release_capture(cid)
 
+    def cleanup_stale(self, max_age_hours: int = 24):
+        db = get_db()
+        try:
+            stale = db.execute(
+                "SELECT camera_id FROM cameras WHERE last_seen IS NULL OR last_seen < datetime('now', ?)",
+                (f"-{max_age_hours} hours",)
+            ).fetchall()
+            for row in stale:
+                cid = row["camera_id"]
+                self._cameras.pop(cid, None)
+                self._release_capture(cid)
+                db.execute("DELETE FROM cameras WHERE camera_id=?", (cid,))
+                log.info(f"Cleaned stale camera: {cid}")
+            db.commit()
+        finally:
+            db.close()
+
     def _update_last_seen(self, camera_id: str):
         db = get_db()
         try:
@@ -945,9 +962,6 @@ async def stream_frames(camera_id: str) -> AsyncIterator[bytes]:
 def record_short_video(camera_id: str, seconds: int = 5, width: int = 640, height: int = 360) -> Dict[str, Any]:
     seconds = max(1, min(int(seconds), 30))
     info = camera_manager.get(camera_id)
-    cap = None
-    if info:
-        cap, _ = camera_manager.open_capture(camera_id)
 
     fps = 10
     video_id = f"vid_{uuid.uuid4().hex[:10]}"
@@ -955,6 +969,13 @@ def record_short_video(camera_id: str, seconds: int = 5, width: int = 640, heigh
     writer = cv2.VideoWriter(str(out_path), cv2.VideoWriter_fourcc(*"mp4v"), fps, (width, height))
     frame_count = 0
     start = time.perf_counter()
+
+    backup_cap = None
+    if info:
+        cap, _ = camera_manager.open_capture(camera_id)
+        if cap is None:
+            backup_cap = cv2.VideoCapture(camera_manager._parse_source(info.source))
+            cap = backup_cap if backup_cap.isOpened() else None
 
     try:
         while time.perf_counter() - start < seconds:
@@ -969,8 +990,8 @@ def record_short_video(camera_id: str, seconds: int = 5, width: int = 640, heigh
             frame_count += 1
             time.sleep(1.0 / fps)
     finally:
-        if cap is not None:
-            cap.release()
+        if backup_cap is not None:
+            backup_cap.release()
         writer.release()
 
     event_row = {
@@ -1009,9 +1030,6 @@ async def motion_capture(
 ) -> Dict[str, Any]:
     seconds = max(1, min(int(seconds), 30))
     info = camera_manager.get(camera_id)
-    cap = None
-    if info:
-        cap, _ = camera_manager.open_capture(camera_id)
 
     mog2 = None
     if method == "mog2":
@@ -1029,10 +1047,33 @@ async def motion_capture(
 
     loop = asyncio.get_event_loop()
 
+    backup_cap = None
+    cap = None
+    if info:
+        cap, _ = camera_manager.open_capture(camera_id)
+        if cap is None:
+            backup_cap = cv2.VideoCapture(camera_manager._parse_source(info.source))
+            cap = backup_cap if backup_cap.isOpened() else None
+
+    def _frame_mog2(f):
+        fg = mog2.apply(f)
+        m = cv2.threshold(fg, 200, 255, cv2.THRESH_BINARY)[1]
+        ctrs, _ = cv2.findContours(m, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        return float(sum(cv2.contourArea(c) for c in ctrs))
+
+    def _frame_simple(f, pg):
+        g = cv2.cvtColor(cv2.resize(f, (320, 240)), cv2.COLOR_BGR2GRAY)
+        if pg is not None:
+            d = cv2.absdiff(pg, g)
+            _, m = cv2.threshold(d, simple_threshold, 255, cv2.THRESH_BINARY)
+            ctrs, _ = cv2.findContours(m, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            return float(sum(cv2.contourArea(c) for c in ctrs)), g
+        return 0.0, g
+
     try:
         while time.perf_counter() - start < seconds:
             if cap is not None:
-                ok, frame = cap.read()
+                ok, frame = await loop.run_in_executor(executor, cap.read)
                 if not ok or frame is None:
                     frame = simulated_frame(frames_seen)
             else:
@@ -1040,20 +1081,9 @@ async def motion_capture(
             frames_seen += 1
 
             if mog2 is not None:
-                fg_mask = mog2.apply(frame)
-                mask = cv2.threshold(fg_mask, 200, 255, cv2.THRESH_BINARY)[1]
-                contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-                score = float(sum(cv2.contourArea(c) for c in contours))
+                score = await loop.run_in_executor(executor, _frame_mog2, frame)
             else:
-                gray = cv2.cvtColor(cv2.resize(frame, (320, 240)), cv2.COLOR_BGR2GRAY)
-                if prev_gray is not None:
-                    diff = cv2.absdiff(prev_gray, gray)
-                    _, mask = cv2.threshold(diff, simple_threshold, 255, cv2.THRESH_BINARY)
-                    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-                    score = float(sum(cv2.contourArea(c) for c in contours))
-                else:
-                    score = 0.0
-                prev_gray = gray
+                score, prev_gray = await loop.run_in_executor(executor, _frame_simple, frame, prev_gray)
 
             if score > best_score:
                 best_score = score
@@ -1061,8 +1091,8 @@ async def motion_capture(
 
             await asyncio.sleep(0.05)
     finally:
-        if cap is not None:
-            cap.release()
+        if backup_cap is not None:
+            backup_cap.release()
     if best_frame is None:
         best_frame = simulated_frame(frames_seen)
 
@@ -1104,6 +1134,7 @@ async def motion_capture(
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     init_db()
+    camera_manager.cleanup_stale(max_age_hours=1)
     camera_manager._load_from_db()
     # Register default camera if none exist
     if not camera_manager.get_all():
@@ -1115,11 +1146,21 @@ async def lifespan(app: FastAPI):
     mqtt_client.disconnect()
     log.info("Lab 6 Enhanced shutdown")
 
+from fastapi.middleware.cors import CORSMiddleware
+
 app = FastAPI(
     title="Lab 6 Enhanced - Computer Vision as IoT Sensor",
     description="SQLite, WebSocket, Multi-camera, MOG2, ONNX, MQTT, Configurable Pipeline",
     version="2.0.0",
     lifespan=lifespan,
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 @app.get("/files/{file_path:path}")
 async def serve_static(file_path: str):
@@ -1179,6 +1220,12 @@ def remove_camera(camera_id: str) -> dict:
     camera_manager.unregister(camera_id)
     return {"status": "removed", "camera_id": camera_id}
 
+@app.post("/cameras/cleanup")
+def cleanup_cameras(max_age_hours: int = Query(24, ge=1, le=720)) -> dict:
+    camera_manager.cleanup_stale(max_age_hours=max_age_hours)
+    count = len(camera_manager.get_all())
+    return {"status": "cleaned", "remaining_cameras": count}
+
 # ── Image Upload ──
 
 @app.post("/upload-image")
@@ -1209,6 +1256,8 @@ async def snapshot(
 ) -> Dict[str, Any]:
     # Use camera_id or source, fallback to default
     if camera_id:
+        if not camera_manager.get(camera_id):
+            raise HTTPException(status_code=404, detail=f"Camera not found: {camera_id}")
         cid = camera_id
     else:
         cams = camera_manager.get_all()
@@ -1252,7 +1301,10 @@ def record_video(
     camera_id: Optional[str] = Query(None),
     seconds: int = Query(5, ge=1, le=30),
 ) -> Dict[str, Any]:
-    if not camera_id:
+    if camera_id:
+        if not camera_manager.get(camera_id):
+            raise HTTPException(status_code=404, detail=f"Camera not found: {camera_id}")
+    else:
         cams = camera_manager.get_all()
         camera_id = cams[0].camera_id if cams else camera_manager.register("0", "Default").camera_id
     return record_short_video(camera_id, seconds=seconds)
@@ -1266,7 +1318,10 @@ async def motion_capture_endpoint(
     method: str = Query("mog2"),
     min_area: int = Query(800, ge=10, le=50000),
 ) -> Dict[str, Any]:
-    if not camera_id:
+    if camera_id:
+        if not camera_manager.get(camera_id):
+            raise HTTPException(status_code=404, detail=f"Camera not found: {camera_id}")
+    else:
         cams = camera_manager.get_all()
         camera_id = cams[0].camera_id if cams else camera_manager.register("0", "Default").camera_id
     return await motion_capture(camera_id, seconds=seconds, method=method, min_area=min_area)
@@ -1278,10 +1333,15 @@ async def video_feed(
     camera_id: Optional[str] = Query(None),
     source: Optional[str] = Query(None),
 ) -> StreamingResponse:
+    cams = camera_manager.get_all()
     if camera_id:
+        if not camera_manager.get(camera_id):
+            if cams:
+                camera_id = cams[0].camera_id
+            else:
+                camera_id = camera_manager.register(CFG["camera"]["default_source"], "Default").camera_id
         cid = camera_id
     else:
-        cams = camera_manager.get_all()
         if source:
             matching = [c for c in cams if c.source == source]
             if matching:
@@ -1373,20 +1433,38 @@ def get_config():
 
 @app.put("/config")
 async def update_config(body: dict):
+    ALLOWED_FILTERS = {"resize", "grayscale", "threshold", "edge", "gaussian_blur", "histogram_equalize", "sobel_x", "sobel_y"}
+    validated = {}
+
     if "filters" in body:
-        CFG["processing"]["filters"] = body["filters"]
-    if "threshold_value" in body:
-        CFG["processing"]["threshold_value"] = body["threshold_value"]
-    if "canny_low" in body:
-        CFG["processing"]["canny_low"] = body["canny_low"]
-    if "canny_high" in body:
-        CFG["processing"]["canny_high"] = body["canny_high"]
-    if "resize_width" in body:
-        CFG["processing"]["resize_width"] = body["resize_width"]
-    if "resize_height" in body:
-        CFG["processing"]["resize_height"] = body["resize_height"]
-    log.info(f"Config updated: {body}")
-    return {"status": "ok", "updated": list(body.keys())}
+        if not isinstance(body["filters"], list) or not all(isinstance(f, str) for f in body["filters"]):
+            raise HTTPException(status_code=400, detail="filters must be a list of strings")
+        invalid = set(body["filters"]) - ALLOWED_FILTERS
+        if invalid:
+            raise HTTPException(status_code=400, detail=f"Unknown filters: {', '.join(sorted(invalid))}")
+        validated["filters"] = body["filters"]
+
+    range_checks = {
+        "threshold_value": (0, 255),
+        "canny_low": (0, 255),
+        "canny_high": (0, 255),
+        "resize_width": (32, 1920),
+        "resize_height": (32, 1080),
+    }
+    for key, (lo, hi) in range_checks.items():
+        if key in body:
+            val = body[key]
+            if not isinstance(val, (int, float)):
+                raise HTTPException(status_code=400, detail=f"{key} must be a number")
+            if not lo <= val <= hi:
+                raise HTTPException(status_code=400, detail=f"{key} must be between {lo} and {hi}")
+            validated[key] = int(val) if isinstance(val, (int, float)) and key in ("resize_width", "resize_height") else val
+
+    for key, val in validated.items():
+        CFG["processing"][key] = val
+
+    log.info(f"Config updated: {validated}")
+    return {"status": "ok", "updated": list(validated.keys())}
 
 # ── WebSocket ──
 
