@@ -29,8 +29,10 @@ services:
     ports:
       - "1883:1883"
       - "9001:9001"
-    # Required for Mosquitto 2.x to allow connections from other containers without custom config file
-    command: mosquitto -c /dev/null --listener 1883 0.0.0.0 --allow_anonymous true
+    command: >
+      sh -c "echo 'listener 1883 0.0.0.0' > /tmp/mosquitto.conf &&
+             echo 'allow_anonymous true' >> /tmp/mosquitto.conf &&
+             exec mosquitto -c /tmp/mosquitto.conf"
     volumes:
       - mosquitto-data:/mosquitto/data
       - mosquitto-log:/mosquitto/log
