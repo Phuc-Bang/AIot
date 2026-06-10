@@ -13,6 +13,7 @@ let WS = null;
 let wsReconnectTimer = null;
 let currentFilters = ['resize','grayscale','threshold','edge'];
 let activeEventFilter = 'ALL';
+let editingCameraId = null;
 
 function initBackendUrl() {
     const isLocalFile = location.protocol === 'file:';
@@ -83,6 +84,10 @@ function connectWS() {
                 } else if (data.type === 'motion_result') {
                     showToast('Motion ' + (data.motion_detected === true ? 'Detected' : 'None'), 'Score: ' + (data.score || '?'));
                     refreshDashboard();
+                } else if (data.type === 'camera_list_updated') {
+                    showToast('Camera List Updated', 'Danh sách camera đã được cập nhật.');
+                    refreshCamSelect();
+                    refreshCameras();
                 }
             } catch(e) {}
         };
@@ -194,16 +199,6 @@ async function refreshCameras() {
     try {
         const r = await fetch(API_BASE + '/cameras');
         const cams = await r.json();
-        const sel = document.getElementById('camSelect');
-        const currentVal = sel.value;
-        sel.innerHTML = '';
-        cams.forEach(c => {
-            const opt = document.createElement('option');
-            opt.value = c.camera_id;
-            opt.textContent = `${c.label} (${c.source}) [${c.status}]`;
-            sel.appendChild(opt);
-        });
-        if (currentVal && Array.from(sel.options).some(o => o.value === currentVal)) sel.value = currentVal;
 
         let html = '<table><thead><tr><th>ID</th><th>Source</th><th>Label</th><th>Status</th><th>Last Seen</th><th>Action</th></tr></thead><tbody>';
         for (const c of cams) {
@@ -213,7 +208,10 @@ async function refreshCameras() {
                 <td>${escapeHTML(c.label)}</td>
                 <td><span class="cam-status-dot ${escapeHTML(c.status)}"></span>${escapeHTML(c.status)}</td>
                 <td>${escapeHTML(c.last_seen || '-')}</td>
-                <td><button class="sm secondary red" onclick="removeCamera('${escapeHTML(c.camera_id)}')"><i class="ph ph-trash"></i> Xóa</button></td>
+                <td>
+                    <button class="sm secondary" onclick="editCamera('${escapeHTML(c.camera_id)}', '${escapeHTML(c.source.replace(/'/g, "\\'"))}', '${escapeHTML(c.label.replace(/'/g, "\\'"))}')"><i class="ph ph-pencil-simple"></i> Sửa</button>
+                    <button class="sm secondary red" onclick="removeCamera('${escapeHTML(c.camera_id)}')"><i class="ph ph-trash"></i> Xóa</button>
+                </td>
             </tr>`;
         }
         html += '</tbody></table>';
@@ -259,9 +257,89 @@ async function removeCamera(cameraId) {
     try {
         await fetch(API_BASE + `/cameras/${cameraId}`, {method:'DELETE'});
         showToast('Camera Removed', cameraId);
+
+        // Nếu camera bị xóa đang phát stream, hãy dừng stream
+        const streamImg = document.getElementById('stream');
+        if (streamImg && streamImg.src && streamImg.src.includes('camera_id=' + cameraId)) {
+            stopStream();
+        }
+
+        // Nếu camera bị xóa đang trong chế độ sửa, hãy hủy chế độ sửa
+        if (editingCameraId === cameraId) {
+            cancelEdit();
+        }
+
         refreshCameras();
         await refreshCamSelect();
     } catch(e) {}
+}
+
+function editCamera(id, source, label) {
+    editingCameraId = id;
+    document.getElementById('newCamSource').value = source;
+    document.getElementById('newCamLabel').value = label;
+
+    // Chuyển nút "Thêm camera" thành "Cập nhật"
+    const addBtn = document.querySelector('button[onclick="addCamera()"]');
+    if (addBtn) {
+        addBtn.innerHTML = '<i class="ph ph-check"></i> Cập nhật';
+        addBtn.setAttribute('onclick', 'saveCamera()');
+    }
+
+    // Thêm nút "Hủy" nếu chưa có
+    if (!document.getElementById('cancelEditBtn') && addBtn) {
+        const cancelBtn = document.createElement('button');
+        cancelBtn.id = 'cancelEditBtn';
+        cancelBtn.className = 'secondary';
+        cancelBtn.innerHTML = '<i class="ph ph-x"></i> Hủy';
+        cancelBtn.onclick = cancelEdit;
+        addBtn.parentNode.appendChild(cancelBtn);
+    }
+}
+
+function cancelEdit() {
+    editingCameraId = null;
+    document.getElementById('newCamSource').value = '0';
+    document.getElementById('newCamLabel').value = '';
+
+    const saveBtn = document.querySelector('button[onclick="saveCamera()"]');
+    if (saveBtn) {
+        saveBtn.innerHTML = '<i class="ph ph-plus"></i> Thêm camera';
+        saveBtn.setAttribute('onclick', 'addCamera()');
+    }
+
+    const cancelBtn = document.getElementById('cancelEditBtn');
+    if (cancelBtn) {
+        cancelBtn.remove();
+    }
+}
+
+async function saveCamera() {
+    if (!editingCameraId) return;
+    const source = document.getElementById('newCamSource').value.trim() || '0';
+    const label = document.getElementById('newCamLabel').value.trim() || source;
+    try {
+        const r = await fetch(API_BASE + `/cameras/${editingCameraId}?source=${encodeURIComponent(source)}&label=${encodeURIComponent(label)}`, {
+            method: 'PUT'
+        });
+        if (r.ok) {
+            showToast('Camera Updated', `${label} (${source})`);
+
+            // Nếu camera đang phát stream, khởi động lại stream để áp dụng cấu hình nguồn mới
+            const streamImg = document.getElementById('stream');
+            if (streamImg && streamImg.src && streamImg.src.includes('camera_id=' + editingCameraId)) {
+                startStream();
+            }
+
+            cancelEdit();
+            refreshCameras();
+            await refreshCamSelect();
+        } else {
+            showToast('Error', 'Cannot update camera');
+        }
+    } catch(e) {
+        showToast('Error', 'Cannot update camera');
+    }
 }
 
 async function refreshCamSelect() {
@@ -269,6 +347,7 @@ async function refreshCamSelect() {
         const r = await fetch(API_BASE + '/cameras');
         const cams = await r.json();
         const sel = document.getElementById('camSelect');
+        const currentVal = sel.value;
         sel.innerHTML = '';
         cams.forEach(c => {
             const opt = document.createElement('option');
@@ -276,6 +355,7 @@ async function refreshCamSelect() {
             opt.textContent = `${c.label} (${c.source})`;
             sel.appendChild(opt);
         });
+        if (currentVal && Array.from(sel.options).some(o => o.value === currentVal)) sel.value = currentVal;
     } catch(e) {}
 }
 
@@ -525,6 +605,17 @@ async function init() {
     await refreshCameras();
     await refreshServerInfo();
     refreshDashboard();
+
+    const sel = document.getElementById('camSelect');
+    if (sel) {
+        sel.addEventListener('change', () => {
+            const streamImg = document.getElementById('stream');
+            if (streamImg && streamImg.src && streamImg.src.includes('/video_feed')) {
+                startStream();
+            }
+        });
+    }
+
     setInterval(refreshDashboard, 5000);
     setInterval(refreshServerInfo, 30000);
     setInterval(refreshCameras, 60000);

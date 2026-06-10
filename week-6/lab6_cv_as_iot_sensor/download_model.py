@@ -9,8 +9,9 @@ from pathlib import Path
 
 MODEL_DIR = Path(__file__).resolve().parent / "models"
 MODEL_PATH = MODEL_DIR / "yolov8n.onnx"
-# Fallback URLs
+# Fallback URLs (multiple sources for resilience)
 URLS = [
+    "https://github.com/uynguyen-aiot/opencv-yolo/releases/download/v1.0/yolov8n.onnx",
     "https://huggingface.co/Kalray/yolov8/resolve/main/yolov8n.onnx",
     "https://huggingface.co/Kalray/yolov8/raw/main/yolov8n.onnx",
 ]

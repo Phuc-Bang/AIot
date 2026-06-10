@@ -283,6 +283,24 @@ class CameraManager:
         finally:
             db.close()
 
+    def update(self, camera_id: str, source: str, label: str = "") -> Optional[CameraInfo]:
+        info = self._cameras.get(camera_id)
+        if not info:
+            return None
+        if info.source != source:
+            self._release_capture(camera_id)
+            info.status = CameraStatus.UNKNOWN
+        info.source = source
+        info.label = label or source
+        db = get_db()
+        try:
+            db.execute("UPDATE cameras SET source=?, label=? WHERE camera_id=?", (source, label or source, camera_id))
+            db.commit()
+        finally:
+            db.close()
+        log.info(f"Camera updated: {camera_id} -> {source} (label: {label})")
+        return info
+
     def get_all(self) -> List[CameraInfo]:
         return list(self._cameras.values())
 
@@ -1249,14 +1267,24 @@ def list_cameras() -> List[dict]:
     ]
 
 @app.post("/cameras")
-def add_camera(source: str = Query(...), label: str = Query("")) -> dict:
+async def add_camera(source: str = Query(...), label: str = Query("")) -> dict:
     info = camera_manager.register(source, label)
+    await ws_manager.broadcast({"type": "camera_list_updated"})
     return {"camera_id": info.camera_id, "source": info.source, "label": info.label}
 
 @app.delete("/cameras/{camera_id}")
-def remove_camera(camera_id: str) -> dict:
+async def remove_camera(camera_id: str) -> dict:
     camera_manager.unregister(camera_id)
+    await ws_manager.broadcast({"type": "camera_list_updated"})
     return {"status": "removed", "camera_id": camera_id}
+
+@app.put("/cameras/{camera_id}")
+async def update_camera(camera_id: str, source: str = Query(...), label: str = Query("")) -> dict:
+    info = camera_manager.update(camera_id, source, label)
+    if not info:
+        raise HTTPException(status_code=404, detail="Camera not found")
+    await ws_manager.broadcast({"type": "camera_list_updated"})
+    return {"camera_id": info.camera_id, "source": info.source, "label": info.label}
 
 @app.post("/cameras/cleanup")
 def cleanup_cameras(max_age_hours: int = Query(24, ge=1, le=720)) -> dict:
