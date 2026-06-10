@@ -20,6 +20,11 @@ processing:
   canny_low: 80
   canny_high: 160
   brightness_threshold: 70
+  filters:
+    - resize
+    - grayscale
+    - threshold
+    - edge
   available_filters:
     - resize
     - grayscale

@@ -9,389 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Outfit:wght@400;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" type="text/css" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/style.css" />
-<style>
-:root {
-    --bg: #09090b;
-    --bg-gradient: radial-gradient(circle at 50% 0%, #18181b 0%, #09090b 80%);
-    --card-bg: rgba(24, 24, 27, 0.7);
-    --card-border: rgba(255, 255, 255, 0.08);
-    --shell-bg: rgba(255, 255, 255, 0.02);
-    --shell-border: rgba(255, 255, 255, 0.04);
-    --text-primary: #fafafa;
-    --text-secondary: #a1a1aa;
-    --accent-cyan: #06b6d4;
-    --accent-teal: #0d9488;
-    --accent-orange: #f97316;
-    --accent-green: #10b981;
-    --accent-red: #f43f5e;
-}
-* { box-sizing: border-box; }
-body {
-    font-family: 'Plus Jakarta Sans', Arial, sans-serif;
-    background: var(--bg-gradient);
-    background-color: var(--bg);
-    color: var(--text-primary);
-    margin: 0; padding: 0; min-height: 100dvh;
-    overflow-x: hidden;
-}
-header {
-    max-width: 1400px; margin: 24px auto 12px; padding: 0 24px;
-}
-.header-container {
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    border-radius: 16px; padding: 24px 32px;
-    box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-}
-h1 {
-    font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 28px; margin: 4px 0;
-    background: linear-gradient(135deg, #ffffff 40%, var(--accent-cyan) 100%);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    letter-spacing: -0.02em;
-}
-header p { font-size: 14px; color: var(--text-secondary); margin: 6px 0; line-height: 1.5; }
-main { max-width: 1400px; margin: 0 auto; padding: 0 24px 60px; }
-h2 { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 18px; margin: 0 0 14px; display: flex; align-items: center; gap: 8px; letter-spacing: -0.01em; color: #ffffff; }
-h3 { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 16px; margin: 0 0 12px; letter-spacing: -0.01em; color: #ffffff; }
-.small { font-size: 13px; line-height: 1.5; }
-.text-secondary { color: var(--text-secondary); }
-
-/* Bento Grid System */
-.bento-grid {
-    display: grid;
-    grid-template-columns: repeat(12, 1fr);
-    gap: 16px;
-    margin-top: 16px;
-}
-.bento-col-12 { grid-column: span 12; }
-.bento-col-9 { grid-column: span 9; }
-.bento-col-8 { grid-column: span 8; }
-.bento-col-7 { grid-column: span 7; }
-.bento-col-6 { grid-column: span 6; }
-.bento-col-5 { grid-column: span 5; }
-.bento-col-4 { grid-column: span 4; }
-.bento-col-3 { grid-column: span 3; }
-
-#allStreamsGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 12px;
-    margin-top: 12px;
-}
-
-@media(max-width:1024px) {
-    .bento-col-9, .bento-col-8, .bento-col-7, .bento-col-6, .bento-col-5, .bento-col-4, .bento-col-3 { grid-column: span 12; }
-}
-
-/* Cards (Bento Boxes) */
-@keyframes fadeUp {
-    from { opacity: 0; transform: translateY(12px); filter: blur(4px); }
-    to { opacity: 1; transform: translateY(0); filter: blur(0); }
-}
-.card-shell {
-    background: var(--shell-bg);
-    border: 1px solid var(--shell-border);
-    border-radius: 16px; padding: 1px;
-    box-shadow: 0 10px 30px -15px rgba(0,0,0,0.5);
-    transition: border-color 0.4s, box-shadow 0.4s;
-    animation: fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) both;
-}
-.card-shell:hover { border-color: var(--shell-border); }
-.card-core {
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    border-radius: 15px; padding: 24px;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
-}
-.flex-col { display: flex; flex-direction: column; height: 100%; }
-
-/* Controls */
-.control-row { margin-bottom: 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-.control-row label { font-weight: 500; font-size: 13px; color: #ffffff; }
-input, select {
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 8px; color: #ffffff; padding: 8px 14px;
-    font-size: 13px; outline: none; transition: border-color 0.3s, background-color 0.3s, box-shadow 0.3s;
-}
-input:focus, select:focus {
-    border-color: var(--accent-cyan);
-    box-shadow: 0 0 0 3px rgba(6,182,212,0.15);
-    background: rgba(255,255,255,0.05);
-}
-input[type="number"] { width: 80px; }
-input[type="text"] { width: 220px; }
-select { width: auto; min-width: 140px; cursor: pointer; }
-.checkbox-group { display: flex; flex-wrap: wrap; gap: 10px; }
-.checkbox-group label { font-weight: 400; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 6px; color: var(--text-secondary); }
-.checkbox-group label input[type="checkbox"] { cursor: pointer; width: 14px; height: 14px; }
-
-/* Clean Tactile Monochrome Buttons */
-button {
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    background: #ffffff;
-    color: #09090b;
-    border: none;
-    border-radius: 8px;
-    padding: 8px 18px;
-    cursor: pointer;
-    font-weight: 600;
-    font-size: 12px;
-    transition: transform 0.2s cubic-bezier(0.16,1,0.3,1), background-color 0.2s, box-shadow 0.2s;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    box-shadow: 0 4px 12px rgba(255,255,255,0.05);
-}
-button:hover { background: #e4e4e7; transform: translateY(-1px); box-shadow: 0 6px 16px rgba(255,255,255,0.1); }
-button:active { transform: scale(0.97) translateY(0); }
-
-button.secondary {
-    background: rgba(255,255,255,0.04);
-    color: #ffffff;
-    border: 1px solid rgba(255,255,255,0.08);
-    box-shadow: none;
-}
-button.secondary:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.15); }
-
-button.warn {
-    background: var(--accent-orange);
-    color: #ffffff;
-    box-shadow: 0 4px 12px rgba(249,115,22,0.15);
-}
-button.warn:hover { background: #ea580c; box-shadow: 0 6px 16px rgba(249,115,22,0.25); }
-
-button.green {
-    background: var(--accent-green);
-    color: #ffffff;
-    box-shadow: 0 4px 12px rgba(16,185,129,0.15);
-}
-button.green:hover { background: #059669; box-shadow: 0 6px 16px rgba(16,185,129,0.25); }
-
-button.red {
-    background: var(--accent-red);
-    color: #ffffff;
-    box-shadow: 0 4px 12px rgba(244,63,94,0.15);
-}
-button.red:hover { background: #e11d48; box-shadow: 0 6px 16px rgba(244,63,94,0.25); }
-
-button.sm { padding: 5px 12px; font-size: 11px; }
-button .icon { font-size: 13px; display: inline-block; }
-
-/* Status Badges */
-.badge {
-    display: inline-flex;
-    align-items: center;
-    background: rgba(6,182,212,0.08);
-    color: var(--accent-cyan);
-    border: 1px solid rgba(6,182,212,0.15);
-    padding: 3px 10px;
-    border-radius: 9999px;
-    font-size: 11px;
-    font-weight: 600;
-    font-family: 'JetBrains Mono', monospace;
-    letter-spacing: 0.02em;
-}
-.badge-green { background: rgba(16,185,129,0.08); color: var(--accent-green); border-color: rgba(16,185,129,0.15); }
-.badge-orange { background: rgba(249,115,22,0.08); color: var(--accent-orange); border-color: rgba(249,115,22,0.15); }
-.badge-red { background: rgba(244,63,94,0.08); color: var(--accent-red); border-color: rgba(244,63,94,0.15); }
-
-/* Media Box */
-.media-container {
-    background: #000000;
-    border: 1px solid var(--card-border);
-    border-radius: 12px; overflow: hidden;
-    display: flex; align-items: center; justify-content: center;
-    min-height: 240px; width: 100%; position: relative;
-    box-shadow: inset 0 2px 8px rgba(0,0,0,0.8);
-}
-.media-container img { max-width: 100%; max-height: 100%; display: block; object-fit: contain; }
-#stream { width: 100%; min-height: 240px; }
-.cam-thumb { min-height: 180px; position: relative; }
-.cam-label {
-    position: absolute; bottom: 10px; left: 10px;
-    background: rgba(9,9,11,0.85); color: #ffffff;
-    padding: 4px 12px; border-radius: 6px; font-size: 11px;
-    font-family: 'JetBrains Mono', monospace;
-    border: 1px solid rgba(255,255,255,0.05);
-}
-.cam-status-dot {
-    width: 6px; height: 6px; border-radius: 50%; display: inline-block; margin-right: 6px;
-    vertical-align: middle;
-}
-.online { background: var(--accent-green); box-shadow: 0 0 8px var(--accent-green); }
-.offline { background: var(--accent-red); box-shadow: 0 0 8px var(--accent-red); }
-.unknown { background: var(--text-secondary); }
-
-/* Detection Overlay */
-.detection-badge {
-    position: absolute; top: 10px; right: 10px;
-    background: rgba(244,63,94,0.9); color: #ffffff;
-    padding: 3px 10px; border-radius: 9999px; font-size: 10px;
-    font-weight: 700;
-    font-family: 'JetBrains Mono', monospace;
-    border: 1px solid rgba(255,255,255,0.1);
-}
-
-/* Console Log Wrapper */
-.console-wrapper {
-    background: #09090b; border: 1px solid var(--card-border);
-    border-radius: 12px; overflow: hidden;
-    box-shadow: inset 0 2px 8px rgba(0,0,0,0.8);
-    display: flex; flex-direction: column; flex: 1;
-}
-.console-header {
-    background: rgba(255,255,255,0.01);
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-    padding: 10px 16px; display: flex; align-items: center; gap: 8px;
-}
-.console-header .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
-.console-header .dot.red { background: var(--accent-red); }
-.console-header .dot.yellow { background: var(--accent-orange); }
-.console-header .dot.green { background: var(--accent-green); }
-.console-title { color: var(--text-secondary); font-size: 11px; font-family: 'JetBrains Mono', monospace; margin-left: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
-pre {
-    font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #e4e4e7;
-    margin: 0; padding: 16px; overflow: auto; max-height: 250px;
-    line-height: 1.6; background: transparent;
-    flex: 1;
-}
-
-/* Elegant Modern Tables */
-.table-container { 
-    overflow-x: auto; margin-top: 10px; border-radius: 12px; 
-    border: 1px solid var(--card-border); background: rgba(0,0,0,0.2); 
-    box-shadow: inset 0 2px 8px rgba(0,0,0,0.3);
-}
-table { width: 100%; border-collapse: collapse; font-size: 12px; text-align: left; }
-th, td { padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.04); }
-th { 
-    background: rgba(255,255,255,0.02); color: #ffffff; font-weight: 600; 
-    text-transform: uppercase; font-size: 10px; letter-spacing: 0.08em; 
-    border-bottom: 1px solid var(--card-border);
-}
-tr:last-child td { border-bottom: 0; }
-tr:hover td { background: rgba(255,255,255,0.01); }
-td.warn { color: var(--accent-orange); font-weight: 500; }
-td.err { color: var(--accent-red); font-weight: 500; }
-td.ok { color: var(--accent-green); font-weight: 500; }
-
-/* Metrics Panels */
-.metric-card { position: relative; overflow: hidden; }
-.metric-glow { position: absolute; width: 120px; height: 120px; border-radius: 50%; filter: blur(50px); pointer-events: none; z-index: 0; opacity: 0.08; top: -40px; left: -40px; }
-.glow-blue { background: var(--accent-cyan); }
-.glow-purple { background: var(--accent-cyan); }
-.glow-orange { background: var(--accent-orange); }
-.glow-green { background: var(--accent-green); }
-.metric { font-family: 'JetBrains Mono', monospace; font-size: 32px; font-weight: 700; line-height: 1.1; position: relative; z-index: 1; color: #ffffff; letter-spacing: -0.03em; }
-.metric-label { font-size: 12px; color: var(--text-secondary); margin-top: 6px; font-weight: 500; position: relative; z-index: 1; text-transform: uppercase; letter-spacing: 0.05em; }
-
-/* Tabs Bar */
-.tab-bar { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
-.tab-btn {
-    background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 8px; padding: 8px 16px; cursor: pointer; font-size: 13px;
-    color: var(--text-secondary); font-weight: 500; transition: all 0.2s;
-}
-.tab-btn:hover { background: rgba(255,255,255,0.05); color: #ffffff; border-color: rgba(255,255,255,0.1); }
-.tab-btn.active { 
-    background: rgba(6,182,212,0.08); 
-    border-color: var(--accent-cyan); 
-    color: var(--accent-cyan); 
-    box-shadow: 0 0 12px rgba(6,182,212,0.1);
-}
-.tab-content { display: none; }
-.tab-content.active { display: block; }
-
-/* Glass Toasts */
-.toast {
-    position: fixed; bottom: 28px; right: 28px;
-    background: rgba(20, 20, 23, 0.9); border: 1px solid var(--card-border);
-    border-radius: 12px; padding: 16px 24px; max-width: 380px;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    transform: translateY(16px); opacity: 0;
-    transition: all 0.4s cubic-bezier(0.16,1,0.3,1);
-    pointer-events: none; z-index: 999;
-}
-.toast.show { transform: translateY(0); opacity: 1; }
-.toast-title { font-weight: 700; font-size: 13px; margin-bottom: 4px; color: #ffffff; }
-.toast-msg { font-size: 12px; color: var(--text-secondary); line-height: 1.4; }
-
-/* Settings Form Sections */
-.settings-group { margin-bottom: 16px; }
-.settings-group label { font-size: 13px; font-weight: 600; color: #ffffff; display: block; margin-bottom: 6px; }
-.settings-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; flex-wrap: wrap; }
-
-/* ── Light Theme Styling (Swiss Industrial Print Aesthetic) ── */
-body.light-theme {
-    --bg: #f5f5f4;
-    --bg-gradient: radial-gradient(circle at 50% 0%, #ffffff 0%, #f5f5f4 80%);
-    --card-bg: rgba(255, 255, 255, 0.85);
-    --card-border: rgba(9, 9, 11, 0.08);
-    --shell-bg: rgba(9, 9, 11, 0.02);
-    --shell-border: rgba(9, 9, 11, 0.03);
-    --text-primary: #09090b;
-    --text-secondary: #71717a;
-}
-body.light-theme h1 {
-    background: linear-gradient(135deg, #09090b 40%, var(--accent-teal) 100%);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-}
-body.light-theme h2, body.light-theme h3, body.light-theme label, body.light-theme .control-row label, body.light-theme .settings-group label {
-    color: #09090b;
-}
-body.light-theme input, body.light-theme select {
-    background: rgba(9, 9, 11, 0.02);
-    color: #09090b;
-    border: 1px solid rgba(9, 9, 11, 0.1);
-}
-body.light-theme input:focus, body.light-theme select:focus {
-    background: #ffffff;
-    border-color: var(--accent-teal);
-    box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
-}
-body.light-theme th {
-    background: rgba(9, 9, 11, 0.03);
-    color: #09090b;
-    border-bottom: 1px solid rgba(9, 9, 11, 0.08);
-}
-body.light-theme tr:hover td {
-    background: rgba(9, 9, 11, 0.02);
-}
-body.light-theme pre {
-    color: #18181b;
-}
-body.light-theme .console-wrapper {
-    background: #f4f4f5;
-    border: 1px solid rgba(9, 9, 11, 0.08);
-}
-body.light-theme .console-header {
-    background: rgba(9, 9, 11, 0.03);
-    border-bottom: 1px solid rgba(9, 9, 11, 0.05);
-}
-body.light-theme .console-title {
-    color: #71717a;
-}
-body.light-theme .toast {
-    background: rgba(255, 255, 255, 0.95);
-    border: 1px solid rgba(9, 9, 11, 0.1);
-    box-shadow: 0 20px 50px rgba(9, 9, 11, 0.15);
-}
-body.light-theme .toast-title {
-    color: #09090b;
-}
-body.light-theme .toast-msg {
-    color: #71717a;
-}
-</style>
+<link rel="stylesheet" type="text/css" href="/static/style.css" />
 </head>
 <body>
 <header>
@@ -417,7 +35,6 @@ body.light-theme .toast-msg {
   </div>
 </header>
 <main>
-  <!-- TABS -->
   <div class="tab-bar">
     <div class="tab-btn active" data-tab="dashboard">Dashboard</div>
     <div class="tab-btn" data-tab="cameras">Camera Manager</div>
@@ -425,10 +42,8 @@ body.light-theme .toast-msg {
     <div class="tab-btn" data-tab="stats">Thống kê</div>
   </div>
 
-  <!-- TAB: DASHBOARD -->
   <div id="tab-dashboard" class="tab-content active">
     <div class="bento-grid">
-      <!-- Camera Stream (8 cols) -->
       <div class="bento-col-8">
         <section class="card-shell" style="height:100%;">
           <div class="card-core">
@@ -452,7 +67,6 @@ body.light-theme .toast-msg {
         </section>
       </div>
 
-      <!-- Upload Zone (4 cols) -->
       <div class="bento-col-4">
         <section class="card-shell" style="height:100%;">
           <div class="card-core" style="justify-content:space-between;">
@@ -460,7 +74,7 @@ body.light-theme .toast-msg {
               <h2>Upload Image</h2>
               <p class="small text-secondary" style="margin-top:4px;margin-bottom:16px;">Tải ảnh lên hệ thống để phân tích qua pipeline xử lý ảnh hoặc phát hiện vật thể.</p>
             </div>
-            <div class="upload-container" style="display:flex;flex-direction:column;gap:16px;margin-bottom:8px;">
+            <div style="display:flex;flex-direction:column;gap:16px;margin-bottom:8px;">
               <input id="file" type="file" accept="image/*" style="width:100%;" />
               <div style="display:flex;gap:10px;">
                 <button class="secondary" onclick="uploadImage()" style="flex:1;"><i class="ph ph-upload-simple"></i> Upload</button>
@@ -471,7 +85,6 @@ body.light-theme .toast-msg {
         </section>
       </div>
 
-      <!-- Raw Image (6 cols) -->
       <div class="bento-col-6">
         <section class="card-shell" style="height:100%;">
           <div class="card-core flex-col">
@@ -483,7 +96,6 @@ body.light-theme .toast-msg {
         </section>
       </div>
 
-      <!-- Processed Image (6 cols) -->
       <div class="bento-col-6">
         <section class="card-shell" style="height:100%;">
           <div class="card-core flex-col">
@@ -496,7 +108,6 @@ body.light-theme .toast-msg {
         </section>
       </div>
 
-      <!-- Metrics Panel (4 cols) -->
       <div class="bento-col-4">
         <div style="display:grid;grid-template-rows:repeat(4, 1fr);gap:16px;height:100%;">
           <section class="card-shell" style="margin:0;">
@@ -530,7 +141,6 @@ body.light-theme .toast-msg {
         </div>
       </div>
 
-      <!-- JSON Log console (8 cols) -->
       <div class="bento-col-8">
         <section class="card-shell" style="height:100%;">
           <div class="card-core">
@@ -546,7 +156,6 @@ body.light-theme .toast-msg {
         </section>
       </div>
 
-      <!-- Metadata Table (6 cols) -->
       <div class="bento-col-6">
         <section class="card-shell" style="height:100%;">
           <div class="card-core">
@@ -556,7 +165,6 @@ body.light-theme .toast-msg {
         </section>
       </div>
 
-      <!-- Events Table (6 cols) -->
       <div class="bento-col-6">
         <section class="card-shell" style="height:100%;">
           <div class="card-core">
@@ -573,7 +181,6 @@ body.light-theme .toast-msg {
         </section>
       </div>
 
-      <!-- Detections Table (6 cols) -->
       <div class="bento-col-6">
         <section class="card-shell" style="height:100%;">
           <div class="card-core">
@@ -583,7 +190,6 @@ body.light-theme .toast-msg {
         </section>
       </div>
 
-      <!-- Multi-Cam Previews (6 cols) -->
       <div class="bento-col-6">
         <section class="card-shell" style="height:100%;">
           <div class="card-core">
@@ -597,10 +203,8 @@ body.light-theme .toast-msg {
     </div>
   </div>
 
-  <!-- TAB: CAMERA MANAGER -->
   <div id="tab-cameras" class="tab-content">
     <div class="bento-grid">
-      <!-- Camera Register and List (7 cols) -->
       <div class="bento-col-7">
         <section class="card-shell" style="height:100%;">
           <div class="card-core">
@@ -618,7 +222,6 @@ body.light-theme .toast-msg {
         </section>
       </div>
 
-      <!-- All Streams Preview (5 cols) -->
       <div class="bento-col-5">
         <section class="card-shell" style="height:100%;">
           <div class="card-core">
@@ -630,21 +233,17 @@ body.light-theme .toast-msg {
     </div>
   </div>
 
-  <!-- TAB: PIPELINE SETTINGS -->
   <div id="tab-settings" class="tab-content">
     <div class="bento-grid">
-      <!-- Processing Config (6 cols) -->
       <div class="bento-col-6">
         <section class="card-shell" style="height:100%;">
           <div class="card-core">
             <h2>Processing Configuration</h2>
             <p class="small text-secondary" style="margin-top:4px;margin-bottom:16px;">Bộ lọc và các tham số cho contact sheet của pipeline hình ảnh.</p>
-            
             <div class="settings-group">
               <label>Filters:</label>
               <div class="checkbox-group" id="filterCheckboxes" style="margin-top:8px; gap:12px;"></div>
             </div>
-            
             <div class="settings-row" style="margin-top:20px;">
               <label>Threshold:</label>
               <input id="thresholdVal" type="number" value="120" min="0" max="255" />
@@ -664,13 +263,11 @@ body.light-theme .toast-msg {
         </section>
       </div>
 
-      <!-- Detection Config (6 cols) -->
       <div class="bento-col-6">
         <section class="card-shell" style="height:100%;">
           <div class="card-core">
             <h2>Detection & Motion</h2>
             <p class="small text-secondary" style="margin-top:4px;margin-bottom:16px;">Tham số phát hiện chuyển động và nhận diện vật thể.</p>
-            
             <h3>Motion Detection</h3>
             <div class="settings-row">
               <label>Method:</label>
@@ -685,7 +282,6 @@ body.light-theme .toast-msg {
               <label>Duration:</label>
               <input id="motionSeconds" type="number" value="8" min="1" max="30" />
             </div>
-            
             <h3 style="margin-top:20px;">Object Detection</h3>
             <div class="settings-row">
               <label>Confidence Threshold:</label>
@@ -695,7 +291,6 @@ body.light-theme .toast-msg {
         </section>
       </div>
 
-      <!-- Bottom Control Actions (12 cols) -->
       <div class="bento-col-12">
         <section class="card-shell">
           <div class="card-core" style="flex-direction: row; justify-content: space-between; align-items: center; padding: 16px 24px; flex-wrap: wrap; gap: 12px;">
@@ -710,16 +305,12 @@ body.light-theme .toast-msg {
     </div>
   </div>
 
-  <!-- TAB: STATS -->
   <div id="tab-stats" class="tab-content">
-    <!-- Top Level Metric Cards (4 cols each, rendered dynamically via JS) -->
     <div class="bento-grid" id="statsGrid">
       <div class="bento-col-12" style="text-align: center; padding: 24px; color: var(--text-secondary);">
         Đang tải thống kê...
       </div>
     </div>
-    
-    <!-- Detail Tables Grid (6 cols each) -->
     <div class="bento-grid" style="margin-top: 16px;">
       <div class="bento-col-6">
         <section class="card-shell" style="height:100%;">
@@ -740,539 +331,11 @@ body.light-theme .toast-msg {
     </div>
   </div>
 
-  <!-- TOAST -->
   <div id="toast" class="toast">
     <div class="toast-title" id="toastTitle">Event</div>
     <div class="toast-msg" id="toastMsg">Nội dung</div>
   </div>
 </main>
-
-<script>
-// ── XSS Protection Helper ──
-function escapeHTML(str) {
-    if (str === null || str === undefined) return '';
-    return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
-}
-
-// ── State ──
-let API_BASE = '';
-let WS = null;
-let wsReconnectTimer = null;
-let currentFilters = ['resize','grayscale','threshold','edge'];
-let activeEventFilter = 'ALL';
-
-// ── Tự động nhận diện backend API ──
-function initBackendUrl() {
-    const isLocalFile = location.protocol === 'file:';
-    const isOtherPort = location.port !== '8001' && location.port !== '8000';
-    if (isLocalFile || isOtherPort) {
-        API_BASE = localStorage.getItem('lab6_backend_url') || 'http://localhost:8001';
-    } else {
-        API_BASE = '';
-    }
-    const input = document.getElementById('backendUrlInput');
-    if (input) {
-        input.value = API_BASE || (location.protocol + '//' + location.host);
-    }
-}
-
-function saveBackendUrl() {
-    const input = document.getElementById('backendUrlInput');
-    if (input) {
-        let val = input.value.trim().replace(/\/$/, '');
-        if (val) {
-            localStorage.setItem('lab6_backend_url', val);
-            API_BASE = val;
-            showToast('Backend Config', 'Đã lưu Backend: ' + val);
-            connectWS();
-            refreshServerInfo();
-            refreshDashboard();
-        }
-    }
-}
-
-// ── WebSocket ──
-function connectWS() {
-    let wsUrl;
-    if (API_BASE) {
-        const baseProto = API_BASE.startsWith('https') ? 'wss:' : 'ws:';
-        const host = API_BASE.replace(/^https?:\/\//, '');
-        wsUrl = `${baseProto}//${host}/ws`;
-    } else {
-        const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
-        wsUrl = `${proto}//${location.host}/ws`;
-    }
-    
-    if (WS) try { WS.close(); } catch(e) {}
-    
-    try {
-        WS = new WebSocket(wsUrl);
-        WS.onopen = () => {
-            document.getElementById('wsBadge').textContent = 'WebSocket: connected';
-            document.getElementById('wsBadge').className = 'badge badge-green';
-        };
-        WS.onmessage = (ev) => {
-            try {
-                const data = JSON.parse(ev.data);
-                if (data.type === 'new_image') {
-                    showToast(data.event?.event_type || 'New Image', data.event?.explanation || '');
-                    if (data.raw_image_url) {
-                        const rawUrl = data.raw_image_url.startsWith('http') ? data.raw_image_url : (API_BASE + data.raw_image_url);
-                        document.getElementById('raw').src = rawUrl + '?t=' + Date.now();
-                    }
-                    if (data.processed_image_url) {
-                        const procUrl = data.processed_image_url.startsWith('http') ? data.processed_image_url : (API_BASE + data.processed_image_url);
-                        document.getElementById('processed').src = procUrl + '?t=' + Date.now();
-                    }
-                    document.getElementById('out').textContent = JSON.stringify(data, null, 2);
-                    if (data.detections && data.detections.length > 0) {
-                        showToast('Detection', data.detections.map(d=>d.label+' '+d.confidence).join(', '));
-                    }
-                    refreshDashboard();
-                } else if (data.type === 'motion_result') {
-                    showToast('Motion ' + (data.motion_detected === true ? 'Detected' : 'None'), 'Score: ' + (data.score || '?'));
-                    refreshDashboard();
-                }
-            } catch(e) {}
-        };
-        WS.onclose = () => {
-            document.getElementById('wsBadge').textContent = 'WebSocket: reconnecting...';
-            document.getElementById('wsBadge').className = 'badge';
-            wsReconnectTimer = setTimeout(connectWS, 3000);
-        };
-        WS.onerror = () => WS.close();
-    } catch(err) {
-        document.getElementById('wsBadge').textContent = 'WebSocket: error';
-        document.getElementById('wsBadge').className = 'badge badge-red';
-        wsReconnectTimer = setTimeout(connectWS, 5000);
-    }
-}
-
-// ── Toast ──
-let toastTimer = null;
-function showToast(title, msg) {
-    document.getElementById('toastTitle').textContent = title;
-    document.getElementById('toastMsg').textContent = msg;
-    document.getElementById('toast').classList.add('show');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => document.getElementById('toast').classList.remove('show'), 4000);
-}
-
-// ── Tabs ──
-document.querySelectorAll('.tab-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-        btn.classList.add('active');
-        document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
-        if (btn.dataset.tab === 'cameras') refreshCameras();
-        if (btn.dataset.tab === 'stats') refreshStats();
-    });
-});
-
-// ── Pipeline Config ──
-function getPipelineConfig() {
-    return {
-        filters: currentFilters,
-        threshold_value: parseInt(document.getElementById('thresholdVal').value) || 120,
-        canny_low: parseInt(document.getElementById('cannyLow').value) || 80,
-        canny_high: parseInt(document.getElementById('cannyHigh').value) || 160,
-        resize_width: parseInt(document.getElementById('resizeW').value) || 320,
-        resize_height: parseInt(document.getElementById('resizeH').value) || 240,
-    };
-}
-
-function initFilterCheckboxes() {
-    const allFilters = ['resize','grayscale','threshold','edge','gaussian_blur','histogram_equalize','sobel_x','sobel_y'];
-    const container = document.getElementById('filterCheckboxes');
-    allFilters.forEach(f => {
-        const label = document.createElement('label');
-        const cb = document.createElement('input');
-        cb.type = 'checkbox';
-        cb.checked = currentFilters.includes(f);
-        cb.onchange = () => {
-            if (cb.checked) { if(!currentFilters.includes(f)) currentFilters.push(f); }
-            else { currentFilters = currentFilters.filter(x => x !== f); }
-            if (currentFilters.length === 0) { currentFilters = ['resize']; cb.checked = true; }
-            updateFiltersUI();
-        };
-        label.appendChild(cb);
-        label.appendChild(document.createTextNode(' ' + f.replace(/_/g,' ')));
-        container.appendChild(label);
-    });
-}
-
-function updateFiltersUI() {
-    document.getElementById('filtersBadge').textContent = currentFilters.length + ' bước';
-    document.getElementById('activeFiltersText').textContent = currentFilters.join(', ');
-}
-
-async function applyPipelineConfig() {
-    const cfg = getPipelineConfig();
-    document.getElementById('applyStatus').textContent = 'Applying...';
-    try {
-        const r = await fetch(API_BASE + '/config', { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(cfg) });
-        if (r.ok) {
-            document.getElementById('applyStatus').textContent = 'Applied ✓';
-        } else {
-            document.getElementById('applyStatus').textContent = 'Failed: ' + (await r.text());
-        }
-    } catch(e) {
-        document.getElementById('applyStatus').textContent = 'Error: ' + e.message;
-    }
-    setTimeout(() => document.getElementById('applyStatus').textContent = '', 3000);
-}
-
-// ── Camera source ──
-function getSelectedCamera() {
-    const sel = document.getElementById('camSelect');
-    return sel.value || '';
-}
-
-async function refreshCameras() {
-    try {
-        const r = await fetch(API_BASE + '/cameras');
-        const cams = await r.json();
-        const sel = document.getElementById('camSelect');
-        const currentVal = sel.value;
-        sel.innerHTML = '';
-        cams.forEach(c => {
-            const opt = document.createElement('option');
-            opt.value = c.camera_id;
-            opt.textContent = `${c.label} (${c.source}) [${c.status}]`;
-            sel.appendChild(opt);
-        });
-        if (currentVal && Array.from(sel.options).some(o => o.value === currentVal)) sel.value = currentVal;
-
-        // Camera table
-        let html = '<table><thead><tr><th>ID</th><th>Source</th><th>Label</th><th>Status</th><th>Last Seen</th><th>Action</th></tr></thead><tbody>';
-        for (const c of cams) {
-            html += `<tr>
-                <td style="font-family:monospace;font-size:11px;">${escapeHTML(c.camera_id)}</td>
-                <td>${escapeHTML(c.source)}</td>
-                <td>${escapeHTML(c.label)}</td>
-                <td><span class="cam-status-dot ${escapeHTML(c.status)}"></span>${escapeHTML(c.status)}</td>
-                <td>${escapeHTML(c.last_seen || '-')}</td>
-                <td><button class="sm secondary red" onclick="removeCamera('${escapeHTML(c.camera_id)}')"><i class="ph ph-trash"></i> Xóa</button></td>
-            </tr>`;
-        }
-        html += '</tbody></table>';
-        if (!cams.length) html = '<p class="small text-secondary" style="padding:12px;">Chưa có camera nào. Thêm camera mới ở trên.</p>';
-        document.getElementById('cameraTable').innerHTML = html;
-
-        // Multi-camera preview grid
-        const grid = document.getElementById('allStreamsGrid');
-        grid.innerHTML = '';
-        cams.forEach(c => {
-            const div = document.createElement('div');
-            div.className = 'card-shell';
-            div.innerHTML = `<div class="card-core" style="padding:10px;">
-                <div class="media-container cam-thumb">
-                    <img src="${API_BASE}/video_feed?camera_id=${escapeHTML(c.camera_id)}&t=${Date.now()}" style="width:100%;" />
-                    <div class="cam-label"><span class="cam-status-dot ${escapeHTML(c.status)}"></span>${escapeHTML(c.label)}</div>
-                </div>
-            </div>`;
-            grid.appendChild(div);
-        });
-    } catch(e) {}
-}
-
-async function addCamera() {
-    const source = document.getElementById('newCamSource').value.trim() || '0';
-    const label = document.getElementById('newCamLabel').value.trim() || source;
-    try {
-        await fetch(API_BASE + `/cameras?source=${encodeURIComponent(source)}&label=${encodeURIComponent(label)}`, {method:'POST'});
-        showToast('Camera Added', `${label} (${source})`);
-        document.getElementById('newCamSource').value = '0';
-        document.getElementById('newCamLabel').value = '';
-        refreshCameras();
-        await refreshCamSelect();
-    } catch(e) { showToast('Error', 'Cannot add camera'); }
-}
-
-async function removeCamera(cameraId) {
-    try {
-        await fetch(API_BASE + `/cameras/${cameraId}`, {method:'DELETE'});
-        showToast('Camera Removed', cameraId);
-        refreshCameras();
-        await refreshCamSelect();
-    } catch(e) {}
-}
-
-async function refreshCamSelect() {
-    try {
-        const r = await fetch(API_BASE + '/cameras');
-        const cams = await r.json();
-        const sel = document.getElementById('camSelect');
-        sel.innerHTML = '';
-        cams.forEach(c => {
-            const opt = document.createElement('option');
-            opt.value = c.camera_id;
-            opt.textContent = `${c.label} (${c.source})`;
-            sel.appendChild(opt);
-        });
-    } catch(e) {}
-}
-
-// ── Stream ──
-function startStream() {
-    const cid = getSelectedCamera();
-    if (!cid) { showToast('Error', 'No camera selected'); return; }
-    document.getElementById('stream').src = API_BASE + '/video_feed?camera_id=' + cid + '&t=' + Date.now();
-}
-function stopStream() { document.getElementById('stream').src = ''; }
-
-// ── Actions ──
-async function snapshot() {
-    const cid = getSelectedCamera();
-    const detect = document.getElementById('detectCheck').checked;
-    let url = API_BASE + '/snapshot?';
-    if (cid) url += 'camera_id=' + cid + '&';
-    url += 'run_detection=' + detect;
-    try {
-        const r = await fetch(url);
-        const d = await r.json();
-        document.getElementById('out').textContent = JSON.stringify(d, null, 2);
-        if (d.raw_image_url) document.getElementById('raw').src = getImageUrl(d.raw_image_url) + '?t=' + Date.now();
-        if (d.processed_image_url) document.getElementById('processed').src = getImageUrl(d.processed_image_url) + '?t=' + Date.now();
-        if (d.detections && d.detections.length) showToast('Detection', d.detections.map(x=>x.label+' '+x.confidence).join(', '));
-        refreshDashboard();
-    } catch(e) { showToast('Error', 'Snapshot failed'); }
-}
-
-async function recordVideo() {
-    const cid = getSelectedCamera();
-    let url = API_BASE + '/record-video?seconds=5';
-    if (cid) url += '&camera_id=' + cid;
-    try {
-        const r = await fetch(url);
-        const d = await r.json();
-        document.getElementById('out').textContent = JSON.stringify(d, null, 2);
-        refreshDashboard();
-    } catch(e) { showToast('Error', 'Video recording failed'); }
-}
-
-async function motionCapture() {
-    const cid = getSelectedCamera();
-    const method = document.getElementById('motionMethod').value;
-    const minArea = document.getElementById('motionMinArea').value || 800;
-    const seconds = document.getElementById('motionSeconds').value || 8;
-    let url = API_BASE + `/motion-capture?seconds=${seconds}&method=${method}&min_area=${minArea}`;
-    if (cid) url += '&camera_id=' + cid;
-    try {
-        const r = await fetch(url);
-        const d = await r.json();
-        document.getElementById('out').textContent = JSON.stringify(d, null, 2);
-        if (d.raw_image_url) document.getElementById('raw').src = getImageUrl(d.raw_image_url) + '?t=' + Date.now();
-        if (d.processed_image_url) document.getElementById('processed').src = getImageUrl(d.processed_image_url) + '?t=' + Date.now();
-        refreshDashboard();
-    } catch(e) { showToast('Error', 'Motion capture failed'); }
-}
-
-async function uploadImage() {
-    const f = document.getElementById('file').files[0];
-    if (!f) { alert('Chọn một ảnh.'); return; }
-    const fd = new FormData();
-    fd.append('file', f);
-    try {
-        const r = await fetch(API_BASE + '/upload-image?device_id=dashboard&run_detection=false', {method:'POST', body:fd});
-        const d = await r.json();
-        document.getElementById('out').textContent = JSON.stringify(d, null, 2);
-        if (d.raw_image_url) document.getElementById('raw').src = getImageUrl(d.raw_image_url) + '?t=' + Date.now();
-        if (d.processed_image_url) document.getElementById('processed').src = getImageUrl(d.processed_image_url) + '?t=' + Date.now();
-        refreshDashboard();
-    } catch(e) { showToast('Error', 'Upload failed'); }
-}
-
-async function uploadWithDetect() {
-    const f = document.getElementById('file').files[0];
-    if (!f) { alert('Chọn một ảnh.'); return; }
-    const fd = new FormData();
-    fd.append('file', f);
-    try {
-        const r = await fetch(API_BASE + '/upload-image?device_id=dashboard&run_detection=true', {method:'POST', body:fd});
-        const d = await r.json();
-        document.getElementById('out').textContent = JSON.stringify(d, null, 2);
-        if (d.raw_image_url) document.getElementById('raw').src = getImageUrl(d.raw_image_url) + '?t=' + Date.now();
-        if (d.processed_image_url) document.getElementById('processed').src = getImageUrl(d.processed_image_url) + '?t=' + Date.now();
-        if (d.detections && d.detections.length) showToast('Detection', d.detections.map(x=>x.label+' '+x.confidence).join(', '));
-        refreshDashboard();
-    } catch(e) { showToast('Error', 'Upload+Detect failed'); }
-}
-
-// ── Events filter ──
-function filterEvents(type) {
-    activeEventFilter = type;
-    refreshDashboard();
-}
-
-// ── Dashboard ──
-function tableFromRows(rows, cols, highlight) {
-    if (!rows || rows.length === 0) return '<p class="small text-secondary" style="padding:12px;">Chưa có dữ liệu.</p>';
-    let html = '<table><thead><tr>';
-    for (const c of cols) html += '<th>' + c + '</th>';
-    html += '</tr></thead><tbody>';
-    for (const row of rows.slice().reverse()) {
-        const sev = (row.severity || '').toLowerCase();
-        let cls = '';
-        if (sev === 'warning') cls = 'warn';
-        else if (sev === 'error') cls = 'err';
-        else if (sev === 'normal') cls = 'ok';
-        html += '<tr>';
-        for (const c of cols) {
-            let val = row[c] ?? '';
-            if (c === 'brightness' && val !== '') val = parseFloat(val).toFixed(1);
-            if (c === 'confidence' && val !== '') val = parseFloat(val).toFixed(3);
-            html += '<td class="' + cls + '">' + escapeHTML(val) + '</td>';
-        }
-        html += '</tr>';
-    }
-    html += '</tbody></table>';
-    return html;
-}
-
-async function refreshDashboard() {
-    try {
-        const [latestRes, metaRes, evRes, detRes] = await Promise.all([
-            fetch(API_BASE + '/latest'),
-            fetch(API_BASE + '/metadata?limit=8'),
-            fetch(API_BASE + '/events?limit=8' + (activeEventFilter !== 'ALL' ? '&event_type=' + activeEventFilter : '')),
-            fetch(API_BASE + '/detections?limit=8'),
-        ]);
-        if (!latestRes.ok) throw new Error('Server error');
-        const latest = await latestRes.json();
-        const meta = await metaRes.json();
-        const ev = await evRes.json();
-        const det = await detRes.json();
-
-        document.getElementById('metadataCount').textContent = latest.metadata_count || 0;
-        document.getElementById('eventCount').textContent = latest.event_count || 0;
-        document.getElementById('detectionCount').textContent = latest.detection_count || 0;
-        document.getElementById('latestEvent').textContent = (latest.latest_event && latest.latest_event.event_type) ? latest.latest_event.event_type : '-';
-
-        if (latest.raw_image_url) document.getElementById('raw').src = getImageUrl(latest.raw_image_url) + '?t=' + Date.now();
-        if (latest.processed_image_url) document.getElementById('processed').src = getImageUrl(latest.processed_image_url) + '?t=' + Date.now();
-
-        document.getElementById('metadataTable').innerHTML = tableFromRows(meta.items, ['image_id','timestamp','source_type','width','height','brightness','processing_status']);
-        document.getElementById('eventTable').innerHTML = tableFromRows(ev.items, ['event_type','timestamp','severity','score','explanation']);
-        document.getElementById('detectionTable').innerHTML = tableFromRows(det.items, ['label','confidence','timestamp','bbox_x','bbox_y','bbox_w','bbox_h']);
-    } catch (e) {
-        console.warn('Dashboard sync error:', e);
-    }
-}
-
-// ── Stats ──
-async function refreshStats() {
-    try {
-        const r = await fetch(API_BASE + '/stats');
-        const s = await r.json();
-        document.getElementById('statsGrid').innerHTML = `
-            <div class="card-shell bento-col-4"><div class="card-core" style="text-align:center;">
-                <div class="metric-glow glow-blue"></div>
-                <div class="metric" style="font-size:36px;">${s.total_images || 0}</div>
-                <div class="metric-label">Total Images</div>
-            </div></div>
-            <div class="card-shell bento-col-4"><div class="card-core" style="text-align:center;">
-                <div class="metric-glow glow-purple"></div>
-                <div class="metric" style="font-size:36px;">${s.total_events || 0}</div>
-                <div class="metric-label">Total Events</div>
-            </div></div>
-            <div class="card-shell bento-col-4"><div class="card-core" style="text-align:center;">
-                <div class="metric-glow glow-orange"></div>
-                <div class="metric" style="font-size:36px;">${s.total_detections || 0}</div>
-                <div class="metric-label">Total Detections</div>
-            </div></div>
-        `;
-        document.getElementById('statsEventTable').innerHTML = tableFromRows(s.event_by_type, ['event_type','cnt']);
-        document.getElementById('statsDetTable').innerHTML = tableFromRows(s.detection_by_label, ['label','cnt']);
-    } catch(e) {}
-}
-
-// ── Server info ──
-async function refreshServerInfo() {
-    try {
-        const r = await fetch(API_BASE + '/health');
-        const h = await r.json();
-        document.getElementById('serverBadge').textContent = 'Server: OK v' + h.version;
-        document.getElementById('serverBadge').className = 'badge badge-green';
-        if (h.detection) {
-            document.getElementById('detectionBadge').textContent = 'Detection: ONNX';
-            document.getElementById('detectionBadge').className = 'badge badge-orange';
-        }
-        if (h.mqtt) {
-            document.getElementById('mqttBadge').textContent = 'MQTT: connected';
-            document.getElementById('mqttBadge').className = 'badge badge-green';
-        }
-    } catch(e) {
-        document.getElementById('serverBadge').textContent = 'Server: offline';
-        document.getElementById('serverBadge').className = 'badge badge-red';
-    }
-}
-
-// ── Theme Switcher Logic ──
-function toggleTheme() {
-    const body = document.body;
-    const icon = document.getElementById('themeIcon');
-    const text = document.getElementById('themeText');
-    
-    if (body.classList.contains('light-theme')) {
-        body.classList.remove('light-theme');
-        if (icon) icon.className = 'ph ph-sun';
-        if (text) text.textContent = 'Chế độ sáng';
-        localStorage.setItem('theme', 'dark');
-        showToast('Theme Updated', 'Đã chuyển sang chế độ tối (Dark Theme)');
-    } else {
-        body.classList.add('light-theme');
-        if (icon) icon.className = 'ph ph-moon';
-        if (text) text.textContent = 'Chế độ tối';
-        localStorage.setItem('theme', 'light');
-        showToast('Theme Updated', 'Đã chuyển sang chế độ sáng (Light Theme)');
-    }
-}
-
-function loadStoredTheme() {
-    const storedTheme = localStorage.getItem('theme');
-    const body = document.body;
-    const icon = document.getElementById('themeIcon');
-    const text = document.getElementById('themeText');
-    
-    if (storedTheme === 'light') {
-        body.classList.add('light-theme');
-        if (icon) icon.className = 'ph ph-moon';
-        if (text) text.textContent = 'Chế độ tối';
-    } else {
-        body.classList.remove('light-theme');
-        if (icon) icon.className = 'ph ph-sun';
-        if (text) text.textContent = 'Chế độ sáng';
-    }
-}
-
-function getImageUrl(path) {
-    if (!path) return '';
-    return path.startsWith('http') ? path : (API_BASE + path);
-}
-
-// ── Initialization ──
-async function init() {
-    loadStoredTheme();
-    initBackendUrl();
-    initFilterCheckboxes();
-    updateFiltersUI();
-    connectWS();
-    await refreshCamSelect();
-    await refreshCameras();
-    await refreshServerInfo();
-    refreshDashboard();
-    setInterval(refreshDashboard, 3000);
-    setInterval(refreshServerInfo, 10000);
-    setInterval(refreshCameras, 15000);
-}
-init();
-</script>
+<script src="/static/app.js"></script>
 </body>
 </html>
