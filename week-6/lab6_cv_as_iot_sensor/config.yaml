@@ -12,6 +12,7 @@ camera:
   height: 480
   fps: 12
   fallback_to_simulated: true
+  flip_mode: "horizontal"  # Hỗ trợ: "none", "horizontal", "vertical", "both"
 
 processing:
   resize_width: 320

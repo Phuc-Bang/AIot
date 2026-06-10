@@ -59,7 +59,7 @@ def load_config() -> dict:
     # merge defaults
     cfg.setdefault("server", {"host": "0.0.0.0", "port": 8000, "reload": True})
     cfg.setdefault("database", {"path": "outputs/lab6.db"})
-    cfg.setdefault("camera", {"default_source": "0", "width": 640, "height": 480, "fps": 12, "fallback_to_simulated": True})
+    cfg.setdefault("camera", {"default_source": "0", "width": 640, "height": 480, "fps": 12, "fallback_to_simulated": True, "flip_mode": "none"})
     proc_defaults = {
         "resize_width": 320,
         "resize_height": 240,
@@ -101,10 +101,11 @@ PROCESSED_DIR = DATA_DIR / "processed_images"
 VIDEO_DIR = DATA_DIR / "videos"
 OUTPUT_DIR = ROOT / "outputs"
 MODELS_DIR = ROOT / "models"
+STATIC_DIR = ROOT / "static"
 DB_PATH = ROOT / CFG["database"]["path"]
 INDEX_HTML = ROOT / "index.html"
 
-for folder in [RAW_DIR, PROCESSED_DIR, VIDEO_DIR, OUTPUT_DIR, MODELS_DIR, DB_PATH.parent, (ROOT / CFG["logging"]["file"]).parent]:
+for folder in [RAW_DIR, PROCESSED_DIR, VIDEO_DIR, OUTPUT_DIR, MODELS_DIR, STATIC_DIR, DB_PATH.parent, (ROOT / CFG["logging"]["file"]).parent]:
     folder.mkdir(parents=True, exist_ok=True)
 
 # ── Logging ──
@@ -418,6 +419,18 @@ def frame_to_jpeg_bytes(frame_bgr: np.ndarray) -> bytes:
 def compute_brightness(frame_bgr: np.ndarray) -> float:
     gray = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2GRAY)
     return float(np.mean(gray))
+
+def flip_frame_if_needed(frame: np.ndarray) -> np.ndarray:
+    if frame is None:
+        return frame
+    mode = CFG["camera"].get("flip_mode", "none")
+    if mode == "horizontal":
+        return cv2.flip(frame, 1)
+    elif mode == "vertical":
+        return cv2.flip(frame, 0)
+    elif mode == "both":
+        return cv2.flip(frame, -1)
+    return frame
 
 # ──────────────────────────────────────────────────────────────────────
 # 6. IMAGE PROCESSING PIPELINE (ENHANCED)
@@ -925,6 +938,7 @@ async def stream_frames(camera_id: str) -> AsyncIterator[bytes]:
             if cap is not None:
                 ok, frame = await loop.run_in_executor(executor, cap.read)
                 if ok and frame is not None:
+                    frame = flip_frame_if_needed(frame)
                     source_label = "LIVE"
                 else:
                     use_simulated = True
@@ -981,7 +995,9 @@ def record_short_video(camera_id: str, seconds: int = 5, width: int = 640, heigh
         while time.perf_counter() - start < seconds:
             if cap is not None:
                 ok, frame = cap.read()
-                if not ok or frame is None:
+                if ok and frame is not None:
+                    frame = flip_frame_if_needed(frame)
+                else:
                     frame = simulated_frame(frame_count, width, height)
             else:
                 frame = simulated_frame(frame_count, width, height)
@@ -1074,7 +1090,9 @@ async def motion_capture(
         while time.perf_counter() - start < seconds:
             if cap is not None:
                 ok, frame = await loop.run_in_executor(executor, cap.read)
-                if not ok or frame is None:
+                if ok and frame is not None:
+                    frame = flip_frame_if_needed(frame)
+                else:
                     frame = simulated_frame(frames_seen)
             else:
                 frame = simulated_frame(frames_seen)
@@ -1162,8 +1180,19 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+@app.get("/static/{file_path:path}")
+async def serve_static_file(file_path: str):
+    full = (STATIC_DIR / file_path).resolve()
+    try:
+        full.relative_to(STATIC_DIR.resolve())
+    except ValueError:
+        raise HTTPException(status_code=403, detail="Forbidden")
+    if not full.is_file():
+        raise HTTPException(status_code=404, detail="Not found")
+    return FileResponse(str(full))
+
 @app.get("/files/{file_path:path}")
-async def serve_static(file_path: str):
+async def serve_data_file(file_path: str):
     full = (ROOT / file_path).resolve()
     try:
         full.relative_to(DATA_DIR.resolve())
@@ -1283,6 +1312,7 @@ async def snapshot(
             frame = simulated_frame(0)
             source_type = "simulated_fallback"
         else:
+            frame = flip_frame_if_needed(frame)
             source_type = "camera"
 
     return await log_image_pipeline(
