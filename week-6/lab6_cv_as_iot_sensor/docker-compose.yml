@@ -1,0 +1,41 @@
+services:
+  lab6:
+    build:
+      context: .
+      network: host
+    container_name: lab6-enhanced
+    ports:
+      # Changed host port to 8001 to avoid conflicts with Lab 5 (port 8000)
+      - "8001:8000"
+    volumes:
+      - ./data:/app/data
+      - ./outputs:/app/outputs
+      - ./models:/app/models
+      - ./config.yaml:/app/config.yaml
+    # Commented out for Windows compatibility. WSL2/Windows Docker does not natively support /dev/video0.
+    # If using Linux or USB forwarding, uncomment the lines below.
+    # devices:
+    #   - /dev/video0:/dev/video0
+    restart: unless-stopped
+    environment:
+      - TZ=Asia/Ho_Chi_Minh
+      - MQTT_ENABLED=true
+      - MQTT_BROKER=mosquitto
+      - MQTT_PORT=1883
+
+  mosquitto:
+    image: eclipse-mosquitto:2
+    container_name: lab6-mosquitto
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    # Required for Mosquitto 2.x to allow connections from other containers without custom config file
+    command: mosquitto -c /dev/null --listener 1883 0.0.0.0 --allow_anonymous true
+    volumes:
+      - mosquitto-data:/mosquitto/data
+      - mosquitto-log:/mosquitto/log
+    restart: unless-stopped
+
+volumes:
+  mosquitto-data:
+  mosquitto-log:

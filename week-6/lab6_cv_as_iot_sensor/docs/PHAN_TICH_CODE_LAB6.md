@@ -16,8 +16,8 @@ camera/upload image
 → frame BGR trong OpenCV
 → lưu ảnh gốc
 → tạo ảnh xử lý bốn bước
-→ ghi image_metadata.csv
-→ ghi image_event_log.csv
+→ ghi metadata vào bảng images (SQLite)
+→ ghi event vào bảng events (SQLite)
 → trả JSON và URL ảnh cho dashboard
 ```
 

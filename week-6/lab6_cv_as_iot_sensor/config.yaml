@@ -1,0 +1,68 @@
+server:
+  host: "0.0.0.0"
+  port: 8000
+  reload: true
+
+database:
+  path: "outputs/lab6.db"
+
+camera:
+  default_source: "0"
+  width: 640
+  height: 480
+  fps: 12
+  fallback_to_simulated: true
+
+processing:
+  resize_width: 320
+  resize_height: 240
+  threshold_value: 120
+  canny_low: 80
+  canny_high: 160
+  brightness_threshold: 70
+  available_filters:
+    - resize
+    - grayscale
+    - threshold
+    - edge
+    - gaussian_blur
+    - histogram_equalize
+    - sobel_x
+    - sobel_y
+
+motion:
+  method: "mog2"
+  min_area: 800
+  simple_threshold: 25
+  mog2_history: 500
+  mog2_var_threshold: 16
+  detect_shadows: true
+
+detection:
+  enabled: true
+  model_path: "models/yolov8n.onnx"
+  model_url: "https://github.com/uynguyen-aiot/opencv-yolo/releases/download/v1.0/yolov8n.onnx"
+  input_size: 640
+  confidence_threshold: 0.5
+  nms_threshold: 0.45
+  classes:
+    - person
+    - bicycle
+    - car
+    - motorcycle
+    - bus
+    - truck
+    - dog
+    - cat
+
+mqtt:
+  enabled: true
+  broker: "localhost"
+  port: 1883
+  client_id: "lab6_camera"
+  topic_prefix: "aiot/lab6"
+  qos: 1
+
+logging:
+  level: "INFO"
+  file: "outputs/lab6.log"

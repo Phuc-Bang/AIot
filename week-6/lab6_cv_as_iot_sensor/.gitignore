@@ -1,0 +1,17 @@
+# Python virtual environment
+.venv/
+
+# CodeGraph database
+.codegraph/
+
+# Python cache
+**/__pycache__/
+**/*.pyc
+
+# Local runtime data (images, videos, database logs)
+data/
+outputs/lab6.db
+outputs/lab6.log
+
+# Git submodules / untracked repos
+taste_skill_repo/

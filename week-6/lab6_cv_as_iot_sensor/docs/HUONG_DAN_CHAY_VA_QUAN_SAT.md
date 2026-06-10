@@ -29,8 +29,8 @@ Quan sát:
 - `data/raw_images/` có ảnh mới.
 - `data/processed_images/` có ảnh tổng hợp bốn bước.
 - `data/videos/` có video ngắn.
-- `outputs/image_metadata.csv` có dòng metadata.
-- `outputs/image_event_log.csv` có event.
+- `outputs/lab6.db` (các bảng `images`/`cameras`) có chứa metadata.
+- `outputs/lab6.db` (bảng `events`) có chứa các event.
 
 Ý nghĩa: pipeline hoạt động ngay cả khi chưa có camera thật.
 

@@ -15,7 +15,7 @@ run_lab6_demo.py    # chạy thử nhanh không cần camera thật
 ```bash
 python -m venv .venv
 # Windows
-.venv\Scriptsctivate
+.venv\Scripts\activate
 # macOS/Linux/WSL
 source .venv/bin/activate
 pip install -r requirements.txt
@@ -35,6 +35,6 @@ http://127.0.0.1:8000/docs
 - `data/raw_images/`: ảnh gốc từ upload/snapshot/motion.
 - `data/processed_images/`: ảnh tổng hợp bốn bước xử lý.
 - `data/videos/`: video ngắn ghi từ camera hoặc stream mô phỏng.
-- `outputs/image_metadata.csv`: metadata của ảnh.
-- `outputs/image_event_log.csv`: event sinh từ ảnh/camera.
+- `outputs/lab6.db`: database SQLite lưu trữ thông tin camera, metadata ảnh, events và detections.
+- `outputs/lab6.log`: file log hoạt động của hệ thống.
 - Dashboard tại `/`: live stream, ảnh gốc, ảnh xử lý, bảng metadata và event.
