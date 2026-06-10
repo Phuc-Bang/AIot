@@ -39,6 +39,8 @@ from io import BytesIO
 from pathlib import Path
 from typing import Any, AsyncIterator, Dict, List, Optional, Set, Tuple
 
+os.environ["OPENCV_LOG_LEVEL"] = "ERROR"
+os.environ["OPENCV_FFMPEG_LOGLEVEL"] = "-8"
 import cv2
 import numpy as np
 import yaml
@@ -1180,6 +1182,13 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+@app.get("/favicon.ico")
+async def favicon():
+    f = STATIC_DIR / "favicon.ico"
+    if f.is_file():
+        return FileResponse(str(f))
+    return FileResponse(str(STATIC_DIR / "favicon.svg"))
+
 @app.get("/static/{file_path:path}")
 async def serve_static_file(file_path: str):
     full = (STATIC_DIR / file_path).resolve()
