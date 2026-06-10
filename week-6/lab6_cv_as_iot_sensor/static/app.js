@@ -69,12 +69,10 @@ function connectWS() {
                 if (data.type === 'new_image') {
                     showToast(data.event?.event_type || 'New Image', data.event?.explanation || '');
                     if (data.raw_image_url) {
-                        const rawUrl = data.raw_image_url.startsWith('http') ? data.raw_image_url : (API_BASE + data.raw_image_url);
-                        document.getElementById('raw').src = rawUrl + '?t=' + Date.now();
+                        updateImageSrcIfChanged('raw', data.raw_image_url);
                     }
                     if (data.processed_image_url) {
-                        const procUrl = data.processed_image_url.startsWith('http') ? data.processed_image_url : (API_BASE + data.processed_image_url);
-                        document.getElementById('processed').src = procUrl + '?t=' + Date.now();
+                        updateImageSrcIfChanged('processed', data.processed_image_url);
                     }
                     document.getElementById('out').textContent = JSON.stringify(data, null, 2);
                     if (data.detections && data.detections.length > 0) {
@@ -349,13 +347,36 @@ async function refreshCamSelect() {
         const sel = document.getElementById('camSelect');
         const currentVal = sel.value;
         sel.innerHTML = '';
+        
+        let currentCamObj = null;
         cams.forEach(c => {
             const opt = document.createElement('option');
             opt.value = c.camera_id;
             opt.textContent = `${c.label} (${c.source})`;
             sel.appendChild(opt);
+            if (c.camera_id === currentVal) {
+                currentCamObj = c;
+            }
         });
-        if (currentVal && Array.from(sel.options).some(o => o.value === currentVal)) sel.value = currentVal;
+        
+        if (currentCamObj) {
+            sel.value = currentVal;
+            // Nếu camera đang phát stream nhưng cấu hình nguồn bị thay đổi từ client khác, restart stream
+            const streamImg = document.getElementById('stream');
+            if (streamImg && streamImg.src && streamImg.src.includes('/video_feed')) {
+                const oldSource = streamImg.dataset.activeSource;
+                if (oldSource !== undefined && oldSource !== currentCamObj.source) {
+                    startStream();
+                }
+            }
+        } else if (currentVal) {
+            // Camera đang chọn đã bị xóa
+            const streamImg = document.getElementById('stream');
+            if (streamImg && streamImg.src && streamImg.src.includes('/video_feed')) {
+                stopStream();
+                showToast('Stream Stopped', 'Camera đang phát đã bị xóa khỏi hệ thống.');
+            }
+        }
     } catch(e) {}
 }
 
@@ -364,11 +385,24 @@ function startStream() {
     if (!cid) { showToast('Error', 'No camera selected'); return; }
     const streamImg = document.getElementById('stream');
     streamImg.src = API_BASE + '/video_feed?camera_id=' + cid + '&t=' + Date.now();
+    streamImg.dataset.activeCameraId = cid;
+    
+    // Lưu source hiện tại từ select box
+    const sel = document.getElementById('camSelect');
+    const opt = sel.options[sel.selectedIndex];
+    if (opt) {
+        const match = opt.textContent.match(/\(([^)]+)\)$/);
+        if (match) {
+            streamImg.dataset.activeSource = match[1];
+        }
+    }
 }
 
 function stopStream() {
     const streamImg = document.getElementById('stream');
     streamImg.src = '';
+    delete streamImg.dataset.activeSource;
+    delete streamImg.dataset.activeCameraId;
 }
 
 async function snapshot() {
@@ -381,8 +415,8 @@ async function snapshot() {
         const r = await fetch(url);
         const d = await r.json();
         document.getElementById('out').textContent = JSON.stringify(d, null, 2);
-        if (d.raw_image_url) document.getElementById('raw').src = getImageUrl(d.raw_image_url) + '?t=' + Date.now();
-        if (d.processed_image_url) document.getElementById('processed').src = getImageUrl(d.processed_image_url) + '?t=' + Date.now();
+        if (d.raw_image_url) updateImageSrcIfChanged('raw', d.raw_image_url);
+        if (d.processed_image_url) updateImageSrcIfChanged('processed', d.processed_image_url);
         if (d.detections && d.detections.length) showToast('Detection', d.detections.map(x=>x.label+' '+x.confidence).join(', '));
         refreshDashboard();
     } catch(e) { showToast('Error', 'Snapshot failed'); }
@@ -411,8 +445,8 @@ async function motionCapture() {
         const r = await fetch(url);
         const d = await r.json();
         document.getElementById('out').textContent = JSON.stringify(d, null, 2);
-        if (d.raw_image_url) document.getElementById('raw').src = getImageUrl(d.raw_image_url) + '?t=' + Date.now();
-        if (d.processed_image_url) document.getElementById('processed').src = getImageUrl(d.processed_image_url) + '?t=' + Date.now();
+        if (d.raw_image_url) updateImageSrcIfChanged('raw', d.raw_image_url);
+        if (d.processed_image_url) updateImageSrcIfChanged('processed', d.processed_image_url);
         refreshDashboard();
     } catch(e) { showToast('Error', 'Motion capture failed'); }
 }
@@ -426,8 +460,8 @@ async function uploadImage() {
         const r = await fetch(API_BASE + '/upload-image?device_id=dashboard&run_detection=false', {method:'POST', body:fd});
         const d = await r.json();
         document.getElementById('out').textContent = JSON.stringify(d, null, 2);
-        if (d.raw_image_url) document.getElementById('raw').src = getImageUrl(d.raw_image_url) + '?t=' + Date.now();
-        if (d.processed_image_url) document.getElementById('processed').src = getImageUrl(d.processed_image_url) + '?t=' + Date.now();
+        if (d.raw_image_url) updateImageSrcIfChanged('raw', d.raw_image_url);
+        if (d.processed_image_url) updateImageSrcIfChanged('processed', d.processed_image_url);
         refreshDashboard();
     } catch(e) { showToast('Error', 'Upload failed'); }
 }
@@ -441,8 +475,8 @@ async function uploadWithDetect() {
         const r = await fetch(API_BASE + '/upload-image?device_id=dashboard&run_detection=true', {method:'POST', body:fd});
         const d = await r.json();
         document.getElementById('out').textContent = JSON.stringify(d, null, 2);
-        if (d.raw_image_url) document.getElementById('raw').src = getImageUrl(d.raw_image_url) + '?t=' + Date.now();
-        if (d.processed_image_url) document.getElementById('processed').src = getImageUrl(d.processed_image_url) + '?t=' + Date.now();
+        if (d.raw_image_url) updateImageSrcIfChanged('raw', d.raw_image_url);
+        if (d.processed_image_url) updateImageSrcIfChanged('processed', d.processed_image_url);
         if (d.detections && d.detections.length) showToast('Detection', d.detections.map(x=>x.label+' '+x.confidence).join(', '));
         refreshDashboard();
     } catch(e) { showToast('Error', 'Upload+Detect failed'); }
@@ -496,8 +530,8 @@ async function refreshDashboard() {
         document.getElementById('detectionCount').textContent = latest.detection_count || 0;
         document.getElementById('latestEvent').textContent = (latest.latest_event && latest.latest_event.event_type) ? latest.latest_event.event_type : '-';
 
-        if (latest.raw_image_url) document.getElementById('raw').src = getImageUrl(latest.raw_image_url) + '?t=' + Date.now();
-        if (latest.processed_image_url) document.getElementById('processed').src = getImageUrl(latest.processed_image_url) + '?t=' + Date.now();
+        if (latest.raw_image_url) updateImageSrcIfChanged('raw', latest.raw_image_url);
+        if (latest.processed_image_url) updateImageSrcIfChanged('processed', latest.processed_image_url);
 
         document.getElementById('metadataTable').innerHTML = tableFromRows(meta.items, ['image_id','timestamp','source_type','width','height','brightness','processing_status']);
         document.getElementById('eventTable').innerHTML = tableFromRows(ev.items, ['event_type','timestamp','severity','score','explanation']);
@@ -593,6 +627,33 @@ function loadStoredTheme() {
 function getImageUrl(path) {
     if (!path) return '';
     return path.startsWith('http') ? path : (API_BASE + path);
+}
+
+function updateImageSrcIfChanged(imgId, newRelativeOrAbsoluteUrl) {
+    const img = document.getElementById(imgId);
+    if (!img || !newRelativeOrAbsoluteUrl) return;
+    const newFullUrl = getImageUrl(newRelativeOrAbsoluteUrl);
+    
+    if (!img.src || img.src === window.location.href || img.src.endsWith('/')) {
+        img.src = newFullUrl + '?t=' + Date.now();
+        return;
+    }
+    
+    try {
+        const currentUrlObj = new URL(img.src);
+        currentUrlObj.search = '';
+        const cleanCurrentUrl = currentUrlObj.toString();
+        
+        const newUrlObj = new URL(newFullUrl, window.location.origin + window.location.pathname);
+        newUrlObj.search = '';
+        const cleanNewUrl = newUrlObj.toString();
+        
+        if (cleanCurrentUrl !== cleanNewUrl) {
+            img.src = newFullUrl + '?t=' + Date.now();
+        }
+    } catch(e) {
+        img.src = newFullUrl + '?t=' + Date.now();
+    }
 }
 
 async function init() {
