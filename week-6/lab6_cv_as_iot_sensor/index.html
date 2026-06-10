@@ -401,11 +401,18 @@ body.light-theme .toast-msg {
     </button>
     <h1>Lab 6 Enhanced: Computer Vision as IoT Sensor</h1>
     <p>Camera/ảnh như cảm biến IoT: multi-camera · WebSocket real-time · MOG2 motion · ONNX detection · MQTT · pipeline configurable</p>
-    <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
-      <span class="badge badge-green" id="wsBadge">WebSocket: chờ...</span>
-      <span class="badge" id="detectionBadge">Detection: tắt</span>
-      <span class="badge badge-orange" id="mqttBadge">MQTT: tắt</span>
-      <span class="badge" id="serverBadge">Server: OK</span>
+    <div style="display:flex;align-items:center;gap:16px;margin-top:12px;flex-wrap:wrap;">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <span class="badge badge-green" id="wsBadge">WebSocket: chờ...</span>
+        <span class="badge" id="detectionBadge">Detection: tắt</span>
+        <span class="badge badge-orange" id="mqttBadge">MQTT: tắt</span>
+        <span class="badge" id="serverBadge">Server: OK</span>
+      </div>
+      <div id="backendConfigContainer" style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.08);padding:4px 12px;border-radius:9999px;font-size:11px;">
+        <span style="color:var(--text-secondary);font-family:'JetBrains Mono',monospace;">Backend:</span>
+        <input id="backendUrlInput" type="text" value="" placeholder="http://localhost:8001" style="height:20px;padding:0 4px;font-size:11px;width:150px;background:transparent;border:none;border-bottom:1px dashed var(--text-secondary);border-radius:0;font-family:'JetBrains Mono',monospace;color:inherit;outline:none;" />
+        <button class="secondary sm" id="saveBackendUrlBtn" onclick="saveBackendUrl()" style="height:18px;padding:0 6px;font-size:10px;border-radius:4px;cursor:pointer;background:var(--text-primary);color:var(--bg);border:none;font-weight:600;">Lưu</button>
+      </div>
     </div>
   </div>
 </header>
@@ -753,45 +760,97 @@ function escapeHTML(str) {
 }
 
 // ── State ──
+let API_BASE = '';
 let WS = null;
 let wsReconnectTimer = null;
 let currentFilters = ['resize','grayscale','threshold','edge'];
 let activeEventFilter = 'ALL';
 
+// ── Tự động nhận diện backend API ──
+function initBackendUrl() {
+    const isLocalFile = location.protocol === 'file:';
+    const isOtherPort = location.port !== '8001' && location.port !== '8000';
+    if (isLocalFile || isOtherPort) {
+        API_BASE = localStorage.getItem('lab6_backend_url') || 'http://localhost:8001';
+    } else {
+        API_BASE = '';
+    }
+    const input = document.getElementById('backendUrlInput');
+    if (input) {
+        input.value = API_BASE || (location.protocol + '//' + location.host);
+    }
+}
+
+function saveBackendUrl() {
+    const input = document.getElementById('backendUrlInput');
+    if (input) {
+        let val = input.value.trim().replace(/\/$/, '');
+        if (val) {
+            localStorage.setItem('lab6_backend_url', val);
+            API_BASE = val;
+            showToast('Backend Config', 'Đã lưu Backend: ' + val);
+            connectWS();
+            refreshServerInfo();
+            refreshDashboard();
+        }
+    }
+}
+
 // ── WebSocket ──
 function connectWS() {
-    const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const url = `${proto}//${location.host}/ws`;
+    let wsUrl;
+    if (API_BASE) {
+        const baseProto = API_BASE.startsWith('https') ? 'wss:' : 'ws:';
+        const host = API_BASE.replace(/^https?:\/\//, '');
+        wsUrl = `${baseProto}//${host}/ws`;
+    } else {
+        const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+        wsUrl = `${proto}//${location.host}/ws`;
+    }
+    
     if (WS) try { WS.close(); } catch(e) {}
-    WS = new WebSocket(url);
-    WS.onopen = () => {
-        document.getElementById('wsBadge').textContent = 'WebSocket: connected';
-        document.getElementById('wsBadge').className = 'badge badge-green';
-    };
-    WS.onmessage = (ev) => {
-        try {
-            const data = JSON.parse(ev.data);
-            if (data.type === 'new_image') {
-                showToast(data.event?.event_type || 'New Image', data.event?.explanation || '');
-                if (data.raw_image_url) document.getElementById('raw').src = data.raw_image_url + '?t=' + Date.now();
-                if (data.processed_image_url) document.getElementById('processed').src = data.processed_image_url + '?t=' + Date.now();
-                document.getElementById('out').textContent = JSON.stringify(data, null, 2);
-                if (data.detections && data.detections.length > 0) {
-                    showToast('Detection', data.detections.map(d=>d.label+' '+d.confidence).join(', '));
+    
+    try {
+        WS = new WebSocket(wsUrl);
+        WS.onopen = () => {
+            document.getElementById('wsBadge').textContent = 'WebSocket: connected';
+            document.getElementById('wsBadge').className = 'badge badge-green';
+        };
+        WS.onmessage = (ev) => {
+            try {
+                const data = JSON.parse(ev.data);
+                if (data.type === 'new_image') {
+                    showToast(data.event?.event_type || 'New Image', data.event?.explanation || '');
+                    if (data.raw_image_url) {
+                        const rawUrl = data.raw_image_url.startsWith('http') ? data.raw_image_url : (API_BASE + data.raw_image_url);
+                        document.getElementById('raw').src = rawUrl + '?t=' + Date.now();
+                    }
+                    if (data.processed_image_url) {
+                        const procUrl = data.processed_image_url.startsWith('http') ? data.processed_image_url : (API_BASE + data.processed_image_url);
+                        document.getElementById('processed').src = procUrl + '?t=' + Date.now();
+                    }
+                    document.getElementById('out').textContent = JSON.stringify(data, null, 2);
+                    if (data.detections && data.detections.length > 0) {
+                        showToast('Detection', data.detections.map(d=>d.label+' '+d.confidence).join(', '));
+                    }
+                    refreshDashboard();
+                } else if (data.type === 'motion_result') {
+                    showToast('Motion ' + (data.motion_detected === true ? 'Detected' : 'None'), 'Score: ' + (data.score || '?'));
+                    refreshDashboard();
                 }
-                refreshDashboard();
-            } else if (data.type === 'motion_result') {
-                showToast('Motion ' + (data.motion_detected === true ? 'Detected' : 'None'), 'Score: ' + (data.score || '?'));
-                refreshDashboard();
-            }
-        } catch(e) {}
-    };
-    WS.onclose = () => {
-        document.getElementById('wsBadge').textContent = 'WebSocket: reconnecting...';
-        document.getElementById('wsBadge').className = 'badge';
-        wsReconnectTimer = setTimeout(connectWS, 3000);
-    };
-    WS.onerror = () => WS.close();
+            } catch(e) {}
+        };
+        WS.onclose = () => {
+            document.getElementById('wsBadge').textContent = 'WebSocket: reconnecting...';
+            document.getElementById('wsBadge').className = 'badge';
+            wsReconnectTimer = setTimeout(connectWS, 3000);
+        };
+        WS.onerror = () => WS.close();
+    } catch(err) {
+        document.getElementById('wsBadge').textContent = 'WebSocket: error';
+        document.getElementById('wsBadge').className = 'badge badge-red';
+        wsReconnectTimer = setTimeout(connectWS, 5000);
+    }
 }
 
 // ── Toast ──
@@ -857,7 +916,7 @@ async function applyPipelineConfig() {
     const cfg = getPipelineConfig();
     document.getElementById('applyStatus').textContent = 'Applying...';
     try {
-        const r = await fetch('/config', { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(cfg) });
+        const r = await fetch(API_BASE + '/config', { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(cfg) });
         if (r.ok) {
             document.getElementById('applyStatus').textContent = 'Applied ✓';
         } else {
@@ -877,7 +936,7 @@ function getSelectedCamera() {
 
 async function refreshCameras() {
     try {
-        const r = await fetch('/cameras');
+        const r = await fetch(API_BASE + '/cameras');
         const cams = await r.json();
         const sel = document.getElementById('camSelect');
         const currentVal = sel.value;
@@ -914,7 +973,7 @@ async function refreshCameras() {
             div.className = 'card-shell';
             div.innerHTML = `<div class="card-core" style="padding:10px;">
                 <div class="media-container cam-thumb">
-                    <img src="/video_feed?camera_id=${escapeHTML(c.camera_id)}&t=${Date.now()}" style="width:100%;" />
+                    <img src="${API_BASE}/video_feed?camera_id=${escapeHTML(c.camera_id)}&t=${Date.now()}" style="width:100%;" />
                     <div class="cam-label"><span class="cam-status-dot ${escapeHTML(c.status)}"></span>${escapeHTML(c.label)}</div>
                 </div>
             </div>`;
@@ -927,7 +986,7 @@ async function addCamera() {
     const source = document.getElementById('newCamSource').value.trim() || '0';
     const label = document.getElementById('newCamLabel').value.trim() || source;
     try {
-        await fetch(`/cameras?source=${encodeURIComponent(source)}&label=${encodeURIComponent(label)}`, {method:'POST'});
+        await fetch(API_BASE + `/cameras?source=${encodeURIComponent(source)}&label=${encodeURIComponent(label)}`, {method:'POST'});
         showToast('Camera Added', `${label} (${source})`);
         document.getElementById('newCamSource').value = '0';
         document.getElementById('newCamLabel').value = '';
@@ -938,7 +997,7 @@ async function addCamera() {
 
 async function removeCamera(cameraId) {
     try {
-        await fetch(`/cameras/${cameraId}`, {method:'DELETE'});
+        await fetch(API_BASE + `/cameras/${cameraId}`, {method:'DELETE'});
         showToast('Camera Removed', cameraId);
         refreshCameras();
         await refreshCamSelect();
@@ -947,7 +1006,7 @@ async function removeCamera(cameraId) {
 
 async function refreshCamSelect() {
     try {
-        const r = await fetch('/cameras');
+        const r = await fetch(API_BASE + '/cameras');
         const cams = await r.json();
         const sel = document.getElementById('camSelect');
         sel.innerHTML = '';
@@ -964,7 +1023,7 @@ async function refreshCamSelect() {
 function startStream() {
     const cid = getSelectedCamera();
     if (!cid) { showToast('Error', 'No camera selected'); return; }
-    document.getElementById('stream').src = '/video_feed?camera_id=' + cid + '&t=' + Date.now();
+    document.getElementById('stream').src = API_BASE + '/video_feed?camera_id=' + cid + '&t=' + Date.now();
 }
 function stopStream() { document.getElementById('stream').src = ''; }
 
@@ -972,15 +1031,15 @@ function stopStream() { document.getElementById('stream').src = ''; }
 async function snapshot() {
     const cid = getSelectedCamera();
     const detect = document.getElementById('detectCheck').checked;
-    let url = '/snapshot?';
+    let url = API_BASE + '/snapshot?';
     if (cid) url += 'camera_id=' + cid + '&';
     url += 'run_detection=' + detect;
     try {
         const r = await fetch(url);
         const d = await r.json();
         document.getElementById('out').textContent = JSON.stringify(d, null, 2);
-        if (d.raw_image_url) document.getElementById('raw').src = d.raw_image_url + '?t=' + Date.now();
-        if (d.processed_image_url) document.getElementById('processed').src = d.processed_image_url + '?t=' + Date.now();
+        if (d.raw_image_url) document.getElementById('raw').src = getImageUrl(d.raw_image_url) + '?t=' + Date.now();
+        if (d.processed_image_url) document.getElementById('processed').src = getImageUrl(d.processed_image_url) + '?t=' + Date.now();
         if (d.detections && d.detections.length) showToast('Detection', d.detections.map(x=>x.label+' '+x.confidence).join(', '));
         refreshDashboard();
     } catch(e) { showToast('Error', 'Snapshot failed'); }
@@ -988,7 +1047,7 @@ async function snapshot() {
 
 async function recordVideo() {
     const cid = getSelectedCamera();
-    let url = '/record-video?seconds=5';
+    let url = API_BASE + '/record-video?seconds=5';
     if (cid) url += '&camera_id=' + cid;
     try {
         const r = await fetch(url);
@@ -1003,14 +1062,14 @@ async function motionCapture() {
     const method = document.getElementById('motionMethod').value;
     const minArea = document.getElementById('motionMinArea').value || 800;
     const seconds = document.getElementById('motionSeconds').value || 8;
-    let url = `/motion-capture?seconds=${seconds}&method=${method}&min_area=${minArea}`;
+    let url = API_BASE + `/motion-capture?seconds=${seconds}&method=${method}&min_area=${minArea}`;
     if (cid) url += '&camera_id=' + cid;
     try {
         const r = await fetch(url);
         const d = await r.json();
         document.getElementById('out').textContent = JSON.stringify(d, null, 2);
-        if (d.raw_image_url) document.getElementById('raw').src = d.raw_image_url + '?t=' + Date.now();
-        if (d.processed_image_url) document.getElementById('processed').src = d.processed_image_url + '?t=' + Date.now();
+        if (d.raw_image_url) document.getElementById('raw').src = getImageUrl(d.raw_image_url) + '?t=' + Date.now();
+        if (d.processed_image_url) document.getElementById('processed').src = getImageUrl(d.processed_image_url) + '?t=' + Date.now();
         refreshDashboard();
     } catch(e) { showToast('Error', 'Motion capture failed'); }
 }
@@ -1021,11 +1080,11 @@ async function uploadImage() {
     const fd = new FormData();
     fd.append('file', f);
     try {
-        const r = await fetch('/upload-image?device_id=dashboard&run_detection=false', {method:'POST', body:fd});
+        const r = await fetch(API_BASE + '/upload-image?device_id=dashboard&run_detection=false', {method:'POST', body:fd});
         const d = await r.json();
         document.getElementById('out').textContent = JSON.stringify(d, null, 2);
-        if (d.raw_image_url) document.getElementById('raw').src = d.raw_image_url + '?t=' + Date.now();
-        if (d.processed_image_url) document.getElementById('processed').src = d.processed_image_url + '?t=' + Date.now();
+        if (d.raw_image_url) document.getElementById('raw').src = getImageUrl(d.raw_image_url) + '?t=' + Date.now();
+        if (d.processed_image_url) document.getElementById('processed').src = getImageUrl(d.processed_image_url) + '?t=' + Date.now();
         refreshDashboard();
     } catch(e) { showToast('Error', 'Upload failed'); }
 }
@@ -1036,11 +1095,11 @@ async function uploadWithDetect() {
     const fd = new FormData();
     fd.append('file', f);
     try {
-        const r = await fetch('/upload-image?device_id=dashboard&run_detection=true', {method:'POST', body:fd});
+        const r = await fetch(API_BASE + '/upload-image?device_id=dashboard&run_detection=true', {method:'POST', body:fd});
         const d = await r.json();
         document.getElementById('out').textContent = JSON.stringify(d, null, 2);
-        if (d.raw_image_url) document.getElementById('raw').src = d.raw_image_url + '?t=' + Date.now();
-        if (d.processed_image_url) document.getElementById('processed').src = d.processed_image_url + '?t=' + Date.now();
+        if (d.raw_image_url) document.getElementById('raw').src = getImageUrl(d.raw_image_url) + '?t=' + Date.now();
+        if (d.processed_image_url) document.getElementById('processed').src = getImageUrl(d.processed_image_url) + '?t=' + Date.now();
         if (d.detections && d.detections.length) showToast('Detection', d.detections.map(x=>x.label+' '+x.confidence).join(', '));
         refreshDashboard();
     } catch(e) { showToast('Error', 'Upload+Detect failed'); }
@@ -1080,10 +1139,10 @@ function tableFromRows(rows, cols, highlight) {
 async function refreshDashboard() {
     try {
         const [latestRes, metaRes, evRes, detRes] = await Promise.all([
-            fetch('/latest'),
-            fetch('/metadata?limit=8'),
-            fetch('/events?limit=8' + (activeEventFilter !== 'ALL' ? '&event_type=' + activeEventFilter : '')),
-            fetch('/detections?limit=8'),
+            fetch(API_BASE + '/latest'),
+            fetch(API_BASE + '/metadata?limit=8'),
+            fetch(API_BASE + '/events?limit=8' + (activeEventFilter !== 'ALL' ? '&event_type=' + activeEventFilter : '')),
+            fetch(API_BASE + '/detections?limit=8'),
         ]);
         if (!latestRes.ok) throw new Error('Server error');
         const latest = await latestRes.json();
@@ -1096,8 +1155,8 @@ async function refreshDashboard() {
         document.getElementById('detectionCount').textContent = latest.detection_count || 0;
         document.getElementById('latestEvent').textContent = (latest.latest_event && latest.latest_event.event_type) ? latest.latest_event.event_type : '-';
 
-        if (latest.raw_image_url) document.getElementById('raw').src = latest.raw_image_url + '?t=' + Date.now();
-        if (latest.processed_image_url) document.getElementById('processed').src = latest.processed_image_url + '?t=' + Date.now();
+        if (latest.raw_image_url) document.getElementById('raw').src = getImageUrl(latest.raw_image_url) + '?t=' + Date.now();
+        if (latest.processed_image_url) document.getElementById('processed').src = getImageUrl(latest.processed_image_url) + '?t=' + Date.now();
 
         document.getElementById('metadataTable').innerHTML = tableFromRows(meta.items, ['image_id','timestamp','source_type','width','height','brightness','processing_status']);
         document.getElementById('eventTable').innerHTML = tableFromRows(ev.items, ['event_type','timestamp','severity','score','explanation']);
@@ -1110,7 +1169,7 @@ async function refreshDashboard() {
 // ── Stats ──
 async function refreshStats() {
     try {
-        const r = await fetch('/stats');
+        const r = await fetch(API_BASE + '/stats');
         const s = await r.json();
         document.getElementById('statsGrid').innerHTML = `
             <div class="card-shell bento-col-4"><div class="card-core" style="text-align:center;">
@@ -1137,7 +1196,7 @@ async function refreshStats() {
 // ── Server info ──
 async function refreshServerInfo() {
     try {
-        const r = await fetch('/health');
+        const r = await fetch(API_BASE + '/health');
         const h = await r.json();
         document.getElementById('serverBadge').textContent = 'Server: OK v' + h.version;
         document.getElementById('serverBadge').className = 'badge badge-green';
@@ -1193,9 +1252,15 @@ function loadStoredTheme() {
     }
 }
 
+function getImageUrl(path) {
+    if (!path) return '';
+    return path.startsWith('http') ? path : (API_BASE + path);
+}
+
 // ── Initialization ──
 async function init() {
     loadStoredTheme();
+    initBackendUrl();
     initFilterCheckboxes();
     updateFiltersUI();
     connectWS();
