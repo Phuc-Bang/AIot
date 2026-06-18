@@ -7,10 +7,8 @@ from pathlib import Path
 from urllib.request import urlretrieve
 
 MODEL_URLS = [
-    # GitHub ONNX Model Zoo LFS/raw mirror. Model size is about 4.73 MB.
-    "https://github.com/onnx/models/raw/main/validated/vision/classification/squeezenet/model/squeezenet1.1-7.onnx",
-    # Fallback: historical raw URL sometimes works depending on repository changes.
-    "https://github.com/onnx/models/raw/master/validated/vision/classification/squeezenet/model/squeezenet1.1-7.onnx",
+    "https://github.com/onnx/models/raw/main/validated/vision/classification/resnet/model/resnet18-v1-7.onnx",
+    "https://github.com/onnx/models/raw/master/validated/vision/classification/resnet/model/resnet18-v1-7.onnx",
 ]
 LABEL_URLS = [
     "https://raw.githubusercontent.com/pytorch/hub/master/imagenet_classes.txt",
@@ -42,12 +40,12 @@ def normalize_labels(path: Path) -> None:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Download lightweight SqueezeNet ONNX model and ImageNet labels.")
+    parser = argparse.ArgumentParser(description="Download ResNet18 ONNX model and ImageNet labels.")
     parser.add_argument("--out-dir", default="models/vision")
     args = parser.parse_args()
     out_dir = Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
-    model_path = out_dir / "squeezenet1.1-7.onnx"
+    model_path = out_dir / "resnet18-v1-7.onnx"
     labels_path = out_dir / "imagenet_classes.txt"
     if not model_path.exists():
         download_first(MODEL_URLS, model_path)

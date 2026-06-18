@@ -197,7 +197,7 @@ def classify_image_annotated(base_url: str, image_path: str, output_path: str):
 
 def main():
     parser = argparse.ArgumentParser(description="Lab 5 AIoT API Client Demonstration Tool")
-    parser.add_argument("--url", default="http://localhost:8001", help="Base URL of the FastAPI inference service")
+    parser.add_argument("--url", default="http://localhost:8000", help="Base URL of the FastAPI inference service")
     parser.add_argument("--image", default="sample_images/classroom_object.jpg", help="Path to sample image for classification")
     parser.add_argument("--output", default="outputs/client/annotated_response.png", help="Path to save output annotated image")
     parser.add_argument("--task", default="all", choices=["all", "health", "info", "anomaly", "forecast", "risk", "classify", "annotate"],

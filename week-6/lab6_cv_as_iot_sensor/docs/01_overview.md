@@ -85,7 +85,7 @@ Một hệ thống AIoT thường có các lớp:
 |---|---|
 | Sensor layer | Camera, ảnh upload, simulated frame |
 | Ingestion layer | API `/snapshot`, `/upload-image`, `/motion-capture`, `/video_feed` |
-| Processing layer | OpenCV resize, grayscale, threshold, edge, motion diff, ONNX YOLO |
+| Processing layer | OpenCV resize, grayscale, threshold, edge, motion diff, MOG2/KNN, HOG person detector |
 | Storage layer | `data/` và `outputs/lab6.db` |
 | Event layer | WebSocket real-time alerts & SQLite events table |
 | Visualization layer | `index.html` dashboard |

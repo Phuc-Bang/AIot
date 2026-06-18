@@ -80,7 +80,11 @@ function connectWS() {
                     }
                     refreshDashboard();
                 } else if (data.type === 'motion_result') {
-                    showToast('Motion ' + (data.motion_detected === true ? 'Detected' : 'None'), 'Score: ' + (data.score || '?'));
+                    showToast(
+                        data.person_motion_detected ? 'Person Motion Detected' : 'No Person Motion',
+                        (data.reason_code || 'UNKNOWN') + ' | Score: ' + (data.motion_score ?? data.score ?? '?')
+                    );
+                    document.getElementById('out').textContent = JSON.stringify(data, null, 2);
                     refreshDashboard();
                 } else if (data.type === 'camera_list_updated') {
                     showToast('Camera List Updated', 'Danh sách camera đã được cập nhật.');
@@ -118,11 +122,16 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.classList.add('active');
         document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
         if (btn.dataset.tab === 'cameras') refreshCameras();
+        if (btn.dataset.tab === 'gallery') {
+            refreshGalleryCamSelect();
+            refreshGallery();
+        }
         if (btn.dataset.tab === 'stats') refreshStats();
     });
 });
 
 function getPipelineConfig() {
+    const hogHitThreshold = parseFloat(document.getElementById('detectConf').value);
     return {
         filters: currentFilters,
         threshold_value: parseInt(document.getElementById('thresholdVal').value) || 120,
@@ -130,6 +139,7 @@ function getPipelineConfig() {
         canny_high: parseInt(document.getElementById('cannyHigh').value) || 160,
         resize_width: parseInt(document.getElementById('resizeW').value) || 320,
         resize_height: parseInt(document.getElementById('resizeH').value) || 240,
+        hog_hit_threshold: Number.isFinite(hogHitThreshold) ? hogHitThreshold : 0.0,
     };
 }
 
@@ -170,6 +180,18 @@ function renderFilterCheckboxes(allFilters) {
 function updateFiltersUI() {
     document.getElementById('filtersBadge').textContent = currentFilters.length + ' bước';
     document.getElementById('activeFiltersText').textContent = currentFilters.join(', ');
+}
+
+function startPreviewStream(btn) {
+    const box = btn.closest('.cam-thumb');
+    const img = box ? box.querySelector('.stream-thumb') : null;
+    if (!img) return;
+    const cid = img.dataset.camId;
+    img.src = `${API_BASE}/video_feed?camera_id=${encodeURIComponent(cid)}&t=${Date.now()}`;
+    img.style.display = 'block';
+    const placeholder = box.querySelector('.preview-placeholder');
+    if (placeholder) placeholder.style.display = 'none';
+    btn.textContent = 'Restart preview';
 }
 
 async function applyPipelineConfig() {
@@ -228,14 +250,49 @@ async function refreshCameras() {
                 div.dataset.cameraId = c.camera_id;
                 div.innerHTML = `<div class="card-core" style="padding:10px;">
                     <div class="media-container cam-thumb">
-                        <img src="${API_BASE}/video_feed?camera_id=${escapeHTML(c.camera_id)}&t=${Date.now()}" style="width:100%;" />
+                        <div class="preview-placeholder small text-secondary" style="padding:36px 12px;text-align:center;">Preview paused</div>
+                        <img class="stream-thumb" data-cam-id="${escapeHTML(c.camera_id)}" src="" style="width:100%;display:none;" />
+                        <button class="sm secondary" onclick="startPreviewStream(this)" style="position:absolute;right:8px;bottom:8px;">Preview</button>
                         <div class="cam-label"><span class="cam-status-dot ${escapeHTML(c.status)}"></span>${escapeHTML(c.label)}</div>
                     </div>
                 </div>`;
                 grid.appendChild(div);
             });
         }
-    } catch(e) {}
+        // Populate dashboard multi-camera preview
+        const previewGrid = document.getElementById('camPreviewGrid');
+        if (previewGrid) {
+            const previewExisting = Array.from(previewGrid.children).map(el => el.dataset.cameraId).filter(Boolean);
+            if (previewExisting.length !== newIds.length || previewExisting.some((id, i) => id !== newIds[i])) {
+                previewGrid.innerHTML = '';
+                cams.slice(0, 4).forEach(c => {
+                    const div = document.createElement('div');
+                    div.className = 'card-shell';
+                    div.dataset.cameraId = c.camera_id;
+                    div.style.cssText = 'margin-bottom:8px;';
+                    div.innerHTML = `<div class="card-core" style="padding:8px;">
+                        <div class="media-container cam-thumb" style="min-height:140px;">
+                            <div class="preview-placeholder small text-secondary" style="padding:42px 12px;text-align:center;">Preview paused</div>
+                            <img class="stream-thumb" data-cam-id="${escapeHTML(c.camera_id)}" src="" style="width:100%;display:none;" />
+                            <button class="sm secondary" onclick="startPreviewStream(this)" style="position:absolute;right:8px;bottom:8px;">Preview</button>
+                            <div class="cam-label"><span class="cam-status-dot ${escapeHTML(c.status)}"></span>${escapeHTML(c.label)}</div>
+                        </div>
+                    </div>`;
+                    previewGrid.appendChild(div);
+                });
+                if (cams.length > 4) {
+                    const more = document.createElement('p');
+                    more.className = 'small text-secondary';
+                    more.style.cssText = 'text-align:center;padding:8px;';
+                    more.textContent = `+ ${cams.length - 4} cameras more in Camera Manager tab`;
+                    previewGrid.appendChild(more);
+                }
+                if (!cams.length) {
+                    previewGrid.innerHTML = '<p class="small text-secondary" style="padding:12px;text-align:center;">Register cameras in Camera Manager tab.</p>';
+                }
+            }
+        }
+    } catch(e) { console.warn('refreshCameras error:', e); }
 }
 
 async function addCamera() {
@@ -378,6 +435,7 @@ async function refreshCamSelect() {
             }
         }
     } catch(e) {}
+    refreshGalleryCamSelect();
 }
 
 function startStream() {
@@ -438,15 +496,28 @@ async function motionCapture() {
     const cid = getSelectedCamera();
     const method = document.getElementById('motionMethod').value;
     const minArea = document.getElementById('motionMinArea').value || 800;
-    const seconds = document.getElementById('motionSeconds').value || 8;
-    let url = API_BASE + `/motion-capture?seconds=${seconds}&method=${method}&min_area=${minArea}`;
+    const seconds = document.getElementById('motionSeconds').value || 3;
+    const debug = document.getElementById('debugMotionCheck')?.checked ? 'true' : 'false';
+    let url = API_BASE + `/motion-capture?seconds=${seconds}&method=${method}&min_area=${minArea}&debug=${debug}`;
     if (cid) url += '&camera_id=' + cid;
     try {
         const r = await fetch(url);
         const d = await r.json();
-        document.getElementById('out').textContent = JSON.stringify(d, null, 2);
+        const q = d.quality || {};
+        const summary = {
+            person_motion_detected: d.person_motion_detected,
+            reason_code: d.reason_code,
+            motion_score: d.motion_score,
+            person_count: d.person_count || 0,
+            best_overlap_ratio: d.best_overlap_ratio || 0,
+            brightness: q.brightness,
+            blur_score: q.blur_score,
+            warnings: q.warnings || [],
+        };
+        document.getElementById('out').textContent = JSON.stringify({summary, response: d}, null, 2);
         if (d.raw_image_url) updateImageSrcIfChanged('raw', d.raw_image_url);
         if (d.processed_image_url) updateImageSrcIfChanged('processed', d.processed_image_url);
+        showToast(d.person_motion_detected ? 'Person Motion Detected' : 'No Person Motion', d.reason_code || '');
         refreshDashboard();
     } catch(e) { showToast('Error', 'Motion capture failed'); }
 }
@@ -541,31 +612,7 @@ async function refreshDashboard() {
     }
 }
 
-async function refreshStats() {
-    try {
-        const r = await fetch(API_BASE + '/stats');
-        const s = await r.json();
-        document.getElementById('statsGrid').innerHTML = `
-            <div class="card-shell bento-col-4"><div class="card-core" style="text-align:center;">
-                <div class="metric-glow glow-blue"></div>
-                <div class="metric" style="font-size:36px;">${s.total_images || 0}</div>
-                <div class="metric-label">Total Images</div>
-            </div></div>
-            <div class="card-shell bento-col-4"><div class="card-core" style="text-align:center;">
-                <div class="metric-glow glow-purple"></div>
-                <div class="metric" style="font-size:36px;">${s.total_events || 0}</div>
-                <div class="metric-label">Total Events</div>
-            </div></div>
-            <div class="card-shell bento-col-4"><div class="card-core" style="text-align:center;">
-                <div class="metric-glow glow-orange"></div>
-                <div class="metric" style="font-size:36px;">${s.total_detections || 0}</div>
-                <div class="metric-label">Total Detections</div>
-            </div></div>
-        `;
-        document.getElementById('statsEventTable').innerHTML = tableFromRows(s.event_by_type, ['event_type','cnt']);
-        document.getElementById('statsDetTable').innerHTML = tableFromRows(s.detection_by_label, ['label','cnt']);
-    } catch(e) {}
-}
+
 
 async function refreshServerInfo() {
     try {
@@ -574,7 +621,7 @@ async function refreshServerInfo() {
         document.getElementById('serverBadge').textContent = 'Server: OK v' + h.version;
         document.getElementById('serverBadge').className = 'badge badge-green';
         if (h.detection) {
-            document.getElementById('detectionBadge').textContent = 'Detection: ONNX';
+            document.getElementById('detectionBadge').textContent = 'Detection: ' + (h.detection_mode || 'OpenCV HOG Person');
             document.getElementById('detectionBadge').className = 'badge badge-orange';
         }
         if (h.mqtt) {
@@ -654,6 +701,182 @@ function updateImageSrcIfChanged(imgId, newRelativeOrAbsoluteUrl) {
     } catch(e) {
         img.src = newFullUrl + '?t=' + Date.now();
     }
+}
+
+async function testCamera() {
+    const source = document.getElementById('newCamSource').value.trim() || '0';
+    const resultEl = document.getElementById('camTestResult');
+    resultEl.textContent = 'Testing...';
+    resultEl.style.color = 'var(--text-secondary)';
+    try {
+        const r = await fetch(API_BASE + `/cameras/test?source=${encodeURIComponent(source)}`);
+        const d = await r.json();
+        if (d.status === 'ok') {
+            resultEl.innerHTML = `<span style="color:var(--accent-green);">&#10003; ${d.message}</span>`;
+        } else {
+            resultEl.innerHTML = `<span style="color:var(--accent-red);">&#10007; ${d.message}</span>`;
+        }
+    } catch(e) {
+        resultEl.innerHTML = `<span style="color:var(--accent-red);">&#10007; Connection failed: ${e.message}</span>`;
+    }
+    setTimeout(() => { if(resultEl.textContent) resultEl.textContent = ''; }, 5000);
+}
+
+async function refreshGallery() {
+    const sel = document.getElementById('galleryCamSelect');
+    const camId = sel ? sel.value : '';
+    let url = API_BASE + '/images?limit=50';
+    if (camId) url += '&camera_id=' + encodeURIComponent(camId);
+    try {
+        const r = await fetch(url);
+        const data = await r.json();
+        const grid = document.getElementById('galleryGrid');
+        if (!data.items || !data.items.length) {
+            grid.innerHTML = '<p class="small text-secondary" style="padding:24px;text-align:center;">Chưa có ảnh nào. Chụp snapshot hoặc upload ảnh từ Dashboard.</p>';
+            return;
+        }
+        let html = '';
+        for (const item of data.items) {
+            const rawUrl = getImageUrl(item.image_path ? '/' + item.image_path.replace(/\\/g,'/') : '');
+            const thumbUrl = rawUrl;
+            const ts = item.timestamp || '';
+            const note = item.note || '';
+            html += `<div class="gallery-item" onclick="openGalleryZoom('${escapeHTML(rawUrl)}', '${escapeHTML(item.processed_path ? '/' + item.processed_path.replace(/\\/g,'/') : '')}', '${escapeHTML(item.image_id || '')}', '${escapeHTML(item.camera_id || '')}', '${escapeHTML(ts)}', '${escapeHTML(item.width||'')}', '${escapeHTML(item.height||'')}', '${escapeHTML(item.brightness||'')}', '${escapeHTML(note)}')">
+                <img src="${escapeHTML(thumbUrl)}" loading="lazy" onerror="this.parentElement.style.display='none'" />
+                <div class="gallery-info">
+                    <strong>${escapeHTML(item.image_id || '')}</strong>
+                    ${escapeHTML(ts)} | ${escapeHTML(item.width||'?')}x${escapeHTML(item.height||'?')}
+                    ${note ? '<br>' + escapeHTML(note) : ''}
+                </div>
+            </div>`;
+        }
+        grid.innerHTML = html;
+    } catch(e) {
+        document.getElementById('galleryGrid').innerHTML = '<p class="small text-secondary" style="padding:24px;text-align:center;">Error loading gallery.</p>';
+    }
+}
+
+function openGalleryZoom(rawUrl, processedPath, imageId, cameraId, ts, w, h, brightness, note) {
+    document.getElementById('galleryZoomImg').src = rawUrl + '?t=' + Date.now();
+    const metaEl = document.getElementById('galleryZoomMeta');
+    metaEl.innerHTML = `<strong>${imageId}</strong> | ${cameraId} | ${ts} | ${w}x${h} | Brightness: ${brightness}${note ? ' | ' + note : ''}`;
+    const dlRaw = document.getElementById('galleryDownloadRaw');
+    dlRaw.href = rawUrl;
+    const dlProc = document.getElementById('galleryDownloadProcessed');
+    if (processedPath) {
+        dlProc.href = getImageUrl(processedPath);
+        dlProc.style.display = 'inline-flex';
+    } else {
+        dlProc.style.display = 'none';
+    }
+    document.getElementById('galleryZoomOverlay').style.display = 'flex';
+}
+
+async function refreshGalleryCamSelect() {
+    try {
+        const r = await fetch(API_BASE + '/cameras');
+        const cams = await r.json();
+        const sel = document.getElementById('galleryCamSelect');
+        sel.innerHTML = '<option value="">All Cameras</option>';
+        cams.forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c.camera_id;
+            opt.textContent = `${c.label} (${c.source})`;
+            sel.appendChild(opt);
+        });
+    } catch(e) {}
+}
+
+function closeGalleryZoom() {
+    document.getElementById('galleryZoomOverlay').style.display = 'none';
+}
+
+function exportJSON() {
+    window.open(API_BASE + '/export/json', '_blank');
+}
+
+function exportMetadataCSV() {
+    window.open(API_BASE + '/export/metadata/csv', '_blank');
+}
+
+function drawBarChart(canvasId, labels, values, color) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.parentElement.getBoundingClientRect();
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    canvas.style.width = rect.width + 'px';
+    canvas.style.height = rect.height + 'px';
+    ctx.scale(dpr, dpr);
+    const w = rect.width, h = rect.height;
+    ctx.clearRect(0, 0, w, h);
+    if (!labels || !values || labels.length === 0) {
+        ctx.fillStyle = '#71717a';
+        ctx.font = '12px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('No data', w/2, h/2);
+        return;
+    }
+    const pad = { top: 16, bottom: 40, left: 16, right: 16 };
+    const maxVal = Math.max(...values, 1);
+    const barW = Math.min(40, (w - pad.left - pad.right) / labels.length - 4);
+    const barGap = 4;
+    ctx.textBaseline = 'bottom';
+    ctx.font = '10px monospace';
+    for (let i = 0; i < labels.length; i++) {
+        const x = pad.left + i * (barW + barGap) + barGap/2;
+        const barH = (values[i] / maxVal) * (h - pad.top - pad.bottom);
+        const y = h - pad.bottom - barH;
+        const gradient = ctx.createLinearGradient(x, y, x, h - pad.bottom);
+        gradient.addColorStop(0, color || '#06b6d4');
+        gradient.addColorStop(1, (color || '#06b6d4') + '44');
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.roundRect(x, y, barW, barH, [4,4,0,0]);
+        ctx.fill();
+        ctx.fillStyle = '#a1a1aa';
+        ctx.textAlign = 'center';
+        ctx.fillText(labels[i].substring(0, 10), x + barW/2, h - pad.bottom + 14);
+        ctx.fillText(values[i], x + barW/2, y - 4);
+    }
+}
+
+async function refreshStats() {
+    try {
+        const r = await fetch(API_BASE + '/stats');
+        const s = await r.json();
+        document.getElementById('statsGrid').innerHTML = `
+            <div class="card-shell bento-col-4"><div class="card-core" style="text-align:center;">
+                <div class="metric-glow glow-blue"></div>
+                <div class="metric" style="font-size:36px;">${s.total_images || 0}</div>
+                <div class="metric-label">Total Images</div>
+            </div></div>
+            <div class="card-shell bento-col-4"><div class="card-core" style="text-align:center;">
+                <div class="metric-glow glow-purple"></div>
+                <div class="metric" style="font-size:36px;">${s.total_events || 0}</div>
+                <div class="metric-label">Total Events</div>
+            </div></div>
+            <div class="card-shell bento-col-4"><div class="card-core" style="text-align:center;">
+                <div class="metric-glow glow-orange"></div>
+                <div class="metric" style="font-size:36px;">${s.total_detections || 0}</div>
+                <div class="metric-label">Total Detections</div>
+            </div></div>
+        `;
+        document.getElementById('statsEventTable').innerHTML = tableFromRows(s.event_by_type, ['event_type','cnt']);
+        document.getElementById('statsDetTable').innerHTML = tableFromRows(s.detection_by_label, ['label','cnt']);
+        drawBarChart('chartEventByType',
+            (s.event_by_type||[]).map(r=>r.event_type),
+            (s.event_by_type||[]).map(r=>r.cnt),
+            '#f97316'
+        );
+        drawBarChart('chartDetByLabel',
+            (s.detection_by_label||[]).map(r=>r.label),
+            (s.detection_by_label||[]).map(r=>r.cnt),
+            '#06b6d4'
+        );
+    } catch(e) {}
 }
 
 async function init() {

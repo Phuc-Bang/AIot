@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Lab 6 Enhanced - Computer Vision as IoT Sensor</title>
-<meta name="description" content="Dashboard nâng cao: multi-camera, WebSocket real-time, ONNX detection, MQTT, pipeline configurable." />
+<meta name="description" content="Dashboard nâng cao: multi-camera, WebSocket real-time, OpenCV HOG person detection, MQTT, pipeline configurable." />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Outfit:wght@400;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -19,7 +19,7 @@
       <i class="ph ph-sun" id="themeIcon"></i> <span id="themeText">Chế độ sáng</span>
     </button>
     <h1>Lab 6 Enhanced: Computer Vision as IoT Sensor</h1>
-    <p>Camera/ảnh như cảm biến IoT: multi-camera · WebSocket real-time · MOG2 motion · ONNX detection · MQTT · pipeline configurable</p>
+    <p>Camera/ảnh như cảm biến IoT: multi-camera · WebSocket real-time · MOG2/KNN motion · OpenCV HOG Person · MQTT · pipeline configurable</p>
     <div style="display:flex;align-items:center;gap:16px;margin-top:12px;flex-wrap:wrap;">
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
         <span class="badge badge-green" id="wsBadge">WebSocket: chờ...</span>
@@ -40,6 +40,7 @@
     <div class="tab-btn active" data-tab="dashboard">Dashboard</div>
     <div class="tab-btn" data-tab="cameras">Camera Manager</div>
     <div class="tab-btn" data-tab="settings">Pipeline Settings</div>
+    <div class="tab-btn" data-tab="gallery">Gallery</div>
     <div class="tab-btn" data-tab="stats">Thống kê</div>
   </div>
 
@@ -58,7 +59,10 @@
               <button class="warn" onclick="recordVideo()"><i class="ph ph-video-camera"></i> Video 5s</button>
               <button onclick="motionCapture()"><i class="ph ph-activity"></i> Motion</button>
               <label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;color:var(--text-secondary);font-size:12px;margin-left:8px;">
-                <input type="checkbox" id="detectCheck" style="margin:0;" /> Object detect
+                <input type="checkbox" id="detectCheck" style="margin:0;" /> Person detect
+              </label>
+              <label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;color:var(--text-secondary);font-size:12px;margin-left:8px;">
+                <input type="checkbox" id="debugMotionCheck" style="margin:0;" /> Debug fail frame
               </label>
             </div>
             <div class="media-container" style="margin-top:8px;">
@@ -174,7 +178,7 @@
               <button class="sm secondary" onclick="filterEvents('ALL')">All</button>
               <button class="sm secondary" onclick="filterEvents('IMAGE_PROCESSED')">Processed</button>
               <button class="sm secondary" onclick="filterEvents('LOW_LIGHT')">Low Light</button>
-              <button class="sm secondary" onclick="filterEvents('MOTION_DETECTED')">Motion</button>
+              <button class="sm secondary" onclick="filterEvents('PERSON_MOTION_DETECTED')">Person Motion</button>
               <button class="sm secondary" onclick="filterEvents('DETECTED')">Detection</button>
             </div>
             <div class="table-container" style="flex:1;"><div id="eventTable"></div></div>
@@ -185,7 +189,7 @@
       <div class="bento-col-6">
         <section class="card-shell" style="height:100%;">
           <div class="card-core">
-            <h2>Detections <span class="badge badge-orange" style="margin-left:8px;">ONNX YOLOv8</span></h2>
+            <h2>Detections <span class="badge badge-orange" style="margin-left:8px;">OpenCV HOG Person</span></h2>
             <div class="table-container" style="flex:1;"><div id="detectionTable"></div></div>
           </div>
         </section>
@@ -217,7 +221,9 @@
               <label>Label:</label>
               <input id="newCamLabel" type="text" value="" placeholder="Tên hiển thị" style="width:150px;" />
               <button onclick="addCamera()"><i class="ph ph-plus"></i> Thêm camera</button>
+              <button class="secondary sm" onclick="testCamera()" style="margin-left:4px;"><i class="ph ph-wifi-high"></i> Test</button>
             </div>
+            <div id="camTestResult" class="small text-secondary" style="margin-bottom:12px;"></div>
             <div class="table-container" style="flex:1;"><div id="cameraTable"></div></div>
           </div>
         </section>
@@ -268,12 +274,13 @@
         <section class="card-shell" style="height:100%;">
           <div class="card-core">
             <h2>Detection & Motion</h2>
-            <p class="small text-secondary" style="margin-top:4px;margin-bottom:16px;">Tham số phát hiện chuyển động và nhận diện vật thể.</p>
+            <p class="small text-secondary" style="margin-top:4px;margin-bottom:16px;">Tham số phát hiện người đang chuyển động bằng OpenCV built-in.</p>
             <h3>Motion Detection</h3>
             <div class="settings-row">
               <label>Method:</label>
               <select id="motionMethod">
                 <option value="mog2">MOG2 (Advanced)</option>
+                <option value="knn">KNN (Background)</option>
                 <option value="simple">Simple (Frame diff)</option>
               </select>
             </div>
@@ -281,12 +288,12 @@
               <label>Min Area:</label>
               <input id="motionMinArea" type="number" value="800" min="10" max="50000" />
               <label>Duration:</label>
-              <input id="motionSeconds" type="number" value="8" min="1" max="30" />
+              <input id="motionSeconds" type="number" value="3" min="1" max="30" />
             </div>
-            <h3 style="margin-top:20px;">Object Detection</h3>
+            <h3 style="margin-top:20px;">Person Detection</h3>
             <div class="settings-row">
-              <label>Confidence Threshold:</label>
-              <input id="detectConf" type="number" value="0.5" min="0.01" max="1.0" step="0.05" />
+              <label>HOG Hit Threshold:</label>
+              <input id="detectConf" type="number" value="0.0" min="-1.0" max="2.0" step="0.1" />
             </div>
           </div>
         </section>
@@ -306,6 +313,44 @@
     </div>
   </div>
 
+  <div id="tab-gallery" class="tab-content">
+    <div class="bento-grid">
+      <div class="bento-col-12">
+        <section class="card-shell">
+          <div class="card-core" style="flex-direction:row;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+            <h2 style="margin:0;">Image Gallery</h2>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <label style="font-size:12px;color:var(--text-secondary);">Camera:</label>
+              <select id="galleryCamSelect" style="width:auto;"></select>
+              <button onclick="refreshGallery()"><i class="ph ph-arrow-clockwise"></i> Refresh</button>
+              <button class="secondary sm" onclick="document.getElementById('galleryZoomOverlay').style.display='none'"><i class="ph ph-x"></i> Close</button>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+    <div class="bento-grid">
+      <div class="bento-col-12">
+        <section class="card-shell">
+          <div class="card-core">
+            <div id="galleryGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;"></div>
+          </div>
+        </section>
+      </div>
+    </div>
+    <div id="galleryZoomOverlay" class="gallery-zoom-overlay" style="display:none;" onclick="closeGalleryZoom()">
+      <div class="gallery-zoom-content" onclick="event.stopPropagation()">
+        <button class="gallery-zoom-close" onclick="closeGalleryZoom()">&times;</button>
+        <img id="galleryZoomImg" src="" alt="Zoom" />
+        <div style="display:flex;gap:8px;margin-top:8px;justify-content:center;">
+          <a id="galleryDownloadRaw" class="button secondary sm" download><i class="ph ph-download-simple"></i> Raw</a>
+          <a id="galleryDownloadProcessed" class="button secondary sm" download><i class="ph ph-download-simple"></i> Processed</a>
+        </div>
+        <div id="galleryZoomMeta" class="small text-secondary" style="margin-top:8px;text-align:center;"></div>
+      </div>
+    </div>
+  </div>
+
   <div id="tab-stats" class="tab-content">
     <div class="bento-grid" id="statsGrid">
       <div class="bento-col-12" style="text-align: center; padding: 24px; color: var(--text-secondary);">
@@ -313,10 +358,24 @@
       </div>
     </div>
     <div class="bento-grid" style="margin-top: 16px;">
+      <div class="bento-col-12">
+        <section class="card-shell">
+          <div class="card-core" style="flex-direction:row;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+            <h2 style="margin:0;">Export Data</h2>
+            <div style="display:flex;gap:8px;">
+              <button class="secondary sm" onclick="exportJSON()"><i class="ph ph-file-json"></i> Export Events (JSON)</button>
+              <button class="secondary sm" onclick="exportMetadataCSV()"><i class="ph ph-file-csv"></i> Export Metadata (CSV)</button>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+    <div class="bento-grid" style="margin-top: 16px;">
       <div class="bento-col-6">
         <section class="card-shell" style="height:100%;">
           <div class="card-core">
-            <h2>Event by Type</h2>
+            <h2>Event by Type <span class="badge" style="margin-left:8px;">Biểu đồ</span></h2>
+            <div style="margin-top:8px;height:200px;"><canvas id="chartEventByType"></canvas></div>
             <div class="table-container" style="flex:1; margin-top: 12px;"><div id="statsEventTable"></div></div>
           </div>
         </section>
@@ -324,7 +383,8 @@
       <div class="bento-col-6">
         <section class="card-shell" style="height:100%;">
           <div class="card-core">
-            <h2>Detection by Label</h2>
+            <h2>Detection by Label <span class="badge" style="margin-left:8px;">Biểu đồ</span></h2>
+            <div style="margin-top:8px;height:200px;"><canvas id="chartDetByLabel"></canvas></div>
             <div class="table-container" style="flex:1; margin-top: 12px;"><div id="statsDetTable"></div></div>
           </div>
         </section>
@@ -337,6 +397,6 @@
     <div class="toast-msg" id="toastMsg">Nội dung</div>
   </div>
 </main>
-<script src="/static/app.js"></script>
+<script src="/static/app.js?v=person-motion-hog-20260610"></script>
 </body>
 </html>

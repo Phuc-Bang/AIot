@@ -73,7 +73,7 @@ http://127.0.0.1:8000
 - **Query Parameters**:
   - `device_id` (mặc định: `upload_client`): ID thiết bị gửi ảnh.
   - `camera_id` (không bắt buộc): ID camera liên kết.
-  - `run_detection` (mặc định: `false`): Chạy phát hiện vật thể (ONNX YOLO / Contours fallback).
+  - `run_detection` (mặc định: `false`): Chạy OpenCV HOG person detector built-in.
 - **Database updates**:
   - Chèn bản ghi metadata vào bảng `images`.
   - Sinh sự kiện trong bảng `events`.
@@ -84,23 +84,26 @@ http://127.0.0.1:8000
 - **Query Parameters**:
   - `camera_id` (không bắt buộc): ID camera muốn snapshot.
   - `source` (không bắt buộc): Nếu không truyền `camera_id`, hệ thống sẽ tìm/đăng ký camera theo `source`.
-  - `run_detection` (mặc định: `false`): Chạy phát hiện vật thể.
+  - `run_detection` (mặc định: `false`): Chạy OpenCV HOG person detector built-in.
 
 ### `GET /record-video`
 - **Mô tả**: Ghi một video ngắn dài `seconds` giây từ camera chỉ định.
 - **Query Parameters**:
   - `camera_id` (không bắt buộc): ID camera ghi hình.
   - `seconds` (mặc định: `5`, từ 1-30): Thời lượng video.
-- **Database updates**:
-  - Ghi sự kiện loại `VIDEO_RECORDED` vào bảng `events`.
 
 ### `GET /motion-capture`
-- **Mô tả**: Theo dõi chuyển động bằng MOG2/Frame difference, trích xuất frame có độ chuyển động cao nhất để lưu và phân tích qua pipeline.
+- **Mô tả**: Phát hiện người đang chuyển động bằng OpenCV built-in, không dùng YOLO/ONNX/model ngoài.
 - **Query Parameters**:
-  - `camera_id` (không bắt buộc): ID camera theo dõi.
-  - `seconds` (mặc định: `8`): Thời lượng theo dõi.
-  - `method` (mặc định: `mog2`): Phương pháp trừ nền (`mog2` hoặc `simple`).
-  - `min_area` (mặc định: `800`): Diện tích contour tối thiểu để xem là chuyển động.
+  - `camera_id` (không bắt buộc): ID camera cần quan sát.
+  - `seconds` (mặc định theo `config.yaml`): Thời gian lấy mẫu.
+  - `method`: `mog2`, `knn`, hoặc `simple`.
+  - `min_area`: Ghi đè ngưỡng motion score cho request hiện tại.
+  - `debug`: Nếu `true`, lưu frame/mask/annotated/json khi fail.
+- **Kết quả**: Chỉ có `raw_image_url` và `processed_image_url` khi `reason_code = PERSON_MOTION_CONFIRMED`.
+- **Database updates**:
+  - Pass: lưu ảnh qua pipeline, ghi `PERSON_MOTION_DETECTED`, ghi bbox `person` vào `detections`.
+  - Fail: không lưu ảnh thường, ghi `NO_PERSON_MOTION` kèm `reason_code`.
 
 ### `GET /video_feed`
 - **Mô tả**: Stream live MJPEG của camera chỉ định phục vụ hiển thị lên giao diện web.

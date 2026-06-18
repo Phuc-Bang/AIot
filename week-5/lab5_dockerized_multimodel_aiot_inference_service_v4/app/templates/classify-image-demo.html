@@ -354,8 +354,15 @@
           </div>
           <input id="file" type="file" accept="image/*" onchange="updateFileName()" />
         </div>
-        <button class="btn-submit" onclick="classifyImage()">Chạy Mô Hình Suy Luận</button>
-        <span id="status" class="status-badge">Chưa thực hiện inference</span>
+        <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap; justify-content:center; width:100%;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <label for="topKSlider" style="color:var(--text-secondary); font-size:0.9rem;">Top-K:</label>
+            <input id="topKSlider" type="range" min="1" max="10" value="5" oninput="topKValue.textContent=this.value" style="width:100px; accent-color:var(--cyan);">
+            <span id="topKValue" style="color:var(--cyan); font-weight:600; min-width:20px;">5</span>
+          </div>
+          <button class="btn-submit" onclick="classifyImage()">Chạy Mô Hình Suy Luận</button>
+          <span id="status" class="status-badge">Chưa thực hiện inference</span>
+        </div>
       </div>
     </div>
 
@@ -445,11 +452,12 @@ async function classifyImage() {
   status.textContent = 'Đang suy luận...';
   status.className = 'status-badge status-loading';
 
+  const topK = document.getElementById('topKSlider').value;
   const formData = new FormData();
   formData.append('file', file);
 
   try {
-    const res = await fetch('/classify-image?top_k=5', { method: 'POST', body: formData });
+    const res = await fetch(`/classify-image?top_k=${topK}`, { method: 'POST', body: formData });
     const data = await res.json();
     
     if (!res.ok) {
@@ -485,7 +493,7 @@ async function classifyImage() {
     // Fetch annotated image
     const formData2 = new FormData();
     formData2.append('file', file);
-    const imgRes = await fetch('/classify-image-annotated?top_k=5', { method: 'POST', body: formData2 });
+    const imgRes = await fetch(`/classify-image-annotated?top_k=${topK}`, { method: 'POST', body: formData2 });
     
     if (imgRes.ok) {
       const blob = await imgRes.blob();

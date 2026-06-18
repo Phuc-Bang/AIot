@@ -17,19 +17,19 @@ DEFAULT_LABELS = [f"class_{i}" for i in range(1000)]
 
 
 class VisionClassifier:
-    """Lightweight ONNX SqueezeNet image classifier for ImageNet-1K.
+    """ResNet18 ONNX image classifier for ImageNet-1K.
 
-    This project deliberately uses a small ONNX model for the deploy stage.
-    Students first learn normal framework-specific model formats in the lab
-    document, then see why a portable inference format such as ONNX is useful
-    when the model has to run inside a Dockerized service.
+    Upgraded from SqueezeNet to ResNet18 for improved classification accuracy.
+    ResNet18 is deeper (18 layers) with residual connections, providing
+    significantly better top-1 and top-5 accuracy while still being suitable
+    for CPU inference inside a Docker container.
     """
 
     def __init__(self, model_path: str, labels_path: str):
         self.model_path = Path(model_path)
         self.labels_path = Path(labels_path)
-        self.model_name = "squeezenet1.1_onnx_imagenet1k"
-        self.model_version = "vision_squeezenet_onnx_v2"
+        self.model_name = "resnet18_onnx_imagenet1k"
+        self.model_version = "vision_resnet18_onnx_v1"
         self.training_framework = "original model exported to ONNX; this lab performs inference only"
         self.input_size = 224
         self.session = None
@@ -165,20 +165,23 @@ class VisionClassifier:
         else:
             label = "No prediction"
             line2 = ""
-        font = ImageFont.load_default()
+        font_size = max(12, min(canvas.width, canvas.height) // 30)
+        try:
+            font = ImageFont.truetype("arial.ttf", font_size)
+        except Exception:
+            font = ImageFont.load_default()
         padding = 10
-        # New Pillow versions support textbbox; fall back if unavailable.
         try:
             box1 = draw.textbbox((0, 0), label, font=font)
             box2 = draw.textbbox((0, 0), line2, font=font)
             text_w = max(box1[2] - box1[0], box2[2] - box2[0])
             text_h = (box1[3] - box1[1]) + (box2[3] - box2[1]) + 8
         except Exception:
-            text_w = max(len(label), len(line2)) * 7
-            text_h = 34
+            text_w = max(len(label), len(line2)) * font_size // 2
+            text_h = font_size * 2 + 8
         rect = [0, 0, min(canvas.width, text_w + padding * 2), min(canvas.height, text_h + padding * 2)]
         draw.rectangle(rect, fill=(0, 0, 0))
         draw.text((padding, padding), label, fill=(255, 255, 255), font=font)
         if line2:
-            draw.text((padding, padding + 18), line2, fill=(220, 220, 220), font=font)
+            draw.text((padding, padding + font_size + 4), line2, fill=(220, 220, 220), font=font)
         return canvas

@@ -17,7 +17,7 @@ uvicorn app:app --reload --host 0.0.0.0 --port 8000
 Ở góc trên có các nhãn trạng thái (badges):
 
 - `WebSocket`: Trạng thái kết nối WebSocket thời gian thực (connected / reconnecting).
-- `Detection`: Trạng thái của bộ phát hiện vật thể (ONNX / contour fallback / tắt).
+- `Detection`: Trạng thái của bộ OpenCV HOG person detector built-in.
 - `MQTT`: Trạng thái kết nối đến MQTT broker (connected / tắt).
 - `Server`: Trạng thái phản hồi của backend.
 
@@ -98,7 +98,7 @@ Kết quả nằm ở khu vực `Object detection result`:
 - `confidence`
 - `bbox`
 
-Nếu dashboard hiển thị `detector_mode = fallback_contour`, nghĩa là chưa có file `models/yolov8n.onnx`. Đây là fallback để lab vẫn chạy được. Khi thêm model ONNX, backend sẽ ưu tiên YOLO.
+Dashboard hiện dùng OpenCV HOG person detector built-in. Hệ thống không dùng YOLO, ONNX, MediaPipe hoặc model tải ngoài; khi motion capture fail có thể bật `Debug fail frame` để lưu frame, mask, ảnh annotated và JSON giải thích.
 
 ## 6. Record video
 
@@ -155,7 +155,7 @@ Ví dụ:
 - `IMAGE_PROCESSED`: ảnh đã được lưu và xử lý.
 - `VIDEO_RECORDED`: video đã ghi xong.
 - `MOTION_DETECTED`: phát hiện chuyển động.
-- `OBJECTS_DETECTED`: YOLO phát hiện object.
+- `PERSON_MOTION_DETECTED`: OpenCV xác nhận có người đang chuyển động.
 - `OBJECT_DETECTION_FALLBACK`: fallback contour được dùng vì model chưa sẵn sàng.
 
 ## 9. Khi demo lab

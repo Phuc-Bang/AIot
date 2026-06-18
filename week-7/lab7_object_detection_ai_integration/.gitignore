@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# Model weight files
+yolov8n.pt
+*.pt
+*.onnx
+*.engine
+
+# Outputs
+outputs/
+
+# Data
+data/annotated_images/
+data/event_snapshots/
+data/input_images/

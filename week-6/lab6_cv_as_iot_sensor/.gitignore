@@ -12,6 +12,11 @@
 data/
 outputs/lab6.db
 outputs/lab6.log
+outputs/parameter_experiment_log.csv
+outputs/server_stderr.log
+outputs/server_stdout.log
+outputs/video_feed_probe.bin
 
 # Git submodules / untracked repos
 taste_skill_repo/
+

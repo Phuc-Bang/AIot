@@ -1,6 +1,6 @@
 LOCAL_PIPELINE_TEST_PASS
-Camera registered: cam_ecca18f7
-{"image_id": "img_a777c359e2", "event": "IMAGE_PROCESSED"}
-{"image_id": "img_943dc994d2", "event": "IMAGE_PROCESSED"}
-{"video_id": "vid_fed6423f8d", "frames": 10}
-DB: 51 images, 77 events
+Camera registered: cam_ca3d5fcc
+{"image_id": "img_5cf59522a4", "event": "IMAGE_PROCESSED"}
+{"image_id": "img_41543a2364", "event": "IMAGE_PROCESSED"}
+{"video_id": "vid_1c28066529", "frames": 10}
+DB: 18 images, 38 events

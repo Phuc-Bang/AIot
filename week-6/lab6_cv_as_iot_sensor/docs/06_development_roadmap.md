@@ -121,9 +121,9 @@ Lab 6 mới làm preprocessing. Bước tiếp theo hợp lý là object detecti
 
 Có thể dùng:
 
-- YOLOv8/YOLOv11.
-- OpenCV DNN.
-- MediaPipe.
+- OpenCV HOG tuning.
+- Multi-object tracking built from OpenCV primitives.
+- Edge deployment optimizations.
 - TensorFlow Lite nếu muốn triển khai edge.
 
 Pipeline mở rộng:

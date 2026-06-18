@@ -1,0 +1,800 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Lab 8 v3 — LLM Reasoning for AIoT</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#f4f3ef; --surface:#ffffff; --surface-2:#faf9f6;
+      --ink:#1f2422; --muted:#7c7a73; --line:#e7e5df; --line-strong:#d8d6cf;
+      --accent:#2f6f57; --accent-soft:#eef3ef;
+      --radius:14px; --radius-sm:8px;
+      --sans:'Outfit',system-ui,-apple-system,'Segoe UI',sans-serif;
+      --serif:'Newsreader',Georgia,'Times New Roman',serif;
+      --mono:'JetBrains Mono',ui-monospace,'SF Mono',Consolas,monospace;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0; background:var(--bg); color:var(--ink);
+      font-family:var(--sans); font-weight:400; line-height:1.55;
+      font-variant-numeric:tabular-nums; -webkit-font-smoothing:antialiased;
+      overflow-wrap:break-word; word-break:break-word;
+    }
+    body::before{
+      content:""; position:fixed; inset:0; pointer-events:none; z-index:0;
+      background:radial-gradient(60% 50% at 80% -5%, rgba(47,111,87,.05), transparent 70%);
+    }
+    main, header{position:relative; z-index:1}
+
+    header{padding:30px 32px 22px; border-bottom:1px solid var(--line); background:var(--surface-2)}
+    .eyebrow{font-family:var(--mono); font-size:11px; letter-spacing:.22em; text-transform:uppercase; color:var(--muted)}
+    header h1{margin:8px 0 0; font-family:var(--serif); font-weight:500; font-size:30px; letter-spacing:-.02em; line-height:1.1}
+    header p{margin:8px 0 0; color:var(--muted); font-size:14px; max-width:70ch}
+
+    main{max-width:1340px; margin:0 auto; padding:24px 32px 56px; display:grid; grid-template-columns:360px minmax(0,1fr); gap:22px; align-items:start}
+    main > section{min-width:0}
+    @media (max-width:1100px){ main{grid-template-columns:1fr; padding:20px} }
+
+    .card{
+      background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+      padding:20px; margin-bottom:18px; box-shadow:0 1px 2px rgba(31,36,34,.03);
+      animation:rise .5s cubic-bezier(.16,1,.3,1) both;
+    }
+    section:nth-child(2) .card:nth-child(2){animation-delay:.04s}
+    section:nth-child(2) .card:nth-child(3){animation-delay:.08s}
+    @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+    @media (prefers-reduced-motion:reduce){ .card{animation:none} }
+
+    .card h2{
+      margin:0 0 14px; font-family:var(--sans); font-weight:600; font-size:14px;
+      letter-spacing:.01em; color:var(--ink); display:flex; align-items:center; gap:9px;
+    }
+    .card h2 .ix{font-family:var(--mono); font-size:11px; font-weight:500; color:var(--accent);
+      letter-spacing:.1em; padding:3px 7px; border:1px solid var(--line); border-radius:6px; background:var(--surface-2)}
+
+    label{display:block; font-family:var(--mono); font-size:11px; font-weight:500; letter-spacing:.04em;
+      text-transform:uppercase; margin:14px 0 6px; color:var(--muted)}
+    select, input[type=number], input[type=range], input[type=file]{
+      width:100%; font-family:var(--sans); font-size:13px; color:var(--ink);
+      padding:9px 10px; border:1px solid var(--line-strong); border-radius:var(--radius-sm);
+      background:var(--surface-2); cursor:pointer; transition:border-color .2s, box-shadow .2s;
+    }
+    select:hover, input:hover{border-color:var(--accent)}
+    input[type=range]{padding:0; accent-color:var(--accent); cursor:grab}
+    input[type=file]{padding:7px; font-size:12px}
+
+    button{
+      font-family:var(--sans); font-size:13px; font-weight:500; cursor:pointer;
+      border:1px solid var(--line-strong); background:var(--surface); color:var(--ink);
+      border-radius:10px; padding:9px 14px; margin:5px 4px 0 0;
+      transition:background .18s, border-color .18s, transform .08s, opacity .18s;
+    }
+    button:hover{background:var(--surface-2); border-color:var(--accent)}
+    button:active{transform:scale(.98)}
+    button:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+    button:disabled{opacity:.45; cursor:not-allowed; transform:none}
+    button.primary{background:var(--ink); color:#fff; border-color:var(--ink)}
+    button.primary:hover{background:#34403a; border-color:#34403a}
+    button.primary:disabled{background:var(--ink)}
+    button.danger{color:#9f2f2d; border-color:#ecd3d2}
+    button.danger:hover{background:#fdebec; border-color:#e3b9b7}
+
+    .divider{border:none; border-top:1px solid var(--line); margin:16px 0 4px}
+
+    .grid3{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px}
+    @media (max-width:820px){ .grid3{grid-template-columns:1fr} }
+    .result{
+      border:1px solid var(--line); border-radius:12px; padding:16px;
+      min-height:200px; background:var(--surface-2); min-width:0;
+      position:relative;
+    }
+    .result h3{margin:0 0 10px; font-family:var(--sans); font-weight:600; font-size:13px; color:var(--ink)}
+    .result p{margin:7px 0; font-size:13.5px}
+    .result b{font-weight:600}
+    .result.loading::after{
+      content:''; position:absolute; inset:0; border-radius:12px;
+      background:rgba(250,249,246,.7); display:flex; align-items:center; justify-content:center;
+    }
+    .result.loading::before{
+      content:''; position:absolute; top:50%; left:50%; z-index:1;
+      width:20px; height:20px; margin:-10px 0 0 -10px;
+      border:2px solid var(--line-strong); border-top-color:var(--accent);
+      border-radius:50%; animation:spin .7s linear infinite;
+    }
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    .result.empty-state{
+      display:flex; align-items:center; justify-content:center;
+      color:var(--muted); font-size:12px; font-family:var(--mono);
+    }
+
+    .risk{display:inline-block; font-family:var(--mono); font-size:11px; font-weight:600;
+      letter-spacing:.07em; padding:3px 9px; border-radius:999px; background:#ecebe6; color:var(--ink)}
+    .LOW{background:#edf3ec; color:#346538} .MEDIUM{background:#fbf3db; color:#956400}
+    .HIGH{background:#f7e8da; color:#9a4f1a} .CRITICAL{background:#fdebec; color:#9f2f2d}
+
+    pre{font-family:var(--mono); font-size:12px; line-height:1.5; color:var(--ink);
+      background:var(--surface-2); border:1px solid var(--line); padding:14px; border-radius:10px;
+      overflow:auto; max-height:360px}
+
+    .sensor-row{padding:6px 0 10px; border-bottom:1px solid var(--line)}
+    .sensor-row:last-child{border-bottom:none; padding-bottom:0}
+    .sensor-label{
+      font-family:var(--mono); font-size:11px; font-weight:500; letter-spacing:.04em;
+      text-transform:uppercase; color:var(--muted); margin:0 0 5px;
+      display:flex; justify-content:space-between; align-items:center;
+    }
+    .sensor-val{
+      font-family:var(--mono); font-size:12px; font-weight:500;
+      color:var(--accent); background:var(--accent-soft);
+      padding:2px 7px; border-radius:5px; letter-spacing:.01em;
+    }
+    .small{font-size:12px; color:var(--muted)}
+
+    /* Timeline */
+    .timeline-wrap{margin-top:12px}
+    .timeline-meta{
+      display:flex; justify-content:space-between; align-items:center;
+      margin-bottom:6px;
+    }
+    .timeline-metric-label{
+      font-family:var(--mono); font-size:11px; color:var(--accent);
+      letter-spacing:.06em; text-transform:uppercase; font-weight:500;
+    }
+    .timeline-range{font-family:var(--mono); font-size:10px; color:var(--muted)}
+    .timeline{
+      height:140px; border:1px solid var(--line); border-radius:10px; background:var(--surface-2);
+      display:flex; align-items:flex-end; gap:3px; padding:10px 10px 0;
+      overflow-x:auto; overflow-y:hidden;
+      scrollbar-width:thin; scrollbar-color:var(--line) transparent;
+    }
+    .bar{
+      flex-shrink:0; background:var(--accent); border-radius:4px 4px 0 0; min-height:2px;
+      opacity:.7; transition:height .35s cubic-bezier(.16,1,.3,1), opacity .2s;
+      cursor:default; position:relative;
+    }
+    .bar:hover{opacity:1}
+    .bar.current{opacity:1; background:#1a4f3a; box-shadow:0 0 0 2px var(--accent)}
+    .timeline-empty{
+      display:flex; align-items:center; justify-content:center; width:100%;
+      color:var(--muted); font-size:12px; font-family:var(--mono);
+    }
+    .timeline-step-info{
+      font-family:var(--mono); font-size:11px; color:var(--muted);
+      margin-top:6px; text-align:right;
+    }
+
+    /* Status notice */
+    .notice{
+      background:var(--surface-2); border:1px solid var(--line); border-left:3px solid var(--accent);
+      padding:12px 14px; border-radius:10px; font-size:13px; line-height:1.6;
+    }
+    .notice-header{display:flex; align-items:center; gap:10px; margin-bottom:6px}
+    .notice-title{font-weight:600; font-size:13px}
+    .running-dot{
+      width:8px; height:8px; border-radius:50%; background:#346538; flex-shrink:0;
+      animation:pulse-dot 1.2s ease-in-out infinite;
+    }
+    .stopped-dot{width:8px; height:8px; border-radius:50%; background:var(--muted); flex-shrink:0}
+    @keyframes pulse-dot{
+      0%,100%{box-shadow:0 0 0 0 rgba(52,101,56,.5)}
+      50%{box-shadow:0 0 0 5px rgba(52,101,56,0)}
+    }
+    .sensor-grid{
+      display:grid; grid-template-columns:repeat(auto-fill, minmax(160px,1fr));
+      gap:4px 12px; margin-top:6px;
+    }
+    .sensor-chip{font-size:12px; font-family:var(--mono); color:var(--muted)}
+    .sensor-chip b{color:var(--ink); font-weight:500}
+
+    /* Stream indicator */
+    .streaming-cursor::after{
+      content:'▌'; animation:blink .8s step-end infinite; color:var(--accent);
+    }
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+    /* Step progress dots */
+    .step-progress{display:flex; align-items:center; gap:6px; margin-top:10px; flex-wrap:wrap}
+    .step-dot{
+      width:10px; height:10px; border-radius:50%;
+      background:var(--line-strong); border:1px solid var(--line-strong);
+      transition:background .25s, transform .25s;
+      cursor:default;
+    }
+    .step-dot.done{background:var(--accent); border-color:var(--accent); opacity:.5}
+    .step-dot.current{
+      background:var(--accent); border-color:var(--accent);
+      transform:scale(1.4); opacity:1;
+      box-shadow:0 0 0 3px var(--accent-soft);
+    }
+    .step-dot.future{background:transparent; border-color:var(--line-strong)}
+
+    /* Copy button */
+    .copy-btn{
+      font-family:var(--mono); font-size:10px; font-weight:500;
+      padding:3px 9px; border-radius:6px; cursor:pointer;
+      background:var(--surface-2); border:1px solid var(--line-strong);
+      color:var(--muted); transition:all .15s; margin-left:8px;
+    }
+    .copy-btn:hover{background:var(--accent-soft); border-color:var(--accent); color:var(--accent)}
+    .copy-btn.copied{background:var(--accent-soft); border-color:var(--accent); color:var(--accent)}
+
+    /* Card header row */
+    .card-header{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px}
+    .card-header h2{margin:0}
+
+    /* Toast notification */
+    .toast{
+      position:fixed; bottom:24px; right:24px; z-index:100;
+      background:var(--ink); color:#fff; font-size:13px;
+      padding:10px 16px; border-radius:10px;
+      transform:translateY(12px); opacity:0; pointer-events:none;
+      transition:all .25s cubic-bezier(.16,1,.3,1);
+      font-family:var(--sans);
+    }
+    .toast.show{transform:translateY(0); opacity:1}
+  </style>
+</head>
+<body>
+<header>
+  <div class="eyebrow">AIoT · Lab 8 v3</div>
+  <h1>LLM Reasoning &amp; Context-aware Decision</h1>
+  <p>So sánh trực tiếp ba tầng: chỉ cảm biến → cảm biến + AI models → cảm biến + AI models + LLM.</p>
+</header>
+<main>
+  <section>
+    <div class="card">
+      <h2><span class="ix">01</span> Chọn kịch bản</h2>
+      <select id="scenario"></select>
+      <p id="scenarioWhy" class="small" style="margin-top:8px;min-height:1.5em"></p>
+      <div style="display:flex;flex-wrap:wrap;gap:0">
+        <button id="btnReset" onclick="resetScenario()">Reset</button>
+        <button id="btnStart" class="primary" onclick="startTimeline()">▶ Start</button>
+        <button id="btnStop" class="danger" onclick="stopTimeline()">■ Stop</button>
+        <button id="btnStep" onclick="stepTimeline()">→ Step</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2><span class="ix">02</span> Sensor control panel</h2>
+      <p class="small">Tự chỉnh cảm biến rồi bấm Apply.</p>
+      <div id="sensorControls"></div>
+      <button class="primary" id="btnApply" onclick="applySensors()" style="margin-top:14px">Apply sensors</button>
+      <span id="applyFeedback" class="small" style="margin-left:8px"></span>
+    </div>
+    <div class="card">
+      <h2><span class="ix">03</span> LLM mode</h2>
+      <select id="llmMode">
+        <option value="mock">mock — luôn chạy được</option>
+        <option value="local">local — Ollama</option>
+        <option value="api">api — Gemini (Google)</option>
+      </select>
+      <div style="display:flex;flex-wrap:wrap;gap:0">
+        <button id="btnCompare" class="primary" onclick="compare()">So sánh 3 tầng</button>
+        <button onclick="refreshState()">Refresh</button>
+      </div>
+      <hr class="divider">
+      <button onclick="compareModels()">So sánh model</button>
+      <button id="btnStream" onclick="streamReason()">Stream explain</button>
+      <label style="margin-top:14px">Vision — ảnh cho Gemini (mode=api)</label>
+      <input type="file" id="visionFile" accept="image/*">
+      <button onclick="visionReason()" style="margin-top:6px">Vision reason</button>
+    </div>
+  </section>
+  <section>
+    <div class="card">
+      <h2><span class="ix">LIVE</span> Telemetry timeline</h2>
+      <div id="currentState" class="notice">Đang tải…</div>
+      <div id="stepProgress" class="step-progress" style="margin-top:10px"></div>
+      <div class="timeline-wrap">
+        <div class="timeline-meta">
+          <span class="timeline-metric-label" id="timelineMetricLabel">—</span>
+          <span class="timeline-range" id="timelineRange"></span>
+        </div>
+        <div id="timeline" class="timeline"><div class="timeline-empty">Chưa có lịch sử</div></div>
+        <div class="timeline-step-info" id="timelineStepInfo"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2><span class="ix">CMP</span> Kết quả so sánh 3 tầng</h2>
+      <div class="grid3">
+        <div class="result empty-state" id="r1"><h3>1 · Chỉ cảm biến</h3><div id="sensorOnly"></div></div>
+        <div class="result empty-state" id="r2"><h3>2 · Cảm biến + AI models</h3><div id="sensorAI"></div></div>
+        <div class="result empty-state" id="r3"><h3>3 · Cảm biến + AI + LLM</h3><div id="sensorAILLM"></div></div>
+      </div>
+    </div>
+    <div class="card" id="streamCard" style="display:none">
+      <div class="card-header">
+        <h2><span class="ix">STR</span> Giải thích trực tiếp <span id="streamStatus" class="small" style="margin-left:4px"></span></h2>
+        <div style="display:flex;gap:6px;align-items:center">
+          <button id="btnStopStream" class="danger" onclick="stopStream()" style="padding:4px 10px;font-size:11px;margin:0" disabled>■ Stop</button>
+          <button class="copy-btn" data-label="Copy" onclick="copyText('streamOut')">Copy</button>
+          <button style="padding:4px 10px;font-size:11px;margin:0" onclick="document.getElementById('streamCard').style.display='none';stopStream()">✕</button>
+        </div>
+      </div>
+      <div id="streamOut" class="result" style="min-height:80px;white-space:pre-wrap;line-height:1.7;max-height:320px;overflow-y:auto"></div>
+    </div>
+    <div class="card" id="modelCard" style="display:none">
+      <div class="card-header">
+        <h2><span class="ix">MDL</span> So sánh model (cùng telemetry)</h2>
+        <button style="padding:4px 10px;font-size:11px;margin:0" onclick="document.getElementById('modelCard').style.display='none'">✕</button>
+      </div>
+      <div id="modelCompare"></div>
+    </div>
+    <div class="card" id="visionCard" style="display:none">
+      <div class="card-header">
+        <h2><span class="ix">VIS</span> Vision reasoning (ảnh + Gemini)</h2>
+        <button style="padding:4px 10px;font-size:11px;margin:0" onclick="document.getElementById('visionCard').style.display='none'">✕</button>
+      </div>
+      <div id="visionOut" class="result" style="min-height:80px"></div>
+    </div>
+    <div class="card">
+      <h2><span class="ix">EVD</span> Evidence từ các lab trước</h2>
+      <div id="evidence"><p class="small" style="color:var(--muted)">Đang tải…</p></div>
+      <p class="small" style="margin-top:10px"><b>Câu chốt:</b> Lab 3/4/6/7 tạo bằng chứng. Lab 8 dùng LLM reasoning trên đó; LLM không thay thế các model trước.</p>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <h2><span class="ix">RAW</span> Context / raw JSON</h2>
+        <button class="copy-btn" data-label="Copy JSON" onclick="copyText('rawJson')">Copy JSON</button>
+      </div>
+      <pre id="rawJson">{}</pre>
+    </div>
+  </section>
+</main>
+<div class="toast" id="toast"></div>
+<script>
+/* ── Helpers ─────────────────────────────────────────────────────── */
+function escapeHTML(str) {
+  if (str === null || str === undefined) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+function fmtTime(iso) {
+  if (!iso) return '—';
+  try { return new Date(iso).toLocaleTimeString('vi-VN', {hour:'2-digit',minute:'2-digit',second:'2-digit'}); }
+  catch(e) { return iso; }
+}
+function prettyKey(k) {
+  return k.replace(/_/g,' ').replace(/\b\w/g, c => c.toUpperCase());
+}
+let _toastTimer = null;
+function toast(msg, duration=2500) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => el.classList.remove('show'), duration);
+}
+
+/* ── State ───────────────────────────────────────────────────────── */
+let scenarios = [];
+let state = null;
+let _streamES = null;
+let _lastComparedStep = null;
+let _comparing = false;
+
+/* ── API ─────────────────────────────────────────────────────────── */
+async function api(path, opts={}) {
+  const r = await fetch(path, opts);
+  if (!r.ok) throw new Error(await r.text());
+  return r.json();
+}
+function riskBadge(r) { return `<span class="risk ${escapeHTML(r)}">${escapeHTML(r)}</span>`; }
+function pretty(obj) { return JSON.stringify(obj, null, 2); }
+
+/* ── Copy helper ─────────────────────────────────────────────────── */
+function copyText(elId) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  const text = el.textContent || el.innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = el.closest('.card')?.querySelector('.copy-btn');
+    if (btn) { btn.textContent = '✓ Copied'; btn.classList.add('copied'); setTimeout(() => { btn.textContent = btn.dataset.label || 'Copy'; btn.classList.remove('copied'); }, 1500); }
+    toast('Đã copy');
+  }).catch(() => toast('Copy thất bại'));
+}
+
+/* ── Render state ────────────────────────────────────────────────── */
+function renderState() {
+  if (!state) return;
+  const running = state.running;
+  const dot = running
+    ? '<span class="running-dot"></span>'
+    : '<span class="stopped-dot"></span>';
+  const statusText = running ? 'Running' : 'Stopped';
+  const sensors = state.sensors || {};
+  const sensorChips = Object.entries(sensors)
+    .map(([k,v]) => `<span class="sensor-chip">${escapeHTML(prettyKey(k))}: <b>${escapeHTML(String(v))}</b></span>`)
+    .join('');
+
+  document.getElementById('currentState').innerHTML =
+    `<div class="notice-header">${dot}<span class="notice-title">${escapeHTML(state.scenario_title)}</span><span class="small">${statusText} · step ${escapeHTML(String(state.step_index))} · ${fmtTime(state.last_updated)}</span></div>` +
+    `<div class="sensor-grid">${sensorChips}</div>`;
+
+  renderControls();
+  renderTimeline();
+  renderStepProgress();
+
+  // Update button states
+  document.getElementById('btnStart').disabled = running;
+  document.getElementById('btnStop').disabled = !running;
+  document.getElementById('btnStep').disabled = running;
+}
+
+/* ── Step progress dots ──────────────────────────────────────────── */
+function renderStepProgress() {
+  if (!state) return;
+  const scenarioMeta = scenarios.find(s => s.scenario_id === state.scenario_id);
+  const hist = state.history || [];
+  const knownMax = hist.length ? Math.max(...hist.map(h => h.step_index ?? 0)) : state.step_index;
+  const totalSteps = scenarioMeta?.timeline_length ?? Math.max(knownMax + 1, state.step_index + 1);
+  const cur = state.step_index;
+
+  let html = '';
+  for (let i = 0; i < totalSteps; i++) {
+    let cls = i < cur ? 'done' : i === cur ? 'current' : 'future';
+    html += `<div class="step-dot ${cls}" title="Step ${i}"></div>`;
+  }
+  if (totalSteps > 1) {
+    html += `<span class="small" style="margin-left:4px">step ${cur + 1} / ${totalSteps}</span>`;
+  }
+  document.getElementById('stepProgress').innerHTML = html;
+}
+
+/* ── Sensor controls ─────────────────────────────────────────────── */
+function renderControls() {
+  const box = document.getElementById('sensorControls');
+  if (box.contains(document.activeElement)) return;
+  const schema = state.editable_sensors || {};
+  const sensors = state.sensors || {};
+  let html = '';
+  for (const [key, spec] of Object.entries(schema)) {
+    const val = sensors[key];
+    html += `<div class="sensor-row">`;
+    html += `<div class="sensor-label"><span>${escapeHTML(prettyKey(key))}${spec.unit ? ' <span style="color:var(--muted);font-weight:400">('+escapeHTML(spec.unit)+')</span>' : ''}</span>`;
+    if (spec.type === 'number') {
+      html += `<span class="sensor-val" id="val_${escapeHTML(key)}">${escapeHTML(String(val))}</span>`;
+    }
+    html += `</div>`;
+    if (spec.type === 'number') {
+      html += `<input id="input_${escapeHTML(key)}" type="range" min="${spec.min}" max="${spec.max}" step="${spec.step}" value="${escapeHTML(String(val))}" oninput="document.getElementById('val_${escapeHTML(key)}').textContent=this.value">`;
+    } else {
+      html += `<select id="input_${escapeHTML(key)}">${spec.options.map(o=>`<option value="${escapeHTML(String(o))}" ${String(o)===String(val)?'selected':''}>${escapeHTML(String(o))}</option>`).join('')}</select>`;
+    }
+    html += `</div>`;
+  }
+  box.innerHTML = html;
+}
+
+/* ── Timeline chart ──────────────────────────────────────────────── */
+function renderTimeline() {
+  const hist = state.history || [];
+  if (!hist.length) {
+    document.getElementById('timeline').innerHTML = '<div class="timeline-empty">Chưa có lịch sử</div>';
+    document.getElementById('timelineMetricLabel').textContent = '—';
+    document.getElementById('timelineRange').textContent = '';
+    document.getElementById('timelineStepInfo').textContent = '';
+    return;
+  }
+
+  // Detect best numeric key: prefer co2_ppm > temperature_c > first numeric field
+  const sampleRow = hist[0];
+  let key = null;
+  const preferredKeys = ['co2_ppm','temperature_c','humidity_percent','fall_confidence','vision_confidence','motion_duration_sec','leaf_spot_confidence','smoke_level'];
+  for (const k of preferredKeys) {
+    if (sampleRow[k] !== undefined && typeof Number(sampleRow[k]) === 'number' && !isNaN(Number(sampleRow[k]))) {
+      key = k; break;
+    }
+  }
+  if (!key) {
+    // fallback: find any numeric field
+    for (const [k, v] of Object.entries(sampleRow)) {
+      if (k === 'step_index' || k === 'timestamp' || k === 'scenario_id' || k === 'source') continue;
+      if (!isNaN(Number(v)) && String(v).length > 0) { key = k; break; }
+    }
+  }
+  if (!key) {
+    document.getElementById('timeline').innerHTML = '<div class="timeline-empty">Không có dữ liệu số</div>';
+    document.getElementById('timelineMetricLabel').textContent = '—';
+    document.getElementById('timelineRange').textContent = '';
+    return;
+  }
+
+  const values = hist.map(x => Number(x[key] ?? 0));
+  const maxVal = Math.max(...values, 1);
+  const minVal = Math.min(...values);
+  const currentStep = state.step_index;
+
+  // Compute adaptive bar width
+  const container = document.getElementById('timeline');
+  const containerW = container.clientWidth || 600;
+  const gap = 3;
+  const barW = Math.max(10, Math.min(28, Math.floor((containerW - 20 - gap * (values.length - 1)) / values.length)));
+
+  const bars = values.map((v, i) => {
+    const range = maxVal - minVal;
+    const h = Math.max(3, range > 0 ? ((v - minVal) / range) * 110 + 8 : 60);
+    const isCurrent = hist[i].step_index === currentStep;
+    return `<div class="bar${isCurrent?' current':''}" style="width:${barW}px;height:${h}px" title="${escapeHTML(prettyKey(key))}: ${v} (step ${hist[i].step_index})"></div>`;
+  }).join('');
+
+  container.innerHTML = bars;
+  document.getElementById('timelineMetricLabel').textContent = prettyKey(key);
+  document.getElementById('timelineRange').textContent = `min ${minVal} · max ${maxVal}`;
+  document.getElementById('timelineStepInfo').textContent = `${values.length} mẫu · step hiện tại: ${currentStep}`;
+
+  // Scroll current bar into view
+  const currentIdx = hist.findIndex(x => x.step_index === currentStep);
+  if (currentIdx >= 0) {
+    const scrollX = currentIdx * (barW + gap) - containerW / 2 + barW / 2;
+    container.scrollLeft = Math.max(0, scrollX);
+  }
+}
+
+/* ── Compare ─────────────────────────────────────────────────────── */
+async function compare() {
+  if (!state) await refreshState();
+  if (_comparing) return;
+  _comparing = true;
+  const btn = document.getElementById('btnCompare');
+  btn.disabled = true; btn.textContent = '…';
+  // Set loading state on result panels
+  ['r1','r2','r3'].forEach(id => {
+    const el = document.getElementById(id);
+    el.classList.remove('empty-state');
+    el.classList.add('loading');
+  });
+  try {
+    const sid = state.scenario_id;
+    const mode = document.getElementById('llmMode').value;
+    const data = await api(`/compare-three-levels/${sid}?mode=${mode}`);
+    renderCompare(data);
+  } catch(e) {
+    ['sensorOnly','sensorAI','sensorAILLM'].forEach(id => {
+      document.getElementById(id).innerHTML = `<p class="small" style="color:#9f2f2d">Lỗi: ${escapeHTML(e.message)}</p>`;
+    });
+  } finally {
+    ['r1','r2','r3'].forEach(id => document.getElementById(id).classList.remove('loading'));
+    _comparing = false;
+    btn.disabled = false; btn.textContent = 'So sánh 3 tầng';
+  }
+}
+
+function renderCompare(data) {
+  const so = data.sensor_only;
+  document.getElementById('sensorOnly').innerHTML =
+    `${riskBadge(so.risk_level)}<p>${escapeHTML(so.summary)}</p>` +
+    `<p><b>Action:</b> ${escapeHTML(so.recommended_action)}</p>` +
+    `<p class="small">${escapeHTML(so.reason)}</p>` +
+    `<p class="small"><b>Hạn chế:</b> ${escapeHTML(so.limitations.join('; '))}</p>`;
+
+  const ai = data.sensor_plus_ai_models;
+  document.getElementById('sensorAI').innerHTML =
+    `${riskBadge(ai.risk_level)}<p>${escapeHTML(ai.summary)}</p>` +
+    `<p><b>Action:</b> ${escapeHTML(ai.recommended_action)}</p>` +
+    `<p class="small">${escapeHTML(ai.reason)}</p>` +
+    `<p class="small"><b>Hạn chế:</b> ${escapeHTML(ai.limitations.join('; '))}</p>`;
+
+  const llmTier = data.sensor_ai_llm;
+  const llm = llmTier.final_decision;
+  const latencyInfo = llmTier.latency_ms != null ? ` · <b>${escapeHTML(String(llmTier.latency_ms))} ms</b>` : '';
+  const providerInfo = llmTier.provider ? `<p class="small"><b>provider:</b> ${escapeHTML(String(llmTier.provider))}${latencyInfo}</p>` : '';
+  document.getElementById('sensorAILLM').innerHTML =
+    `${riskBadge(llm.risk_level)}${providerInfo}<p>${escapeHTML(llm.situation_summary)}</p>` +
+    `<p><b>Action:</b> ${escapeHTML(llm.recommended_action)}</p>` +
+    `<p><b>Human review:</b> ${escapeHTML(String(llm.need_human_review))} · <b>Control:</b> ${escapeHTML(String(llm.control_allowed))}</p>` +
+    `<p class="small"><b>Blocked:</b> ${escapeHTML(llm.blocked_reason)}</p>`;
+
+  document.getElementById('evidence').innerHTML = `<pre>${escapeHTML(pretty(ai.ai_model_outputs))}</pre>`;
+  document.getElementById('rawJson').textContent = pretty(data);
+}
+
+/* ── Timeline controls ───────────────────────────────────────────── */
+async function resetScenario() {
+  const sid = document.getElementById('scenario').value;
+  _lastComparedStep = null;
+  try {
+    state = await api(`/live/reset?scenario_id=${sid}`, {method:'POST'});
+    const s = scenarios.find(x => x.scenario_id === sid);
+    document.getElementById('scenarioWhy').textContent = s ? s.why : '';
+    renderState();
+    await compare();
+  } catch(e) { toast('Reset thất bại: ' + e.message); }
+}
+
+async function startTimeline() {
+  const sid = document.getElementById('scenario').value;
+  _lastComparedStep = null;
+  try {
+    state = await api(`/live/start?scenario_id=${sid}&interval_sec=2`, {method:'POST'});
+    renderState();
+    toast('Timeline đang chạy');
+  } catch(e) { toast('Lỗi: ' + e.message); }
+}
+
+async function stopTimeline() {
+  _lastComparedStep = null;
+  try {
+    state = await api('/live/stop', {method:'POST'});
+    renderState();
+    toast('Đã dừng');
+  } catch(e) { toast('Lỗi: ' + e.message); }
+}
+
+async function stepTimeline() {
+  try {
+    state = await api('/live/step', {method:'POST'});
+    _lastComparedStep = state.step_index; // prevent SSE double-fire
+    renderState();
+    await compare();
+  } catch(e) { toast('Lỗi: ' + e.message); }
+}
+
+async function refreshState() {
+  try {
+    state = await api('/live/state');
+    renderState();
+  } catch(e) { toast('Lỗi: ' + e.message); }
+}
+
+async function applySensors() {
+  const schema = state.editable_sensors || {};
+  const updates = {};
+  for (const key of Object.keys(schema)) {
+    const el = document.getElementById('input_' + key);
+    if (el) updates[key] = el.value;
+  }
+  const btn = document.getElementById('btnApply');
+  const fb = document.getElementById('applyFeedback');
+  btn.disabled = true; fb.textContent = 'Applying…';
+  try {
+    state = await api('/live/update-sensor', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({updates})});
+    renderState();
+    await compare();
+    fb.textContent = '✓ Applied';
+    setTimeout(() => fb.textContent = '', 2000);
+  } catch(e) {
+    fb.textContent = 'Lỗi: ' + e.message;
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+/* ── Compare models ──────────────────────────────────────────────── */
+async function compareModels() {
+  if (!state) await refreshState();
+  const sid = state.scenario_id;
+  document.getElementById('modelCard').style.display = 'block';
+  document.getElementById('modelCompare').innerHTML = '<p class="small" style="color:var(--muted)">Đang chạy song song mock / local / api…</p>';
+  try {
+    const data = await api(`/compare-models/${sid}?modes=mock,local,api`);
+    const order = ['mock','local','api'];
+    let html = '<div class="grid3">';
+    for (const m of order) {
+      const r = data.models[m]; if (!r) continue;
+      const tok = r.usage ? `${r.usage.total_tokens} tok` : '–';
+      html += `<div class="result"><h3>${escapeHTML(m)}</h3>${riskBadge(r.risk_level)}` +
+        `<p class="small"><b>provider:</b> ${escapeHTML(String(r.provider))}</p>` +
+        `<p class="small"><b>latency:</b> ${escapeHTML(String(r.latency_ms))} ms · <b>tokens:</b> ${escapeHTML(tok)} · <b>valid:</b> ${escapeHTML(String(r.validated))}</p>` +
+        `<p>${escapeHTML(r.situation_summary)}</p>` +
+        `<p class="small"><b>review:</b> ${escapeHTML(String(r.need_human_review))}</p></div>`;
+    }
+    html += '</div>';
+    document.getElementById('modelCompare').innerHTML = html;
+  } catch(e) {
+    document.getElementById('modelCompare').innerHTML = `<p class="small" style="color:#9f2f2d">Lỗi: ${escapeHTML(e.message)}</p>`;
+  }
+}
+
+/* ── Stream ──────────────────────────────────────────────────────── */
+function stopStream() {
+  if (_streamES) { _streamES.close(); _streamES = null; }
+  const out = document.getElementById('streamOut');
+  out.classList.remove('streaming-cursor');
+  document.getElementById('streamStatus').textContent = '■ stopped';
+  document.getElementById('btnStream').disabled = false;
+  document.getElementById('btnStopStream').disabled = true;
+}
+
+function streamReason() {
+  if (!state) return;
+  stopStream();
+  const sid = state.scenario_id;
+  const mode = document.getElementById('llmMode').value;
+  document.getElementById('streamCard').style.display = 'block';
+  document.getElementById('streamStatus').textContent = '● streaming…';
+  document.getElementById('btnStream').disabled = true;
+  document.getElementById('btnStopStream').disabled = false;
+  const out = document.getElementById('streamOut');
+  out.textContent = '';
+  out.classList.add('streaming-cursor');
+  _streamES = new EventSource(`/reason-stream/${sid}?mode=${mode}`);
+  _streamES.onmessage = (ev) => {
+    const d = JSON.parse(ev.data);
+    if (d.done) {
+      _streamES.close(); _streamES = null;
+      out.classList.remove('streaming-cursor');
+      document.getElementById('streamStatus').textContent = '✓ done';
+      document.getElementById('btnStream').disabled = false;
+      document.getElementById('btnStopStream').disabled = true;
+      return;
+    }
+    if (d.error) {
+      console.error('[stream error]', d.error);
+      out.textContent += `\n\n⚠ Lỗi Gemini: ${d.error}`;
+    } else if (d.text) {
+      out.textContent += d.text;
+    }
+    out.scrollTop = out.scrollHeight;
+  };
+  _streamES.onerror = () => {
+    if (_streamES) { _streamES.close(); _streamES = null; }
+    out.classList.remove('streaming-cursor');
+    document.getElementById('streamStatus').textContent = '⚠ error';
+    document.getElementById('btnStream').disabled = false;
+    document.getElementById('btnStopStream').disabled = true;
+  };
+}
+
+/* ── Vision ──────────────────────────────────────────────────────── */
+async function visionReason() {
+  if (!state) return;
+  const sid = state.scenario_id;
+  const mode = document.getElementById('llmMode').value;
+  const f = document.getElementById('visionFile').files[0];
+  document.getElementById('visionCard').style.display = 'block';
+  const out = document.getElementById('visionOut');
+  out.textContent = 'Đang gửi ảnh tới ' + mode + '…';
+  try {
+    const fd = new FormData();
+    if (f) fd.append('image', f);
+    const r = await fetch(`/vision-reason/${sid}?mode=${mode}`, {method:'POST', body: fd});
+    if (!r.ok) throw new Error('Server lỗi ' + r.status);
+    const d = await r.json();
+    const llm = d.final_decision;
+    out.innerHTML =
+      `${riskBadge(llm.risk_level)}` +
+      `<p><b>provider:</b> ${escapeHTML(String(d.provider))} · <b>latency:</b> ${escapeHTML(String(d.latency_ms))} ms</p>` +
+      `<p>${escapeHTML(llm.situation_summary)}</p>` +
+      `<p><b>Action:</b> ${escapeHTML(llm.recommended_action)}</p>` +
+      `<p class="small"><b>Human review:</b> ${escapeHTML(String(llm.need_human_review))} · <b>Control:</b> ${escapeHTML(String(llm.control_allowed))}</p>` +
+      `<p class="small"><b>Evidence:</b> ${escapeHTML((llm.evidence_used||[]).join(', '))}</p>`;
+  } catch(e) {
+    out.textContent = 'Lỗi: ' + e.message;
+  }
+}
+
+/* ── Init ────────────────────────────────────────────────────────── */
+async function init() {
+  scenarios = await api('/scenarios');
+  const sel = document.getElementById('scenario');
+  sel.innerHTML = scenarios.map(s =>
+    `<option value="${escapeHTML(s.scenario_id)}">${escapeHTML(s.title)}</option>`
+  ).join('');
+  sel.onchange = resetScenario;
+  await resetScenario();
+
+  const es = new EventSource('/stream/events');
+  es.onmessage = (ev) => {
+    const data = JSON.parse(ev.data);
+    state = data.state;
+    renderState();
+    if (state.step_index !== _lastComparedStep) {
+      _lastComparedStep = state.step_index;
+      compare();
+    }
+  };
+  es.onerror = () => { /* reconnects automatically */ };
+}
+
+init().catch(err => {
+  document.getElementById('currentState').innerHTML =
+    `<p style="color:#9f2f2d;font-family:var(--mono);font-size:12px">` +
+    `<b>Không thể kết nối server.</b><br>${escapeHTML(err.message)}</p>`;
+});
+</script>
+</body>
+</html>
